@@ -32,7 +32,8 @@ Once all is done successfully, log out and restart your shell.
 Install ROOT and Conan with:
 
 ```bash
-conda install -c conda-forge root conan
+conda install -c conda-forge root
+conda install -c conda-forge "conan>=2.7.0"
 ```
 
 ### Step 3: Define the correct environment
@@ -43,10 +44,33 @@ Put the following lines after `<<< conda initialize <<<` line:
 export CC=[gcc command]
 export CXX=[g++ command]
 ```
+where `[g++/gcc command]` is the command used to run a specific version of gcc. Please make sure it exists in the system by checking
+
+```bash
+[g++ command] --version
+```
 
 for example:
 
 ```bash
 export CC=gcc-14.2.0
 export CXX=g++-14.2.0
+```
+
+## Troubleshooting
+
+### libarchive error
+
+#### Error message
+
+```text
+Error while loading conda entry point: conda-libmamba-solver (libarchive.so.20: cannot open shared object file: No such file or directory)
+```
+
+This could happen if you are in an old operating system.
+
+#### Solution
+
+```bash
+conda install --solver=classic conda-forge::conda-libmamba-solver conda-forge::libmamba conda-forge::libmambapy conda-forge::libarchive
 ```

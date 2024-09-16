@@ -25,11 +25,12 @@ srs-daq is an asynchronous data IO program for SRS system.
 
   To check the version of compiler, use
   ```bash
-  gcc --version
+  gcc --version # if gcc is used
+  clang --version # if clang is used
   ```
   if the version is less than 14.2, use the correct version by
   ```bash
-  export CXX=[gcc command]
+  export CXX=[gcc command] # e.g. export CXX=g++-14.2.0
   ```
 - Conan <span>&#8805;</span> 2.2. To install Conan
     ```bash
