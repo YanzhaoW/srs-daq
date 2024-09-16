@@ -17,13 +17,24 @@ srs-daq is an asynchronous data IO program for SRS system.
 ### Prerequisites
 
 - C++ compiler 
-  - gcc <span>&#8805;</span> 14.2
+  - gcc <span>&#8805;</span> 14.2.
   - clang <span>&#8805;</span> 18
+  To check the version of compiler, use
+  ```bash
+  gcc --version
+  ```
+  if the version is less than 14.2, use the correct version by
+  ```bash
+  export CXX=[gcc command]
+  ```
 - Conan <span>&#8805;</span> 2.2. To install Conan
     ```bash
     python -m pip install conan
     ```
-- cmake <span>&#8805;</span> 3.26
+- cmake <span>&#8805;</span> 3.26. The version can be checked with
+  ```bash
+  cmake --version # please make sure the output is larger than 3.26
+  ```
 - **(Optional)** ROOT <span>&#8805;</span> 6.32
 
 > [!Tip]

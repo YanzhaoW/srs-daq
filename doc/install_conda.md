@@ -27,10 +27,26 @@ and for zsh user:
 
 Once all is done successfully, log out and restart your shell.
 
-### Step2: Install dependencies
+### Step 2: Install dependencies
 
 Install ROOT and Conan with:
 
 ```bash
 conda install -c conda-forge root conan
+```
+
+### Step 3: Define the correct environment
+
+Put the following lines after `<<< conda initialize <<<` line:
+
+```bash
+export CC=[gcc command]
+export CXX=[g++ command]
+```
+
+for example:
+
+```bash
+export CC=gcc-14.2.0
+export CXX=g++-14.2.0
 ```
