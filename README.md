@@ -1,10 +1,10 @@
-# srslib - A data IO program for SRS FEC & VMM3
+# srs-daq - A data acquisition program for SRS FEC & VMM3
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/f3a70c8e8a9d4909a1953142fe5ff1e9)](https://app.codacy.com/gh/YanzhaoW/srslib/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/7e8c956af1bc46c7836524f1ace32c11)](https://app.codacy.com/gh/YanzhaoW/srs-daq/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
 ## Introduction
 
-srslib is an asynchronous data IO program for SRS system.
+srs-daq is an asynchronous data IO program for SRS system.
 
 ### Included
 
@@ -52,10 +52,10 @@ To run the program
 - `-h` or `--help`: print the help message
 - `-v` or `--verbose-level`: set the verbose level. Available options: "critical", "error", "warn", "info" (default), "debug", "trace", "off".
 - `-p` or `--print-mode`: set the data printing mode. Available options:
-    - speed (default): print the reading rate of received data
-    - header: print the header message of received data
-    - raw: print the received raw bytes
-    - all: print all data, including header, hit and marker data, but no raw data.
+  - speed (default): print the reading rate of received data
+  - header: print the header message of received data
+  - raw: print the received raw bytes
+  - all: print all data, including header, hit and marker data, but no raw data.
 
 ### Custom configuration
 
