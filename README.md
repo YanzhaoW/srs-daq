@@ -32,7 +32,7 @@ srs-daq is an asynchronous data IO program for SRS system.
 ### Installation
 
 ```
-git clone -b dev https://github.com/YanzhaoW/srslib.git
+git clone -b dev https://github.com/YanzhaoW/srs-daq.git
 cd srslib
 git submodule update --init
 cmake --preset default .
