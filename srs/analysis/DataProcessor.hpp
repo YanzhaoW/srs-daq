@@ -2,6 +2,7 @@
 
 #include "CommonDefitions.hpp"
 #include "DataStructs.hpp"
+#include "DataWriter.hpp"
 #include <asio/awaitable.hpp>
 #include <asio/steady_timer.hpp>
 #include <atomic>
@@ -68,6 +69,7 @@ namespace srs
         tbb::concurrent_bounded_queue<SerializableMsgBuffer> data_queue_;
         std::atomic<uint64_t> total_read_data_bytes_ = 0;
         gsl::not_null<App*> control_;
+        DataWriter data_writer_;
         DataMonitor monitor_;
 
         // buffer variables
@@ -78,8 +80,8 @@ namespace srs
         // should run on a different task
         void analysis_loop();
         void fill_raw_data(const ReceiveDataSquence& data_seq);
-        void analyse_one_frame(SerializableMsgBuffer a_frame);
-        void write_data() {}
+        void analyse_one_frame(const SerializableMsgBuffer& a_frame);
+        void write_data(const SerializableMsgBuffer& a_frame);
         void print_data();
         void clear_data_buffer();
         static bool check_is_hit(const DataElementType& element);

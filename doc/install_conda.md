@@ -32,13 +32,12 @@ Once all is done successfully, log out and restart your shell.
 Install ROOT and Conan with:
 
 ```bash
-conda install -c conda-forge root
-conda install -c conda-forge "conan>=2.7.0"
+conda install -c conda-forge root conan
 ```
 
 ### Step 3: Define the correct environment
 
-Put the following lines after `<<< conda initialize <<<` line:
+Put the following lines **after** `<<< conda initialize <<<` line in the `.bashrc`:
 
 ```bash
 export CC=[gcc command]
@@ -56,6 +55,7 @@ for example:
 export CC=gcc-14.2.0
 export CXX=g++-14.2.0
 ```
+Finally, restart the shell before you build the project.
 
 ## Troubleshooting
 

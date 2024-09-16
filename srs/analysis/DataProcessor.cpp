@@ -110,7 +110,8 @@ namespace srs
             while (not is_stopped)
             {
                 data_queue_.pop(input_data_buffer);
-                analyse_one_frame(std::move(input_data_buffer));
+                analyse_one_frame(input_data_buffer);
+                input_data_buffer.clear();
             }
         }
         catch (oneapi::tbb::user_abort& ex)
@@ -119,13 +120,12 @@ namespace srs
         }
         catch (std::exception& ex)
         {
-            // TODO: call stop of the control
             spdlog::critical(ex.what());
             control_->exit();
         }
     }
 
-    void DataProcessor::analyse_one_frame(SerializableMsgBuffer a_frame)
+    void DataProcessor::analyse_one_frame(const SerializableMsgBuffer& a_frame)
     {
         a_frame.deserialize(receive_raw_data_.header, receive_raw_data_.data);
         fill_raw_data(receive_raw_data_.data);
@@ -134,9 +134,23 @@ namespace srs
             spdlog::info("data: {:x}", fmt::join(a_frame.data(), ""));
         }
         print_data();
-        write_data();
+        write_data(a_frame);
 
         clear_data_buffer();
+    }
+
+    void DataProcessor::write_data(const SerializableMsgBuffer& a_frame)
+    {
+        if (data_writer_.is_binary())
+        {
+            data_writer_.write_binary(a_frame.data());
+        }
+
+        if(data_writer_.is_struct())
+        {
+
+            data_writer_.write_struct(receive_raw_data_);
+        }
     }
 
     void DataProcessor::clear_data_buffer()

@@ -30,7 +30,8 @@ srs-daq is an asynchronous data IO program for SRS system.
   ```
   if the version is less than 14.2, use the correct version by
   ```bash
-  export CXX=[gcc command] # e.g. export CXX=g++-14.2.0
+  export CXX=[g++ command] # e.g. export CXX=g++-14.2.0
+  export CC=[gcc command] # e.g. export CC=gcc-14.2.0
   ```
 - Conan <span>&#8805;</span> 2.2. To install Conan
     ```bash

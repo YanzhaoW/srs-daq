@@ -31,7 +31,7 @@ namespace srs
         }
 
         template <std::size_t T>
-        auto deserialize(auto&& header, std::vector<std::bitset<T>>& body)
+        auto deserialize(auto&& header, std::vector<std::bitset<T>>& body) const
         {
             auto deserialize_to = zpp::bits::in{ data_, zpp::bits::endian::network{}, zpp::bits::no_size{} };
 
