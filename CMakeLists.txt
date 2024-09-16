@@ -7,6 +7,7 @@ project(
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+include(cmake/project_config.cmake)
 
 find_package(asio REQUIRED)
 find_package(fmt REQUIRED)

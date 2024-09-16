@@ -33,15 +33,11 @@ cmake --preset default .
 cmake --build ./build -- -j[nproc]
 ```
 
-The executable programs are compiled in the build directory:
-
-```
-./build/apps/
-```
+The executable programs are compiled in the `build/bin` directory whereas the dynamic library in `build/lib`.
 
 ## srs_control - The control program
 
-To run the program
+To run the program, first go to `build/bin` directory and run
 
 ```bash
 ./srs_control [-p DATA_PRINT_OPTION] [-v LOG_LEVEL] [-h]
@@ -49,12 +45,12 @@ To run the program
 
 ### Run-time options
 
-- `-h` or `--help`: print the help message
+- `-h` or `--help`: print the help message.
 - `-v` or `--verbose-level`: set the verbose level. Available options: "critical", "error", "warn", "info" (default), "debug", "trace", "off".
 - `-p` or `--print-mode`: set the data printing mode. Available options:
-  - speed (default): print the reading rate of received data
-  - header: print the header message of received data
-  - raw: print the received raw bytes
+  - speed (default): print the reading rate of received data.
+  - header: print the header message of received data.
+  - raw: print the received raw bytes.
   - all: print all data, including header, hit and marker data, but no raw data.
 
 ### Custom configuration
