@@ -1,7 +1,7 @@
 add_library(srs SHARED)
 
 target_sources(srs PRIVATE Application.cpp utils/Connections.cpp analysis/DataProcessor.cpp
-                               analysis/DataStructs.cpp)
+                           analysis/DataStructs.cpp analysis/DataWriter.cpp)
 
 target_sources(
     srs
@@ -30,3 +30,9 @@ target_link_libraries(
             spdlog::spdlog
             onetbb::onetbb
             CLI11::CLI11)
+
+if(ROOT_FOUND)
+    message(STATUS "root is found")
+    target_link_libraries(srs PRIVATE ROOT::RIO)
+    target_compile_definitions(srs PRIVATE HAS_ROOT=1)
+endif()
