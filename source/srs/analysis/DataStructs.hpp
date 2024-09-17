@@ -17,8 +17,8 @@ namespace srs
     struct ReceiveDataHeader
     {
         uint32_t frame_counter{};
-        std::array<char, VMM_TAG_BIT_LENGTH> vmm_tag;
-        uint8_t fec_id;
+        std::array<char, VMM_TAG_BIT_LENGTH> vmm_tag{};
+        uint8_t fec_id{};
         uint32_t udp_timestamp{};
         uint32_t overflow{};
 #ifdef HAS_ROOT
@@ -64,7 +64,7 @@ namespace srs
 
     struct ExportData
     {
-        ReceiveDataHeader header;
+        ReceiveDataHeader header{};
         std::vector<MarkerData> marker_data;
         std::vector<HitData> hit_data;
 #ifdef HAS_ROOT
