@@ -40,6 +40,7 @@ namespace srs
         void set_status_acq_on(bool val = true) { status_.is_acq_on.store(val); }
         void set_status_is_reading(bool val = true) { status_.is_reading.store(val); }
         void set_print_mode(DataPrintMode mode);
+        void set_write_option(DataWriterOption option);
 
         // getters:
         [[nodiscard]] auto get_channel_address() const -> uint16_t { return channel_address_; }

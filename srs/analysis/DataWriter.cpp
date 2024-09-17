@@ -1,5 +1,6 @@
 #include "DataWriter.hpp"
-#include <TFile.h>
+#include "DataProcessor.hpp"
+#include "RootFileSink.hpp"
 #include <map>
 #include <spdlog/spdlog.h>
 
@@ -23,7 +24,11 @@ namespace srs
         write_option_ = option;
     }
 
-    DataWriter::DataWriter() = default;
+    DataWriter::DataWriter(DataProcessor* processor)
+        : data_processor_{ processor }
+    {
+    }
+
     DataWriter::~DataWriter() = default;
     void DataWriter::write_binary(const WriteBufferType& read_data)
     {
@@ -42,7 +47,7 @@ namespace srs
         }
     }
 
-    void DataWriter::write_struct(const ReceiveData& read_data)
+    void DataWriter::write_struct(ExportData& read_data)
     {
         if (write_option_ == json)
         {
@@ -59,8 +64,21 @@ namespace srs
         }
     }
 
-    void DataWriter::write_struct_json(const ReceiveData& read_data) {}
-    void DataWriter::write_struct_root(const ReceiveData& read_data) {}
+    void DataWriter::write_struct_json(const ExportData& data_struct) {}
+
+    void DataWriter::write_struct_root(ExportData& data_struct)
+    {
+#ifdef HAS_ROOT
+        if (root_file_ == nullptr)
+        {
+            auto filename = fmt::format("{}.{}", output_basename_, file_suffix.at(write_option_));
+            root_file_ = std::make_unique<RootFileSink>(filename.c_str(), "recreate");
+            root_file_->register_branch(data_processor_->get_export_data());
+        }
+
+        root_file_->fill();
+#endif
+    }
 
     void DataWriter::write_binary_file(const WriteBufferType& read_data)
     {

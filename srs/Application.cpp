@@ -54,6 +54,7 @@ namespace srs
     }
 
     void App::set_print_mode(DataPrintMode mode) { data_processor_->set_print_mode(mode); }
+    void App::set_write_option(DataWriterOption option) { data_processor_->set_write_option(option); }
 
     void App::set_remote_endpoint(std::string_view remote_ip, int port_number)
     {

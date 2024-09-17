@@ -7,6 +7,8 @@ project(
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+include(GNUInstallDirs)
 include(cmake/project_config.cmake)
 
 find_package(asio REQUIRED)
@@ -16,7 +18,7 @@ find_package(gsl-lite REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(CLI11 REQUIRED)
 find_package(TBB REQUIRED)
-find_package(ROOT COMPONENTS RIO)
+find_package(ROOT COMPONENTS RIO Tree Hist)
 
 add_subdirectory(srs)
 add_subdirectory(apps)

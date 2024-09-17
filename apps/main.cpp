@@ -12,12 +12,16 @@ auto main(int argc, char** argv) -> int
 
         auto spdlog_level = spdlog::level::info;
         auto print_mode = srs::DataPrintMode::print_speed;
+        auto write_mode = srs::DataWriterOption::binary;
 
         cli_args.add_option("-v, --verbose-level", spdlog_level, "set log level")
             ->transform(CLI::CheckedTransformer(spd_log_map, CLI::ignore_case))
             ->capture_default_str();
-        cli_args.add_option("-p, --print-mode", print_mode, "set print mode")
+        cli_args.add_option("-p, --print-mode", print_mode, "set data print mode")
             ->transform(CLI::CheckedTransformer(print_mode_map, CLI::ignore_case))
+            ->capture_default_str();
+        cli_args.add_option("-w, --write-mode", write_mode, "set output mode")
+            ->transform(CLI::CheckedTransformer(write_option_map, CLI::ignore_case))
             ->capture_default_str();
         cli_args.parse(argc, argv);
 
@@ -26,6 +30,7 @@ auto main(int argc, char** argv) -> int
         auto app = srs::App{};
         app.set_remote_endpoint("10.0.0.2", 6600);
         app.set_print_mode(print_mode);
+        app.set_write_option(write_mode);
         app.read_data();
         app.switch_on();
         app.run();

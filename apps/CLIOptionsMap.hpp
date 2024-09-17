@@ -2,8 +2,8 @@
 
 #include <map>
 #include <spdlog/common.h>
-#include <string>
 #include <srs/Application.hpp>
+#include <string>
 
 using enum srs::DataPrintMode;
 const auto spd_log_map = std::map<std::string, spdlog::level::level_enum>{
@@ -16,3 +16,8 @@ const auto print_mode_map = std::map<std::string, srs::DataPrintMode>{ { "speed"
                                                                        { "header", print_header },
                                                                        { "raw", print_raw },
                                                                        { "all", print_all } };
+
+const auto write_option_map = std::map<std::string, srs::DataWriterOption>{ { "root", srs::DataWriterOption::root },
+                                                                            { "json", srs::DataWriterOption::json },
+                                                                            { "binary", srs::DataWriterOption::binary },
+                                                                            { "udp", srs::DataWriterOption::udp } };

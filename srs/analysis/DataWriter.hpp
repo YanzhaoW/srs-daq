@@ -3,23 +3,16 @@
 #include "DataStructs.hpp"
 #include <fstream>
 
-class TFile;
-
 namespace srs
 {
-    enum class DataWriterOption
-    {
-        root,
-        json,
-        binary,
-        udp
-    };
+    class RootFileSink;
+    class DataProcessor;
 
     class DataWriter
     {
       public:
         using enum DataWriterOption;
-        DataWriter();
+        explicit DataWriter(DataProcessor* processor);
 
         ~DataWriter();
         DataWriter(const DataWriter&) = delete;
@@ -28,7 +21,7 @@ namespace srs
         DataWriter& operator=(DataWriter&&) = default;
 
         void write_binary(const WriteBufferType& read_data);
-        void write_struct(const ReceiveData& read_data);
+        void write_struct(ExportData& read_data);
 
         // setters:
         void set_write_option(DataWriterOption option);
@@ -44,10 +37,11 @@ namespace srs
         std::string output_basename_ = "output";
         std::unique_ptr<std::ofstream> binary_file_;
         std::unique_ptr<std::ofstream> json_file_;
-        std::unique_ptr<TFile> root_file_;
+        std::unique_ptr<RootFileSink> root_file_;
+        DataProcessor* data_processor_ = nullptr;
 
-        void write_struct_json(const ReceiveData& read_data);
-        void write_struct_root(const ReceiveData& read_data);
+        void write_struct_json(const ExportData& data_struct);
+        void write_struct_root(ExportData& data_struct);
 
         void write_binary_file(const WriteBufferType& read_data);
         static void write_binary_udp(const WriteBufferType& read_data);

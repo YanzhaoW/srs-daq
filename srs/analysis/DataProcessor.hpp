@@ -55,11 +55,13 @@ namespace srs
 
         // getters:
         [[nodiscard]] auto get_read_data_bytes() const -> uint64_t { return total_read_data_bytes_.load(); }
+        [[nodiscard]] auto get_export_data() -> auto& { return export_data_; }
 
         // setters:
         void set_print_mode(DataPrintMode mode) { print_mode_ = mode; }
         void set_show_data_speed(bool val = true) { monitor_.show_data_speed(val); }
         void set_monitor_display_period(std::chrono::milliseconds duration) { monitor_.set_display_period(duration); }
+        void set_write_option(DataWriterOption option) { data_writer_.set_write_option(option); }
 
       private:
         using enum DataPrintMode;
@@ -69,13 +71,12 @@ namespace srs
         tbb::concurrent_bounded_queue<SerializableMsgBuffer> data_queue_;
         std::atomic<uint64_t> total_read_data_bytes_ = 0;
         gsl::not_null<App*> control_;
-        DataWriter data_writer_;
+        DataWriter data_writer_{ this };
         DataMonitor monitor_;
 
         // buffer variables
-        ReceiveData receive_raw_data_{};
-        std::vector<MarkerData> marker_data_;
-        std::vector<HitData> hit_data_;
+        ReceiveDataSquence receive_raw_data_;
+        ExportData export_data_;
 
         // should run on a different task
         void analysis_loop();

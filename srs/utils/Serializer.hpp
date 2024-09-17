@@ -1,8 +1,8 @@
 #pragma once
 
-#include "CommonDefitions.hpp"
 #include <asio/buffer.hpp>
 #include <zpp_bits.h>
+#include "CommonFunctions.hpp"
 
 namespace srs
 {

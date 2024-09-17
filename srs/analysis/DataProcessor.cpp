@@ -127,8 +127,8 @@ namespace srs
 
     void DataProcessor::analyse_one_frame(const SerializableMsgBuffer& a_frame)
     {
-        a_frame.deserialize(receive_raw_data_.header, receive_raw_data_.data);
-        fill_raw_data(receive_raw_data_.data);
+        a_frame.deserialize(export_data_.header, receive_raw_data_);
+        fill_raw_data(receive_raw_data_);
         if (print_mode_ == print_raw)
         {
             spdlog::info("data: {:x}", fmt::join(a_frame.data(), ""));
@@ -146,19 +146,19 @@ namespace srs
             data_writer_.write_binary(a_frame.data());
         }
 
-        if(data_writer_.is_struct())
+        if (data_writer_.is_struct())
         {
 
-            data_writer_.write_struct(receive_raw_data_);
+            data_writer_.write_struct(export_data_);
         }
     }
 
     void DataProcessor::clear_data_buffer()
     {
-        receive_raw_data_.header = ReceiveDataHeader{};
-        receive_raw_data_.data.clear();
-        marker_data_.clear();
-        hit_data_.clear();
+        export_data_.header = ReceiveDataHeader{};
+        receive_raw_data_.clear();
+        export_data_.marker_data.clear();
+        export_data_.hit_data.clear();
     }
 
     bool DataProcessor::check_is_hit(const DataElementType& element) { return element.test(FLAG_BIT_POSITION); }
@@ -170,11 +170,11 @@ namespace srs
             // spdlog::info("raw data: {:x}", element.to_ullong());
             if (auto is_hit = check_is_hit(element); is_hit)
             {
-                hit_data_.emplace_back(element);
+                export_data_.hit_data.emplace_back(element);
             }
             else
             {
-                marker_data_.emplace_back(element);
+                export_data_.marker_data.emplace_back(element);
             }
         }
     }
@@ -183,17 +183,16 @@ namespace srs
     {
         if (print_mode_ == print_header or print_mode_ == print_raw or print_mode_ == print_all)
         {
-            spdlog::info(
-                "frame header: [ {} ]. Data size: {}", receive_raw_data_.header, receive_raw_data_.data.size());
+            spdlog::info("frame header: [ {} ]. Data size: {}", export_data_.header, receive_raw_data_.size());
         }
 
         if (print_mode_ == print_all)
         {
-            for (const auto& hit_data : hit_data_)
+            for (const auto& hit_data : export_data_.hit_data)
             {
                 spdlog::info("Hit data: [ {} ]", hit_data);
             }
-            for (const auto& marker_data : marker_data_)
+            for (const auto& marker_data : export_data_.marker_data)
             {
                 spdlog::info("Marker data: [ {} ]", marker_data);
             }

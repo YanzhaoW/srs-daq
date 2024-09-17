@@ -1,7 +1,12 @@
 add_library(srs SHARED)
 
-target_sources(srs PRIVATE Application.cpp utils/Connections.cpp analysis/DataProcessor.cpp
-                           analysis/DataStructs.cpp analysis/DataWriter.cpp)
+target_sources(
+    srs
+    PRIVATE Application.cpp
+            utils/Connections.cpp
+            analysis/DataProcessor.cpp
+            analysis/DataStructs.cpp
+            analysis/DataWriter.cpp)
 
 target_sources(
     srs
@@ -32,8 +37,14 @@ target_link_libraries(
             CLI11::CLI11)
 
 if(ROOT_FOUND)
-    message(STATUS "root is found")
-    target_link_libraries(srs PRIVATE ROOT::RIO)
+    target_link_libraries(srs PRIVATE ROOT::RIO ROOT::Tree ROOT::Hist)
     target_compile_definitions(srs PRIVATE HAS_ROOT=1)
     target_compile_options(srs PRIVATE "-Wno-cpp")
+    root_generate_dictionary(
+        srs_dict
+        analysis/DataStructs.hpp
+        MODULE
+        srs
+        LINKDEF
+        SRSLinkDef.hpp)
 endif()
