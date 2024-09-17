@@ -100,34 +100,15 @@ namespace srs
             const auto& root_files = output_filenames.at(root);
             if (root_files.size() > 1)
             {
-                spdlog::warn("DataWriter: Multiple root output files detected: {:?}. Only the first one is used",
+                spdlog::warn("DataWriter: Multiple root files detected: {:?}. Only the first one is used",
                              fmt::join(root_files, ", "));
             }
-            spdlog::info("DataWriter: Writing data structure to a root file {:?}", root_files.front());
             root_file_ = std::make_unique<RootFileSink>(root_files.front().c_str(), "recreate");
             root_file_->register_branch(data_struct);
         }
 
         root_file_->fill();
 #endif
-    }
-
-    void DataWriter::write_binary_file(const WriteBufferType& read_data)
-    {
-        if (binary_file_ == nullptr)
-        {
-            const auto& bin_files = output_filenames.at(root);
-            if (bin_files.size() > 1)
-            {
-                spdlog::warn("DataWriter: Multiple binary output files detected: {:?}. Only the first one is used",
-                             fmt::join(bin_files, ", "));
-            }
-            spdlog::info("DataWriter: Writing raw data to a binary file {:?}", bin_files.front());
-            binary_file_ =
-                std::make_unique<std::ofstream>(bin_files.front(), std::ios::out | std::ios::binary | std::ios::trunc);
-        }
-        binary_file_->write(reinterpret_cast<const char*>(read_data.data()),
-                            static_cast<int64_t>(read_data.size() * sizeof(BufferElementType) / sizeof(char)));
     }
 
     void DataWriter::set_output_filenames(std::vector<std::string> filenames)
@@ -156,6 +137,19 @@ namespace srs
                 write_option_ |= udp;
             }
         }
+    }
+
+    void DataWriter::write_binary_file(const WriteBufferType& read_data)
+    {
+        if (binary_file_ == nullptr)
+        {
+            auto filename = fmt::format("{}.{}", output_basename_, file_suffix.at(write_option_));
+            spdlog::info("DataWriter: Writing raw data to a binary file {:?}", filename);
+            binary_file_ =
+                std::make_unique<std::ofstream>(filename, std::ios::out | std::ios::binary | std::ios::trunc);
+        }
+        binary_file_->write(reinterpret_cast<const char*>(read_data.data()),
+                            static_cast<int64_t>(read_data.size() * sizeof(BufferElementType) / sizeof(char)));
     }
 
     void DataWriter::write_binary_udp(const WriteBufferType& /*read_data*/)

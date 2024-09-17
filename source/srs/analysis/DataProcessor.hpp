@@ -61,7 +61,10 @@ namespace srs
         void set_print_mode(DataPrintMode mode) { print_mode_ = mode; }
         void set_show_data_speed(bool val = true) { monitor_.show_data_speed(val); }
         void set_monitor_display_period(std::chrono::milliseconds duration) { monitor_.set_display_period(duration); }
-        void set_write_option(DataWriterOption option) { data_writer_.set_write_option(option); }
+        void set_output_filenames(std::vector<std::string> filenames)
+        {
+            data_writer_.set_output_filenames(std::move(filenames));
+        }
 
       private:
         using enum DataPrintMode;

@@ -58,14 +58,6 @@ namespace srs
         print_all
     };
 
-    enum class DataWriterOption
-    {
-        root,
-        json,
-        binary,
-        udp
-    };
-
     using io_context_type = asio::thread_pool;
 
 } // namespace srs

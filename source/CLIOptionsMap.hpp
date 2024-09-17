@@ -16,8 +16,3 @@ const auto print_mode_map = std::map<std::string, srs::DataPrintMode>{ { "speed"
                                                                        { "header", print_header },
                                                                        { "raw", print_raw },
                                                                        { "all", print_all } };
-
-const auto write_option_map = std::map<std::string, srs::DataWriterOption>{ { "root", srs::DataWriterOption::root },
-                                                                            { "json", srs::DataWriterOption::json },
-                                                                            { "binary", srs::DataWriterOption::binary },
-                                                                            { "udp", srs::DataWriterOption::udp } };

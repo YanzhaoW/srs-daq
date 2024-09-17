@@ -1,7 +1,9 @@
 #pragma once
 
 #include "DataStructs.hpp"
+#include "DataWriterOptions.hpp"
 #include <fstream>
+#include <map>
 
 namespace srs
 {
@@ -11,7 +13,7 @@ namespace srs
     class DataWriter
     {
       public:
-        using enum DataWriterOption;
+        using enum DataWriterOption::Option;
         explicit DataWriter(DataProcessor* processor);
 
         ~DataWriter();
@@ -25,7 +27,7 @@ namespace srs
 
         // setters:
         void set_write_option(DataWriterOption option);
-        void set_output_file_basename(std::string_view filename);
+        void set_output_filenames(std::vector<std::string> filenames);
 
         // Getter:
         [[nodiscard]] auto get_write_option() const -> DataWriterOption { return write_option_; }
@@ -33,8 +35,11 @@ namespace srs
         [[nodiscard]] auto is_struct() const -> bool { return write_option_ == root or write_option_ == json; }
 
       private:
-        DataWriterOption write_option_ = binary;
-        std::string output_basename_ = "output";
+        DataWriterOption write_option_ = no_output;
+        std::map<DataWriterOption::Option, std::vector<std::string>> output_filenames{ { binary, {} },
+                                                                                       { root, {} },
+                                                                                       { json, {} },
+                                                                                       { udp, {} } };
         std::unique_ptr<std::ofstream> binary_file_;
         std::unique_ptr<std::ofstream> json_file_;
         std::unique_ptr<RootFileSink> root_file_;

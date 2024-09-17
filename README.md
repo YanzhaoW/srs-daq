@@ -72,6 +72,25 @@ To run the program, first go to `build/bin` directory and run
   - header: print the header message of received data.
   - raw: print the received raw bytes.
   - all: print all data, including header, hit and marker data, but no raw data.
+- `-o` or `--output-files`: set the file outputs (more detail below).
+
+#### Data output to multiple sinks
+
+srs-daq can output received data into multiple sink types at the same time. Currently, following output types are available:
+
+- binary. File extensions: ".lmd" or ".bin"
+- root. File extensions: ".root" (require ROOT library)
+- json. File extensions: ".json" (not yet implemented)
+- UDP socket. string format: "ip:port" (not yet implemented)
+- google protobuf. (planned)
+
+Users have to use the correct file extensions to enable the corresponding output types. Except the UDP socket, each output type should only have one file.
+
+For example, to output data both to a binary file and a root file:
+
+```bash
+./srs_control -o "output.root" -o "output.bin"
+```
 
 ### Custom configuration
 
