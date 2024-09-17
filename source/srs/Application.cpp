@@ -1,7 +1,6 @@
 #include "Application.hpp"
 #include "DataProcessor.hpp"
 #include "spdlog/spdlog.h"
-#include <CLI/CLI.hpp>
 #include <Connections.hpp>
 #include <fmt/ranges.h>
 #include <string_view>

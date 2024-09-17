@@ -20,5 +20,4 @@ find_package(CLI11 REQUIRED)
 find_package(TBB REQUIRED)
 find_package(ROOT COMPONENTS RIO Tree Hist)
 
-add_subdirectory(srs)
-add_subdirectory(apps)
+add_subdirectory(source)
