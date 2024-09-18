@@ -40,6 +40,9 @@ srs-daq is an asynchronous data IO program for SRS system.
   ```
 - **(Optional)** ROOT <span>&#8805;</span> 6.32
 
+> [!CAUTION]
+> DO NOT USE Conda to install ROOT. Use latest compiler to install ROOT from the source.
+
 ### Installation
 
 ```
