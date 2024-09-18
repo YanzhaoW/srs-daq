@@ -3,6 +3,7 @@
 #include "DataStructs.hpp"
 #include "DataWriterOptions.hpp"
 #include <fstream>
+#include "JsonWriter.hpp"
 #include <map>
 
 namespace srs
@@ -41,7 +42,7 @@ namespace srs
                                                                                        { json, {} },
                                                                                        { udp, {} } };
         std::unique_ptr<std::ofstream> binary_file_;
-        std::unique_ptr<std::ofstream> json_file_;
+        std::unique_ptr<JsonWriter> json_file_;
         std::unique_ptr<RootFileSink> root_file_;
         DataProcessor* data_processor_ = nullptr;
 

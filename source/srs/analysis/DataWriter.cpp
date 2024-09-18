@@ -62,11 +62,13 @@ namespace srs
         {
             write_binary_file(read_data);
         }
-        else if (write_option_ == udp)
+
+        if (write_option_ == udp)
         {
             write_binary_udp(read_data);
         }
-        else
+
+        if (not(write_option_ == binary) and not(write_option_ == udp))
         {
             throw std::runtime_error(
                 R"(DataWriter: write_binary is called but write option is not set to either "binary" or "udp")");
@@ -79,18 +81,36 @@ namespace srs
         {
             write_struct_json(read_data);
         }
-        else if (write_option_ == root)
+
+        if (write_option_ == root)
         {
             write_struct_root(read_data);
         }
-        else
+
+        if (not(write_option_ == json) and not(write_option_ == root))
         {
             throw std::runtime_error(
                 R"(DataWriter: write_struct is called but write option is not set to either "root" or "json")");
         }
     }
 
-    void DataWriter::write_struct_json(const ExportData& data_struct) {}
+    void DataWriter::write_struct_json(const ExportData& data_struct)
+    {
+        if (json_file_ == nullptr)
+        {
+            const auto& json_files = output_filenames.at(json);
+            if (json_files.size() > 1)
+            {
+                spdlog::warn("DataWriter: Multiple json output files detected: {:?}. Only the first one is used",
+                             fmt::join(json_files, ", "));
+            }
+            spdlog::info("DataWriter: Writing data structure to a json file {:?}", json_files.front());
+            json_file_ = std::make_unique<JsonWriter>(json_files.front());
+            json_file_->write(data_struct);
+        }
+        json_file_->write(",");
+        json_file_->write(data_struct);
+    }
 
     void DataWriter::write_struct_root(ExportData& data_struct)
     {
@@ -116,7 +136,7 @@ namespace srs
     {
         if (binary_file_ == nullptr)
         {
-            const auto& bin_files = output_filenames.at(root);
+            const auto& bin_files = output_filenames.at(binary);
             if (bin_files.size() > 1)
             {
                 spdlog::warn("DataWriter: Multiple binary output files detected: {:?}. Only the first one is used",
@@ -154,6 +174,13 @@ namespace srs
             {
                 output_filenames[udp].push_back(std::move(filename));
                 write_option_ |= udp;
+            }
+            else
+            {
+                spdlog::critical(
+                    "Unrecognized file extension {:?}. Available file extensions are .bin, .lmd, .root, .json",
+                    file_ext.c_str());
+                throw std::runtime_error("Error occured at DataWriter");
             }
         }
     }
