@@ -43,6 +43,7 @@ namespace srs
 
     // Data processor:
     constexpr auto DEFAULT_DISPLAY_PERIOD = std::chrono::milliseconds{ 200 };
+    constexpr auto DEFAULT_ROOT_HTTP_SERVER_PERIOD = std::chrono::milliseconds{ 1000 };
     constexpr auto FEC_ID_BIT_LENGTH = 8;
     constexpr auto HIT_DATA_BIT_LENGTH = 48;
     constexpr auto VMM_TAG_BIT_LENGTH = 3;

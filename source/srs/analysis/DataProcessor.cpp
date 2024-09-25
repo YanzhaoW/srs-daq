@@ -16,8 +16,24 @@ namespace srs
         : processor_{ processor }
         , io_context_{ io_context }
         , clock_{ *io_context_ }
+#ifdef HAS_ROOT
+        , root_server_clock_{ *io_context_ }
+#endif
     {
     }
+
+#ifdef HAS_ROOT
+    auto DataMonitor::server_refresh() -> asio::awaitable<void>
+    {
+        root_server_clock_.expires_after(server_refresh_period_);
+        while (true)
+        {
+            co_await root_server_clock_.async_wait(asio::use_awaitable);
+            root_server_clock_.expires_after(server_refresh_period_);
+            root_http_server_.process_request();
+        }
+    }
+#endif
 
     auto DataMonitor::print_cycle() -> asio::awaitable<void>
     {
@@ -34,15 +50,23 @@ namespace srs
             clock_.expires_after(period_);
 
             auto total_bytes_count = processor_->get_read_data_bytes();
+            auto total_hits_count = processor_->get_processed_hit_number();
+
             auto time_now = std::chrono::steady_clock::now();
 
             auto time_duration = std::chrono::duration_cast<std::chrono::microseconds>(time_now - last_print_time_);
             auto bytes_read = static_cast<double>(total_bytes_count - last_read_data_bytes_);
+            auto hits_processed = static_cast<double>(total_hits_count - last_processed_hit_num_);
 
             last_read_data_bytes_ = total_bytes_count;
+            last_processed_hit_num_ = total_hits_count;
             last_print_time_ = time_now;
 
-            set_speed_string(bytes_read / static_cast<double>(time_duration.count()));
+            const auto time_duration_double = static_cast<double>(time_duration.count());
+            current_received_bytes_MBps_.store(bytes_read / time_duration_double);
+            current_hits_ps_.store(hits_processed / time_duration_double * 1e6);
+
+            set_speed_string(current_received_bytes_MBps_.load());
             console_->info("Data reading rate: {}. Press \"Ctrl-C\" to stop.\r", speed_string_);
         }
     }
@@ -60,8 +84,24 @@ namespace srs
         }
     }
 
-    void DataMonitor::start() { asio::co_spawn(*io_context_, print_cycle(), asio::detached); }
-    void DataMonitor::stop() { clock_.cancel(); }
+    void DataMonitor::start()
+    {
+        asio::co_spawn(*io_context_, print_cycle(), asio::detached);
+#ifdef HAS_ROOT
+        asio::co_spawn(*io_context_, server_refresh(), asio::detached);
+#endif
+    }
+
+    void DataMonitor::stop()
+    {
+#ifdef HAS_ROOT
+        root_http_server_.terminate();
+        root_server_clock_.cancel();
+        spdlog::debug("DataMonitor: root http server clock is killed.");
+#endif
+        clock_.cancel();
+        spdlog::debug("DataMonitor: rate polling clock is killed.");
+    }
 
     DataProcessor::DataProcessor(App* control)
         : control_{ control }
@@ -128,7 +168,7 @@ namespace srs
     void DataProcessor::analyse_one_frame(const SerializableMsgBuffer& a_frame)
     {
         a_frame.deserialize(export_data_.header, receive_raw_data_);
-        fill_raw_data(receive_raw_data_);
+        translate_raw_data(receive_raw_data_);
         if (print_mode_ == print_raw)
         {
             spdlog::info("data: {:x}", fmt::join(a_frame.data(), ""));
@@ -163,7 +203,7 @@ namespace srs
 
     bool DataProcessor::check_is_hit(const DataElementType& element) { return element.test(FLAG_BIT_POSITION); }
 
-    void DataProcessor::fill_raw_data(const ReceiveDataSquence& data_seq)
+    void DataProcessor::translate_raw_data(const ReceiveDataSquence& data_seq)
     {
         for (const auto& element : data_seq)
         {
@@ -177,6 +217,8 @@ namespace srs
                 export_data_.marker_data.emplace_back(element);
             }
         }
+        total_processed_hit_numer_ += export_data_.hit_data.size();
+        monitor_.update(export_data_);
     }
 
     void DataProcessor::print_data()

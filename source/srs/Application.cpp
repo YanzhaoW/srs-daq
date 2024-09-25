@@ -48,7 +48,6 @@ namespace srs
 
         switch_off();
         set_status_acq_on(false);
-        spdlog::info("SRS system is turned off");
         io_work_guard_.reset();
     }
 

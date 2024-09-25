@@ -7,20 +7,20 @@
 
 namespace srs
 {
-    class RootFileSink
+    class RootFileWriter
     {
       public:
-        explicit RootFileSink(auto&&... args)
+        explicit RootFileWriter(auto&&... args)
             : root_file{ std::forward<decltype(args)>(args)... }
         {
             tree.SetDirectory(&root_file);
         }
 
-        RootFileSink(const RootFileSink&) = delete;
-        RootFileSink(RootFileSink&&) = delete;
-        RootFileSink& operator=(const RootFileSink&) = delete;
-        RootFileSink& operator=(RootFileSink&&) = delete;
-        ~RootFileSink() { root_file.Write(); }
+        RootFileWriter(const RootFileWriter&) = delete;
+        RootFileWriter(RootFileWriter&&) = delete;
+        RootFileWriter& operator=(const RootFileWriter&) = delete;
+        RootFileWriter& operator=(RootFileWriter&&) = delete;
+        ~RootFileWriter() { root_file.Write(); }
 
         void register_branch(ExportData& data) { tree.Branch("srs_frame_data", &data); }
 

@@ -2,13 +2,13 @@
 
 #include "DataStructs.hpp"
 #include "DataWriterOptions.hpp"
-#include <fstream>
 #include "JsonWriter.hpp"
+#include <fstream>
 #include <map>
 
 namespace srs
 {
-    class RootFileSink;
+    class RootFileWriter;
     class DataProcessor;
 
     class DataWriter
@@ -43,7 +43,9 @@ namespace srs
                                                                                        { udp, {} } };
         std::unique_ptr<std::ofstream> binary_file_;
         std::unique_ptr<JsonWriter> json_file_;
-        std::unique_ptr<RootFileSink> root_file_;
+#ifdef HAS_ROOT
+        std::unique_ptr<RootFileWriter> root_file_;
+#endif
         DataProcessor* data_processor_ = nullptr;
 
         void write_struct_json(const ExportData& data_struct);

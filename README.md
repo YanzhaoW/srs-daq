@@ -78,11 +78,11 @@ To run the program, first go to `build/bin` directory and run
 
 srs-daq can output received data into multiple sink types at the same time. Currently, following output types are available:
 
-- binary. File extensions: ".lmd" or ".bin"
-- root. File extensions: ".root" (require ROOT library)
-- json. File extensions: ".json" (not yet implemented)
-- UDP socket. string format: "ip:port" (not yet implemented)
-- google protobuf. (planned)
+- **binary**. File extensions: `.lmd` or `.bin`
+- **root**. File extensions: `.root` (require ROOT library)
+- **json**. File extensions: `.json`
+- **UDP socket**. Input format: `[ip]:[port]` (not yet implemented)
+- **Google's protobuf**. (planned)
 
 Users have to use the correct file extensions to enable the corresponding output types. Except the UDP socket, each output type should only have one file.
 
@@ -102,6 +102,6 @@ To be added ...
 
 ## TODO list
 
-- calibration routines
-- graphical user interface
-- ROOT output file
+- Calibration routines.
+- Graphical user interface (typescript + react + websocket).
+- Program configuration through Lua.

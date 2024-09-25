@@ -1,6 +1,6 @@
 #include "DataWriter.hpp"
 #include "DataProcessor.hpp"
-#include "RootFileSink.hpp"
+#include "RootFileWriter.hpp"
 #include <asio/ip/address.hpp>
 #include <filesystem>
 #include <map>
@@ -124,7 +124,7 @@ namespace srs
                              fmt::join(root_files, ", "));
             }
             spdlog::info("DataWriter: Writing data structure to a root file {:?}", root_files.front());
-            root_file_ = std::make_unique<RootFileSink>(root_files.front().c_str(), "recreate");
+            root_file_ = std::make_unique<RootFileWriter>(root_files.front().c_str(), "recreate");
             root_file_->register_branch(data_struct);
         }
 
@@ -162,8 +162,14 @@ namespace srs
             }
             else if (file_ext == ".root")
             {
+#ifdef HAS_ROOT
                 output_filenames[root].push_back(std::move(filename));
                 write_option_ |= root;
+#else
+                spdlog::critical("This program is not compiled with the cern ROOT library. Output root file {:?} will "
+                                 "not be generated!",
+                                 filename);
+#endif
             }
             else if (file_ext == ".json")
             {

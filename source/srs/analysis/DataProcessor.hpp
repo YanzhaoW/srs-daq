@@ -3,6 +3,7 @@
 #include "CommonDefitions.hpp"
 #include "DataStructs.hpp"
 #include "DataWriter.hpp"
+#include "RootHttpServer.hpp"
 #include <asio/awaitable.hpp>
 #include <asio/steady_timer.hpp>
 #include <atomic>
@@ -24,9 +25,19 @@ namespace srs
         explicit DataMonitor(DataProcessor* processor, io_context_type* io_context);
         void show_data_speed(bool val = true) { is_shown_ = val; }
         void set_display_period(std::chrono::milliseconds duration) { period_ = duration; }
-        auto print_cycle() -> asio::awaitable<void>;
         void start();
         void stop();
+        void update(const ExportData& data_struct)
+        {
+#ifdef HAS_ROOT
+            root_http_server_.update(data_struct);
+#endif
+        }
+        void http_server_loop();
+
+        // getters:
+        [[nodiscard]] auto get_received_bytes_MBps() const -> double { return current_received_bytes_MBps_.load(); }
+        [[nodiscard]] auto get_processed_hit_rate() const -> double { return current_hits_ps_.load(); }
 
       private:
         bool is_shown_ = true;
@@ -35,11 +46,21 @@ namespace srs
         std::shared_ptr<spdlog::logger> console_;
         asio::steady_timer clock_;
         std::atomic<uint64_t> last_read_data_bytes_ = 0;
+        std::atomic<uint64_t> last_processed_hit_num_ = 0;
         std::chrono::time_point<std::chrono::steady_clock> last_print_time_ = std::chrono::steady_clock::now();
         std::chrono::milliseconds period_ = DEFAULT_DISPLAY_PERIOD;
+        std::atomic<double> current_received_bytes_MBps_;
+        std::atomic<double> current_hits_ps_;
         std::string speed_string_;
+#ifdef HAS_ROOT
+        RootHttpServer root_http_server_{ this };
+        std::chrono::milliseconds server_refresh_period_ = DEFAULT_ROOT_HTTP_SERVER_PERIOD;
+        asio::steady_timer root_server_clock_;
+        auto server_refresh() -> asio::awaitable<void>;
+#endif
 
         void set_speed_string(double speed_MBps);
+        auto print_cycle() -> asio::awaitable<void>;
     };
 
     class DataProcessor
@@ -47,7 +68,7 @@ namespace srs
       public:
         explicit DataProcessor(App* control);
 
-        // Need to be fast return
+        // From socket interface. Need to be fast return
         void read_data_once(std::span<BufferElementType> read_data);
 
         void start();
@@ -55,7 +76,9 @@ namespace srs
 
         // getters:
         [[nodiscard]] auto get_read_data_bytes() const -> uint64_t { return total_read_data_bytes_.load(); }
+        [[nodiscard]] auto get_processed_hit_number() const -> uint64_t { return total_processed_hit_numer_.load(); }
         [[nodiscard]] auto get_export_data() -> auto& { return export_data_; }
+        [[nodiscard]] auto get_data_monitor() const -> const auto& { return monitor_; }
 
         // setters:
         void set_print_mode(DataPrintMode mode) { print_mode_ = mode; }
@@ -73,6 +96,7 @@ namespace srs
         DataPrintMode print_mode_ = DataPrintMode::print_speed;
         tbb::concurrent_bounded_queue<SerializableMsgBuffer> data_queue_;
         std::atomic<uint64_t> total_read_data_bytes_ = 0;
+        std::atomic<uint64_t> total_processed_hit_numer_ = 0;
         gsl::not_null<App*> control_;
         DataWriter data_writer_{ this };
         DataMonitor monitor_;
@@ -83,7 +107,7 @@ namespace srs
 
         // should run on a different task
         void analysis_loop();
-        void fill_raw_data(const ReceiveDataSquence& data_seq);
+        void translate_raw_data(const ReceiveDataSquence& data_seq);
         void analyse_one_frame(const SerializableMsgBuffer& a_frame);
         void write_data(const SerializableMsgBuffer& a_frame);
         void print_data();
