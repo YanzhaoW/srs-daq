@@ -8,7 +8,6 @@ srs-daq is an asynchronous data IO program for SRS system.
 
 ### Included
 
-- Control/monitoring for SRS FEC & VMM3a hybrids
 - Readout of data
 - Data deserialization from SRS system
 
@@ -45,15 +44,30 @@ srs-daq is an asynchronous data IO program for SRS system.
 
 ### Installation
 
-```
+```bash
 git clone -b dev https://github.com/YanzhaoW/srs-daq.git
 cd srs-daq
 git submodule update --init
-cmake --preset default .
+cmake --preset default . [options]
 cmake --build ./build -- -j[nproc]
 ```
 
 The executable programs are compiled in the `build/bin` directory whereas the dynamic library in `build/lib`.
+
+Following CMake preset options are available:
+
+- `-DUSE_ROOT=`
+  - `OFF` or `FALSE` (default). The program would only compile with ROOT if ROOT exists. 
+  - `ON` or `TRUE`. CMake configuration will fail if `ROOT` is not found. 
+- `-DNO_ROOT=`
+  - `OFF` or `FALSE` (default). Same as `-DUSE_ROOT=OFF`.
+  - `ON` or `TRUE`. The program does NOT compiler with ROOT even if ROOT exists.
+
+For example, to disable the ROOT dependency, run the `cmake --preset` with:
+
+```bash
+cmake --preset default . -DNO_ROOT=TRUE
+```
 
 ## srs_control - The control program
 
@@ -74,13 +88,13 @@ To run the program, first go to `build/bin` directory and run
   - all: print all data, including header, hit and marker data, but no raw data.
 - `-o` or `--output-files`: set the file outputs (more detail below).
 
-#### Data output to multiple sinks
+#### Data output to multiple files
 
-srs-daq can output received data into multiple sink types at the same time. Currently, following output types are available:
+srs-daq can output received data into multiple files with different types at the same time. Currently, following output types are available (or planned):
 
 - **binary**. File extensions: `.lmd` or `.bin`
+- **json**. File extensions: `.json` (NOTE: JSON file could be very large)
 - **root**. File extensions: `.root` (require ROOT library)
-- **json**. File extensions: `.json`
 - **UDP socket**. Input format: `[ip]:[port]` (not yet implemented)
 - **Google's protobuf**. (planned)
 
@@ -102,6 +116,7 @@ To be added ...
 
 ## TODO list
 
+- Control/monitoring for SRS FEC & VMM3a hybrids
 - Calibration routines.
 - Graphical user interface (typescript + react + websocket).
 - Program configuration through Lua.
