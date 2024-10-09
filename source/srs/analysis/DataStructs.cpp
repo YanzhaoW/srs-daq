@@ -1,5 +1,5 @@
 #include "DataStructs.hpp"
-#include "CommonDefitions.hpp"
+#include "CommonFunctions.hpp"
 #include <bit>
 
 namespace srs

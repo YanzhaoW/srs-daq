@@ -26,13 +26,20 @@ namespace srs
     class Stopper : public ConnectionBase<>
     {
       public:
+        Stopper(const Stopper&) = delete;
+        Stopper(Stopper&&) = default;
+        Stopper& operator=(const Stopper&) = delete;
+        Stopper& operator=(Stopper&&) = default;
+
         explicit Stopper(const ConnectionInfo& info)
             : ConnectionBase(info, "Stopper")
         {
         }
 
+        ~Stopper() { spdlog::info("SRS system is turned off"); }
+
         void acq_off();
-        void end_of_read(){}
+        void end_of_read() {}
     };
 
     class DataReader : public ConnectionBase<LARGE_READ_MSG_BUFFER_SIZE>

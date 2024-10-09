@@ -1,6 +1,7 @@
 #pragma once
 
-#include "CommonDefitions.hpp"
+#include "CommonFunctions.hpp"
+#include <algorithm>
 #include <asio/buffer.hpp>
 #include <zpp_bits.h>
 
@@ -15,7 +16,7 @@ namespace srs
         explicit SerializableMsgBuffer(std::span<BufferElementType> read_data)
         {
             data_.reserve(read_data.size());
-            std::copy(read_data.begin(), read_data.end(), std::back_inserter(data_));
+            std::ranges::copy(read_data, std::back_inserter(data_));
         }
 
         auto serialize(auto&&... structs)
@@ -31,7 +32,7 @@ namespace srs
         }
 
         template <std::size_t T>
-        auto deserialize(auto&& header, std::vector<std::bitset<T>>& body)
+        auto deserialize(auto&& header, std::vector<std::bitset<T>>& body) const
         {
             auto deserialize_to = zpp::bits::in{ data_, zpp::bits::endian::network{}, zpp::bits::no_size{} };
 

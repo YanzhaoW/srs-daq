@@ -2,8 +2,8 @@
 
 #include <map>
 #include <spdlog/common.h>
-#include <string>
 #include <srs/Application.hpp>
+#include <string>
 
 using enum srs::DataPrintMode;
 const auto spd_log_map = std::map<std::string, spdlog::level::level_enum>{

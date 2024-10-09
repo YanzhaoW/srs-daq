@@ -1,7 +1,6 @@
 #include "Application.hpp"
 #include "DataProcessor.hpp"
 #include "spdlog/spdlog.h"
-#include <CLI/CLI.hpp>
 #include <Connections.hpp>
 #include <fmt/ranges.h>
 #include <string_view>
@@ -49,11 +48,14 @@ namespace srs
 
         switch_off();
         set_status_acq_on(false);
-        spdlog::info("SRS system is turned off");
         io_work_guard_.reset();
     }
 
     void App::set_print_mode(DataPrintMode mode) { data_processor_->set_print_mode(mode); }
+    void App::set_output_filenames(std::vector<std::string> filenames)
+    {
+        data_processor_->set_output_filenames(std::move(filenames));
+    }
 
     void App::set_remote_endpoint(std::string_view remote_ip, int port_number)
     {

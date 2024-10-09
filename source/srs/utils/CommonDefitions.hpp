@@ -1,7 +1,6 @@
 #pragma once
 
 #include <asio/thread_pool.hpp>
-#include <bitset>
 #include <chrono>
 #include <cstdint>
 #include <vector>
@@ -12,6 +11,7 @@ namespace srs
     constexpr auto BYTE_BIT_LENGTH = 8;
 
     // Connections:
+    constexpr auto DEFAULT_SRS_IP = std::string_view{ "10.0.0.2" };
     constexpr auto WRITE_COMMAND_BITS = uint8_t{ 0xaa };
     constexpr auto DEFAULT_TYPE_BITS = uint8_t{ 0xaa };
     constexpr auto DEFAULT_CHANNEL_ADDRE = uint16_t{ 0xff };
@@ -31,6 +31,7 @@ namespace srs
     constexpr auto DEFAULT_STATUS_WAITING_TIME_SECONDS = std::chrono::seconds{ 4 };
 
     // port numbers:
+    constexpr auto DEFAULT_SRS_CONTROL_PORT = 6600;
     constexpr auto FEC_DAQ_RECEIVE_PORT = 6006;
     static constexpr int FEC_CONTROL_LOCAL_PORT = 6007;
 
@@ -44,6 +45,7 @@ namespace srs
 
     // Data processor:
     constexpr auto DEFAULT_DISPLAY_PERIOD = std::chrono::milliseconds{ 200 };
+    constexpr auto DEFAULT_ROOT_HTTP_SERVER_PERIOD = std::chrono::milliseconds{ 1000 };
     constexpr auto FEC_ID_BIT_LENGTH = 8;
     constexpr auto HIT_DATA_BIT_LENGTH = 48;
     constexpr auto VMM_TAG_BIT_LENGTH = 3;
@@ -51,7 +53,7 @@ namespace srs
     constexpr auto SRS_TIMESTAMP_LOW_BIT_LENGTH = 10;
     constexpr auto FLAG_BIT_POSITION = 15; // zero based
 
-    enum class DataPrintMode
+    enum class DataPrintMode : uint8_t
     {
         print_speed,
         print_header,
@@ -61,51 +63,4 @@ namespace srs
 
     using io_context_type = asio::thread_pool;
 
-    // subbits from a half open range [min, max)
-    template <std::size_t bit_size, std::size_t max, std::size_t min = 0>
-    inline constexpr auto subset(const std::bitset<bit_size>& bits) -> std::bitset<max - min>
-    {
-        constexpr auto max_size = 64;
-        static_assert(max > min);
-        static_assert(max_size >= (max - min));
-        constexpr auto ignore_high = bit_size - max;
-
-        auto new_bits = (bits << ignore_high) >> (ignore_high + min);
-        return std::bitset<max - min>{ new_bits.to_ullong() };
-    }
-
-    template <std::size_t high_size, std::size_t low_size>
-    inline constexpr auto merge_bits(const std::bitset<high_size>& high_bits,
-                                     const std::bitset<low_size>& low_bits) -> std::bitset<high_size + low_size>
-    {
-        using NewBit = std::bitset<high_size + low_size>;
-        constexpr auto max_size = 64;
-        static_assert(max_size >= high_size + low_size);
-
-        auto high_bits_part = NewBit(high_bits.to_ullong());
-        auto low_bits_part = NewBit(low_bits.to_ullong());
-        auto new_bits = (high_bits_part << low_size) | low_bits_part;
-        return std::bitset<high_size + low_size>(new_bits.to_ullong());
-    }
-
-    template <std::size_t bit_size>
-    inline constexpr auto byte_swap(const std::bitset<bit_size>& bits)
-    {
-        auto val = bits.to_ullong();
-        val = val << (sizeof(uint64_t) * BYTE_BIT_LENGTH - bit_size);
-        val = std::byteswap(val);
-        return std::bitset<bit_size>(val);
-    }
-
-    template <typename T>
-    constexpr auto gray_to_binary(T gray_val)
-    {
-        auto bin_val = T{ gray_val };
-        while (gray_val > 0)
-        {
-            gray_val >>= 1;
-            bin_val ^= gray_val;
-        }
-        return bin_val;
-    }
 } // namespace srs

@@ -48,3 +48,4 @@ CheckOptions:
     value: 'true'
 
 FormatStyle: 'file'
+HeaderFilterRegex: '.*'

@@ -34,15 +34,23 @@ namespace srs
             clock_.expires_after(period_);
 
             auto total_bytes_count = processor_->get_read_data_bytes();
+            auto total_hits_count = processor_->get_processed_hit_number();
+
             auto time_now = std::chrono::steady_clock::now();
 
             auto time_duration = std::chrono::duration_cast<std::chrono::microseconds>(time_now - last_print_time_);
             auto bytes_read = static_cast<double>(total_bytes_count - last_read_data_bytes_);
+            auto hits_processed = static_cast<double>(total_hits_count - last_processed_hit_num_);
 
             last_read_data_bytes_ = total_bytes_count;
+            last_processed_hit_num_ = total_hits_count;
             last_print_time_ = time_now;
 
-            set_speed_string(bytes_read / static_cast<double>(time_duration.count()));
+            const auto time_duration_double = static_cast<double>(time_duration.count());
+            current_received_bytes_MBps_.store(bytes_read / time_duration_double);
+            current_hits_ps_.store(hits_processed / time_duration_double * 1e6);
+
+            set_speed_string(current_received_bytes_MBps_.load());
             console_->info("Data reading rate: {}. Press \"Ctrl-C\" to stop.\r", speed_string_);
         }
     }
@@ -61,7 +69,12 @@ namespace srs
     }
 
     void DataMonitor::start() { asio::co_spawn(*io_context_, print_cycle(), asio::detached); }
-    void DataMonitor::stop() { clock_.cancel(); }
+
+    void DataMonitor::stop()
+    {
+        clock_.cancel();
+        spdlog::debug("DataMonitor: rate polling clock is killed.");
+    }
 
     DataProcessor::DataProcessor(App* control)
         : control_{ control }
@@ -110,7 +123,8 @@ namespace srs
             while (not is_stopped)
             {
                 data_queue_.pop(input_data_buffer);
-                analyse_one_frame(std::move(input_data_buffer));
+                analyse_one_frame(input_data_buffer);
+                input_data_buffer.clear();
             }
         }
         catch (oneapi::tbb::user_abort& ex)
@@ -119,67 +133,81 @@ namespace srs
         }
         catch (std::exception& ex)
         {
-            // TODO: call stop of the control
             spdlog::critical(ex.what());
             control_->exit();
         }
     }
 
-    void DataProcessor::analyse_one_frame(SerializableMsgBuffer a_frame)
+    void DataProcessor::analyse_one_frame(const SerializableMsgBuffer& a_frame)
     {
-        a_frame.deserialize(receive_raw_data_.header, receive_raw_data_.data);
-        fill_raw_data(receive_raw_data_.data);
+        a_frame.deserialize(export_data_.header, receive_raw_data_);
+        translate_raw_data(receive_raw_data_);
         if (print_mode_ == print_raw)
         {
             spdlog::info("data: {:x}", fmt::join(a_frame.data(), ""));
         }
         print_data();
-        write_data();
+        write_data(a_frame);
 
         clear_data_buffer();
     }
 
+    void DataProcessor::write_data(const SerializableMsgBuffer& a_frame)
+    {
+        if (data_writer_.is_binary())
+        {
+            data_writer_.write_binary(a_frame.data());
+        }
+
+        if (data_writer_.is_struct())
+        {
+
+            data_writer_.write_struct(export_data_);
+        }
+    }
+
     void DataProcessor::clear_data_buffer()
     {
-        receive_raw_data_.header = ReceiveDataHeader{};
-        receive_raw_data_.data.clear();
-        marker_data_.clear();
-        hit_data_.clear();
+        export_data_.header = ReceiveDataHeader{};
+        receive_raw_data_.clear();
+        export_data_.marker_data.clear();
+        export_data_.hit_data.clear();
     }
 
     bool DataProcessor::check_is_hit(const DataElementType& element) { return element.test(FLAG_BIT_POSITION); }
 
-    void DataProcessor::fill_raw_data(const ReceiveDataSquence& data_seq)
+    void DataProcessor::translate_raw_data(const ReceiveDataSquence& data_seq)
     {
         for (const auto& element : data_seq)
         {
             // spdlog::info("raw data: {:x}", element.to_ullong());
             if (auto is_hit = check_is_hit(element); is_hit)
             {
-                hit_data_.emplace_back(element);
+                export_data_.hit_data.emplace_back(element);
             }
             else
             {
-                marker_data_.emplace_back(element);
+                export_data_.marker_data.emplace_back(element);
             }
         }
+        total_processed_hit_numer_ += export_data_.hit_data.size();
+        monitor_.update(export_data_);
     }
 
     void DataProcessor::print_data()
     {
         if (print_mode_ == print_header or print_mode_ == print_raw or print_mode_ == print_all)
         {
-            spdlog::info(
-                "frame header: [ {} ]. Data size: {}", receive_raw_data_.header, receive_raw_data_.data.size());
+            spdlog::info("frame header: [ {} ]. Data size: {}", export_data_.header, receive_raw_data_.size());
         }
 
         if (print_mode_ == print_all)
         {
-            for (const auto& hit_data : hit_data_)
+            for (const auto& hit_data : export_data_.hit_data)
             {
                 spdlog::info("Hit data: [ {} ]", hit_data);
             }
-            for (const auto& marker_data : marker_data_)
+            for (const auto& marker_data : export_data_.marker_data)
             {
                 spdlog::info("Marker data: [ {} ]", marker_data);
             }

@@ -8,15 +8,22 @@
 #include <fmt/ranges.h>
 #include <vector>
 
+#ifdef HAS_ROOT
+#include <Rtypes.h>
+#endif
+
 namespace srs
 {
     struct ReceiveDataHeader
     {
         uint32_t frame_counter{};
-        std::array<char, VMM_TAG_BIT_LENGTH> vmm_tag;
-        uint8_t fec_id;
+        std::array<char, VMM_TAG_BIT_LENGTH> vmm_tag{};
+        uint8_t fec_id{};
         uint32_t udp_timestamp{};
         uint32_t overflow{};
+#ifdef HAS_ROOT
+        ClassDefNV(ReceiveDataHeader, 1);
+#endif
     };
 
     using DataElementType = std::bitset<HIT_DATA_BIT_LENGTH>;
@@ -34,6 +41,9 @@ namespace srs
         explicit MarkerData(const std::bitset<HIT_DATA_BIT_LENGTH>& raw_data);
         uint8_t vmm_id{};
         uint64_t srs_timestamp{};
+#ifdef HAS_ROOT
+        ClassDefNV(MarkerData, 1);
+#endif
     };
 
     struct HitData
@@ -47,8 +57,20 @@ namespace srs
         uint8_t vmm_id{};
         uint16_t adc{};
         uint16_t bc_id{};
+#ifdef HAS_ROOT
+        ClassDefNV(HitData, 1);
+#endif
     };
 
+    struct ExportData
+    {
+        ReceiveDataHeader header{};
+        std::vector<MarkerData> marker_data;
+        std::vector<HitData> hit_data;
+#ifdef HAS_ROOT
+        ClassDefNV(ExportData, 1);
+#endif
+    };
 } // namespace srs
 
 template <>

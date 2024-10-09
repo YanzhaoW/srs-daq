@@ -13,6 +13,7 @@ class CompressorRecipe(ConanFile):
         self.requires("zpp_bits/4.4.20")
         self.requires("fmt/11.0.1", override=True)
         self.requires("onetbb/2021.12.0")
+        # self.requires("glaze/3.3.4")
 
     def generate(self):
         tc = CMakeToolchain(self)

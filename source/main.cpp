@@ -12,20 +12,30 @@ auto main(int argc, char** argv) -> int
 
         auto spdlog_level = spdlog::level::info;
         auto print_mode = srs::DataPrintMode::print_speed;
+        auto output_filenames = std::vector<std::string>{ "output.bin" };
 
         cli_args.add_option("-v, --verbose-level", spdlog_level, "set log level")
             ->transform(CLI::CheckedTransformer(spd_log_map, CLI::ignore_case))
             ->capture_default_str();
-        cli_args.add_option("-p, --print-mode", print_mode, "set print mode")
+        cli_args.add_option("-p, --print-mode", print_mode, "set data print mode")
             ->transform(CLI::CheckedTransformer(print_mode_map, CLI::ignore_case))
             ->capture_default_str();
+        cli_args.add_option("-o, --output-files", output_filenames, "set output file (or socket) names")
+            ->capture_default_str()
+            ->expected(0, -1);
         cli_args.parse(argc, argv);
 
         spdlog::set_level(spdlog_level);
 
+        for (const auto& filename : output_filenames)
+        {
+            spdlog::info("output file: {}", filename);
+        }
+
         auto app = srs::App{};
-        app.set_remote_endpoint("10.0.0.2", 6600);
+        app.set_remote_endpoint(srs::DEFAULT_SRS_IP, srs::DEFAULT_SRS_CONTROL_PORT);
         app.set_print_mode(print_mode);
+        app.set_output_filenames(std::move(output_filenames));
         app.read_data();
         app.switch_on();
         app.run();
