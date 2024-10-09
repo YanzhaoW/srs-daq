@@ -3,7 +3,6 @@
 #include "CommonDefitions.hpp"
 #include "DataStructs.hpp"
 #include "DataWriter.hpp"
-#include "RootHttpServer.hpp"
 #include <asio/awaitable.hpp>
 #include <asio/steady_timer.hpp>
 #include <atomic>
@@ -29,9 +28,6 @@ namespace srs
         void stop();
         void update(const ExportData& data_struct)
         {
-#ifdef HAS_ROOT
-            root_http_server_.update(data_struct);
-#endif
         }
         void http_server_loop();
 
@@ -52,12 +48,6 @@ namespace srs
         std::atomic<double> current_received_bytes_MBps_;
         std::atomic<double> current_hits_ps_;
         std::string speed_string_;
-#ifdef HAS_ROOT
-        RootHttpServer root_http_server_{ this };
-        std::chrono::milliseconds server_refresh_period_ = DEFAULT_ROOT_HTTP_SERVER_PERIOD;
-        asio::steady_timer root_server_clock_;
-        auto server_refresh() -> asio::awaitable<void>;
-#endif
 
         void set_speed_string(double speed_MBps);
         auto print_cycle() -> asio::awaitable<void>;

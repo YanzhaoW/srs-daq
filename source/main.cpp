@@ -33,7 +33,7 @@ auto main(int argc, char** argv) -> int
         }
 
         auto app = srs::App{};
-        app.set_remote_endpoint("10.0.0.2", 6600);
+        app.set_remote_endpoint(srs::DEFAULT_SRS_IP, srs::DEFAULT_SRS_CONTROL_PORT);
         app.set_print_mode(print_mode);
         app.set_output_filenames(std::move(output_filenames));
         app.read_data();

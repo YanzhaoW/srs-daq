@@ -16,24 +16,8 @@ namespace srs
         : processor_{ processor }
         , io_context_{ io_context }
         , clock_{ *io_context_ }
-#ifdef HAS_ROOT
-        , root_server_clock_{ *io_context_ }
-#endif
     {
     }
-
-#ifdef HAS_ROOT
-    auto DataMonitor::server_refresh() -> asio::awaitable<void>
-    {
-        root_server_clock_.expires_after(server_refresh_period_);
-        while (true)
-        {
-            co_await root_server_clock_.async_wait(asio::use_awaitable);
-            root_server_clock_.expires_after(server_refresh_period_);
-            root_http_server_.process_request();
-        }
-    }
-#endif
 
     auto DataMonitor::print_cycle() -> asio::awaitable<void>
     {
@@ -84,21 +68,10 @@ namespace srs
         }
     }
 
-    void DataMonitor::start()
-    {
-        asio::co_spawn(*io_context_, print_cycle(), asio::detached);
-#ifdef HAS_ROOT
-        asio::co_spawn(*io_context_, server_refresh(), asio::detached);
-#endif
-    }
+    void DataMonitor::start() { asio::co_spawn(*io_context_, print_cycle(), asio::detached); }
 
     void DataMonitor::stop()
     {
-#ifdef HAS_ROOT
-        root_http_server_.terminate();
-        root_server_clock_.cancel();
-        spdlog::debug("DataMonitor: root http server clock is killed.");
-#endif
         clock_.cancel();
         spdlog::debug("DataMonitor: rate polling clock is killed.");
     }

@@ -11,6 +11,7 @@ namespace srs
     constexpr auto BYTE_BIT_LENGTH = 8;
 
     // Connections:
+    constexpr auto DEFAULT_SRS_IP = std::string_view{ "10.0.0.2" };
     constexpr auto WRITE_COMMAND_BITS = uint8_t{ 0xaa };
     constexpr auto DEFAULT_TYPE_BITS = uint8_t{ 0xaa };
     constexpr auto DEFAULT_CHANNEL_ADDRE = uint16_t{ 0xff };
@@ -30,6 +31,7 @@ namespace srs
     constexpr auto DEFAULT_STATUS_WAITING_TIME_SECONDS = std::chrono::seconds{ 4 };
 
     // port numbers:
+    constexpr auto DEFAULT_SRS_CONTROL_PORT = 6600;
     constexpr auto FEC_DAQ_RECEIVE_PORT = 6006;
     static constexpr int FEC_CONTROL_LOCAL_PORT = 6007;
 
@@ -51,7 +53,7 @@ namespace srs
     constexpr auto SRS_TIMESTAMP_LOW_BIT_LENGTH = 10;
     constexpr auto FLAG_BIT_POSITION = 15; // zero based
 
-    enum class DataPrintMode
+    enum class DataPrintMode : uint8_t
     {
         print_speed,
         print_header,

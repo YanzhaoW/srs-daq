@@ -1,9 +1,9 @@
 #pragma once
 
-
+#include "CommonFunctions.hpp"
+#include <algorithm>
 #include <asio/buffer.hpp>
 #include <zpp_bits.h>
-#include "CommonFunctions.hpp"
 
 namespace srs
 {
@@ -16,7 +16,7 @@ namespace srs
         explicit SerializableMsgBuffer(std::span<BufferElementType> read_data)
         {
             data_.reserve(read_data.size());
-            std::copy(read_data.begin(), read_data.end(), std::back_inserter(data_));
+            std::ranges::copy(read_data, std::back_inserter(data_));
         }
 
         auto serialize(auto&&... structs)
