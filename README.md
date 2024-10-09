@@ -117,6 +117,4 @@ To be added ...
 ## TODO list
 
 - Control/monitoring for SRS FEC & VMM3a hybrids
-- Calibration routines.
 - Graphical user interface (typescript + react + websocket).
-- Program configuration through Lua.
