@@ -8,7 +8,7 @@ namespace srs
 {
     // subbits from a half open range [min, max)
     template <std::size_t bit_size, std::size_t max, std::size_t min = 0>
-    inline constexpr auto subset(const std::bitset<bit_size>& bits) -> std::bitset<max - min>
+    constexpr auto subset(const std::bitset<bit_size>& bits) -> std::bitset<max - min>
     {
         constexpr auto max_size = 64;
         static_assert(max > min);
@@ -20,7 +20,7 @@ namespace srs
     }
 
     template <std::size_t high_size, std::size_t low_size>
-    inline constexpr auto merge_bits(const std::bitset<high_size>& high_bits,
+    constexpr auto merge_bits(const std::bitset<high_size>& high_bits,
                                      const std::bitset<low_size>& low_bits) -> std::bitset<high_size + low_size>
     {
         using NewBit = std::bitset<high_size + low_size>;
@@ -34,7 +34,7 @@ namespace srs
     }
 
     template <std::size_t bit_size>
-    inline constexpr auto byte_swap(const std::bitset<bit_size>& bits)
+    constexpr auto byte_swap(const std::bitset<bit_size>& bits)
     {
         auto val = bits.to_ullong();
         val = val << (sizeof(uint64_t) * BYTE_BIT_LENGTH - bit_size);
