@@ -15,4 +15,5 @@ option(NO_ROOT "Disable the usage of ROOT dependency." OFF)
 include(GNUInstallDirs)
 include(cmake/project_config.cmake)
 
-add_subdirectory(source)
+add_subdirectory(frontend)
+add_subdirectory(backend)
