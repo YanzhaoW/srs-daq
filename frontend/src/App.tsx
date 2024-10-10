@@ -1,10 +1,11 @@
 import './App.css'
+import Headline from './components/Headline.tsx'
 
 function App() {
 
     return (
         <>
-            <p> Hello world </p>
+            <Headline />
         </>
     )
 }
