@@ -10,7 +10,8 @@
 #include <gsl/gsl-lite.hpp>
 #include <span>
 #include <spdlog/logger.h>
-#include <srs/utils/Serializer.hpp>
+#include <srs/serializers/SerializableBuffer.hpp>
+#include <srs/serializers/StructSerializer.hpp>
 #include <tbb/concurrent_queue.h>
 
 namespace srs
@@ -26,9 +27,7 @@ namespace srs
         void set_display_period(std::chrono::milliseconds duration) { period_ = duration; }
         void start();
         void stop();
-        void update(const ExportData& data_struct)
-        {
-        }
+        void update(const StructData& data_struct) {}
         void http_server_loop();
 
         // getters:
@@ -83,6 +82,7 @@ namespace srs
         using enum DataPrintMode;
 
         std::atomic<bool> is_stopped{ false };
+        std::size_t received_data_size_ {};
         DataPrintMode print_mode_ = DataPrintMode::print_speed;
         tbb::concurrent_bounded_queue<SerializableMsgBuffer> data_queue_;
         std::atomic<uint64_t> total_read_data_bytes_ = 0;
@@ -92,17 +92,18 @@ namespace srs
         DataMonitor monitor_;
 
         // buffer variables
-        ReceiveDataSquence receive_raw_data_;
-        ExportData export_data_;
+        StructSerializer struct_serializer;
+        // ReceiveDataSquence receive_raw_data_;
+        StructData export_data_;
 
         // should run on a different task
         void analysis_loop();
-        void translate_raw_data(const ReceiveDataSquence& data_seq);
+        // void translate_raw_data(const ReceiveDataSquence& data_seq);
         void analyse_one_frame(const SerializableMsgBuffer& a_frame);
         void write_data(const SerializableMsgBuffer& a_frame);
         void print_data();
         void clear_data_buffer();
-        static bool check_is_hit(const DataElementType& element);
+        // static bool check_is_hit(const DataElementType& element);
     };
 
 } // namespace srs

@@ -22,7 +22,7 @@ namespace srs
         RootFileWriter& operator=(RootFileWriter&&) = delete;
         ~RootFileWriter() { root_file.Write(); }
 
-        void register_branch(ExportData& data) { tree.Branch("srs_frame_data", &data); }
+        void register_branch(StructData& data) { tree.Branch("srs_frame_data", &data); }
 
         void fill() { tree.Fill(); }
 

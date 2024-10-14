@@ -9,6 +9,6 @@
 #pragma link C++ class srs::HitData+;
 #pragma link C++ class vector<srs::HitData>+;
 #pragma link C++ class vector<srs::MarkerData>+;
-#pragma link C++ class srs::ExportData+;
+#pragma link C++ class srs::StructData+;
 
 #endif

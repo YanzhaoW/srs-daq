@@ -56,7 +56,7 @@ namespace srs
     }
 
     DataWriter::~DataWriter() = default;
-    void DataWriter::write_binary(const WriteBufferType& read_data)
+    void DataWriter::write_binary(const BinaryData& read_data)
     {
         if (write_option_ == binary)
         {
@@ -75,7 +75,7 @@ namespace srs
         }
     }
 
-    void DataWriter::write_struct(ExportData& read_data)
+    void DataWriter::write_struct(StructData& read_data)
     {
         if (write_option_ == json)
         {
@@ -94,7 +94,7 @@ namespace srs
         }
     }
 
-    void DataWriter::write_struct_json(const ExportData& data_struct)
+    void DataWriter::write_struct_json(const StructData& data_struct)
     {
         if (json_file_ == nullptr)
         {
@@ -112,7 +112,7 @@ namespace srs
         json_file_->write(data_struct);
     }
 
-    void DataWriter::write_struct_root(ExportData& data_struct)
+    void DataWriter::write_struct_root(StructData& data_struct)
     {
 #ifdef HAS_ROOT
         if (root_file_ == nullptr)
@@ -132,7 +132,7 @@ namespace srs
 #endif
     }
 
-    void DataWriter::write_binary_file(const WriteBufferType& read_data)
+    void DataWriter::write_binary_file(const BinaryData& read_data)
     {
         if (binary_file_ == nullptr)
         {
@@ -191,7 +191,7 @@ namespace srs
         }
     }
 
-    void DataWriter::write_binary_udp(const WriteBufferType& /*read_data*/)
+    void DataWriter::write_binary_udp(const BinaryData& /*read_data*/)
     {
         throw std::logic_error("DataWriter: udp file output is not yet implemented. Please use other write options.");
     }

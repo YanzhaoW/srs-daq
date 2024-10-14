@@ -62,13 +62,13 @@ namespace srs
 #endif
     };
 
-    struct ExportData
+    struct StructData
     {
         ReceiveDataHeader header{};
         std::vector<MarkerData> marker_data;
         std::vector<HitData> hit_data;
 #ifdef HAS_ROOT
-        ClassDefNV(ExportData, 1);
+        ClassDefNV(StructData, 1);
 #endif
     };
 } // namespace srs

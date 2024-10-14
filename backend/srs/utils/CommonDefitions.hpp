@@ -36,7 +36,7 @@ namespace srs
     static constexpr int FEC_CONTROL_LOCAL_PORT = 6007;
 
     using BufferElementType = uint8_t;
-    using WriteBufferType = std::vector<BufferElementType>;
+    using BinaryData = std::vector<BufferElementType>;
 
     template <int buffer_size = SMALL_READ_MSG_BUFFER_SIZE>
     using ReadBufferType = std::array<BufferElementType, buffer_size>;

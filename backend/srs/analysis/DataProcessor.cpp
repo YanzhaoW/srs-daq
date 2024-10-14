@@ -140,8 +140,9 @@ namespace srs
 
     void DataProcessor::analyse_one_frame(const SerializableMsgBuffer& a_frame)
     {
-        a_frame.deserialize(export_data_.header, receive_raw_data_);
-        translate_raw_data(receive_raw_data_);
+        struct_serializer.convert(a_frame.data(), export_data_);
+        total_processed_hit_numer_ += export_data_.hit_data.size();
+        monitor_.update(export_data_);
         if (print_mode_ == print_raw)
         {
             spdlog::info("data: {:x}", fmt::join(a_frame.data(), ""));
@@ -169,36 +170,16 @@ namespace srs
     void DataProcessor::clear_data_buffer()
     {
         export_data_.header = ReceiveDataHeader{};
-        receive_raw_data_.clear();
         export_data_.marker_data.clear();
+        received_data_size_ = 0;
         export_data_.hit_data.clear();
-    }
-
-    bool DataProcessor::check_is_hit(const DataElementType& element) { return element.test(FLAG_BIT_POSITION); }
-
-    void DataProcessor::translate_raw_data(const ReceiveDataSquence& data_seq)
-    {
-        for (const auto& element : data_seq)
-        {
-            // spdlog::info("raw data: {:x}", element.to_ullong());
-            if (auto is_hit = check_is_hit(element); is_hit)
-            {
-                export_data_.hit_data.emplace_back(element);
-            }
-            else
-            {
-                export_data_.marker_data.emplace_back(element);
-            }
-        }
-        total_processed_hit_numer_ += export_data_.hit_data.size();
-        monitor_.update(export_data_);
     }
 
     void DataProcessor::print_data()
     {
         if (print_mode_ == print_header or print_mode_ == print_raw or print_mode_ == print_all)
         {
-            spdlog::info("frame header: [ {} ]. Data size: {}", export_data_.header, receive_raw_data_.size());
+            spdlog::info("frame header: [ {} ]. Data size: {}", export_data_.header, received_data_size_);
         }
 
         if (print_mode_ == print_all)

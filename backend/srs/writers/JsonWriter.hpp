@@ -23,7 +23,7 @@ namespace srs
                                                                 { "bc_id", {} } };
         // HitDataVec hit_data;
 
-        void set_value(const ExportData& data_struct)
+        void set_value(const StructData& data_struct)
         {
             header = data_struct.header;
             fill_hit_data(data_struct.hit_data);
@@ -87,7 +87,7 @@ namespace srs
             file_stream_.close();
         }
 
-        void write(const ExportData& data_struct)
+        void write(const StructData& data_struct)
         {
             data_buffer_.set_value(data_struct);
             auto error_code =

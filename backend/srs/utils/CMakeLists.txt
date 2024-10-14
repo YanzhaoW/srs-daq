@@ -5,4 +5,4 @@ target_include_directories(srs PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(
     srs
     PUBLIC asio::asio gsl::gsl-lite
-    PRIVATE fmt::fmt zpp_bits::zpp_bits spdlog::spdlog)
+    PRIVATE fmt::fmt spdlog::spdlog)

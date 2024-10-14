@@ -7,7 +7,7 @@
 #include <fmt/ranges.h>
 #include <spdlog/spdlog.h>
 #include <srs/Application.hpp>
-#include <srs/utils/Serializer.hpp>
+#include <srs/serializers/SerializableBuffer.hpp>
 
 namespace srs
 {
