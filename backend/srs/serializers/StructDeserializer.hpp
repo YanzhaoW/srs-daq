@@ -9,13 +9,15 @@
 
 namespace srs
 {
-    class StructSerializer
+    class StructDeserializer
     {
       public:
-        StructSerializer() = default;
+        StructDeserializer() = default;
+
+        using OutputType = StructData;
 
         // thread safe
-        auto convert(const BinaryData& binary_data, StructData& struct_data) -> std::size_t
+        auto convert(const BinaryData& binary_data, OutputType& struct_data) -> std::size_t
         {
             auto translated_size = std::size_t{};
             auto deserialize_to = zpp::bits::in{ binary_data, zpp::bits::endian::network{}, zpp::bits::no_size{} };
@@ -46,7 +48,7 @@ namespace srs
         ReceiveDataSquence receive_raw_data_;
         std::mutex mutex_;
 
-        void translate_raw_data(StructData& struct_data)
+        void translate_raw_data(OutputType& struct_data)
         {
             for (const auto& element : receive_raw_data_)
             {

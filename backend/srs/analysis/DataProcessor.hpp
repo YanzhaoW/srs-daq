@@ -11,7 +11,7 @@
 #include <span>
 #include <spdlog/logger.h>
 #include <srs/serializers/SerializableBuffer.hpp>
-#include <srs/serializers/StructSerializer.hpp>
+#include <srs/serializers/StructDeserializer.hpp>
 #include <tbb/concurrent_queue.h>
 
 namespace srs
@@ -92,7 +92,7 @@ namespace srs
         DataMonitor monitor_;
 
         // buffer variables
-        StructSerializer struct_serializer;
+        StructDeserializer struct_serializer;
         // ReceiveDataSquence receive_raw_data_;
         StructData export_data_;
 
