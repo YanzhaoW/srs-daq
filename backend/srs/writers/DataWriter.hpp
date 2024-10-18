@@ -5,6 +5,7 @@
 #include "JsonWriter.hpp"
 #include <fstream>
 #include <map>
+#include <srs/serializers/DataDeserializeOptions.hpp>
 
 namespace srs
 {
@@ -15,6 +16,7 @@ namespace srs
     {
       public:
         using enum DataWriterOption::Option;
+        using enum DataDeserializeOptions;
         explicit DataWriter(DataProcessor* processor);
 
         ~DataWriter();
@@ -32,15 +34,17 @@ namespace srs
 
         // Getter:
         [[nodiscard]] auto get_write_option() const -> DataWriterOption { return write_option_; }
-        [[nodiscard]] auto is_binary() const -> bool { return write_option_ == binary or write_option_ == udp; }
-        [[nodiscard]] auto is_struct() const -> bool { return write_option_ == root or write_option_ == json; }
+        [[nodiscard]] auto has_binary() const -> bool { return write_option_ == bin or write_option_ == udp_bin; }
+        [[nodiscard]] auto has_struct() const -> bool { return write_option_ == root or write_option_ == json; }
+        [[nodiscard]] auto has_proto() const -> bool { return write_option_ == bin_pd or write_option_ == udp_pd; }
+        [[nodiscard]] auto has_deserialize_type(DataDeserializeOptions option) const -> bool;
 
       private:
         DataWriterOption write_option_ = no_output;
-        std::map<DataWriterOption::Option, std::vector<std::string>> output_filenames{ { binary, {} },
+        std::map<DataWriterOption::Option, std::vector<std::string>> output_filenames{ { bin, {} },
                                                                                        { root, {} },
                                                                                        { json, {} },
-                                                                                       { udp, {} } };
+                                                                                       { udp_bin, {} } };
         std::unique_ptr<std::ofstream> binary_file_;
         std::unique_ptr<JsonWriter> json_file_;
 #ifdef HAS_ROOT

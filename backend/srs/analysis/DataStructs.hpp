@@ -71,6 +71,13 @@ namespace srs
         ClassDefNV(StructData, 1);
 #endif
     };
+
+    inline void reset_struct_data(StructData& struct_data)
+    {
+        struct_data.header = ReceiveDataHeader{};
+        struct_data.marker_data.clear();
+        struct_data.hit_data.clear();
+    }
 } // namespace srs
 
 template <>

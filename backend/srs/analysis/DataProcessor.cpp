@@ -118,13 +118,16 @@ namespace srs
         try
         {
             spdlog::trace("entering analysis loop");
-            auto input_data_buffer = SerializableMsgBuffer{};
+            // TODO: Use direct binary data
 
             while (not is_stopped)
             {
-                data_queue_.pop(input_data_buffer);
-                analyse_one_frame(input_data_buffer);
-                input_data_buffer.clear();
+                data_queue_.pop(deserializers_.get_binary_ref());
+                analyse_one_frame();
+                print_data();
+                write_data();
+
+                deserializers_.clear();
             }
         }
         catch (oneapi::tbb::user_abort& ex)
@@ -138,41 +141,31 @@ namespace srs
         }
     }
 
-    void DataProcessor::analyse_one_frame(const SerializableMsgBuffer& a_frame)
+    void DataProcessor::analyse_one_frame()
     {
-        struct_serializer.convert(a_frame.data(), export_data_);
+        const auto& bin_data = deserializers_.get_data<Deserializers::binary>().data();
+        struct_serializer.convert(bin_data, export_data_);
         total_processed_hit_numer_ += export_data_.hit_data.size();
         monitor_.update(export_data_);
         if (print_mode_ == print_raw)
         {
-            spdlog::info("data: {:x}", fmt::join(a_frame.data(), ""));
+            spdlog::info("data: {:x}", fmt::join(bin_data, ""));
         }
-        print_data();
-        write_data(a_frame);
-
-        clear_data_buffer();
     }
 
-    void DataProcessor::write_data(const SerializableMsgBuffer& a_frame)
+    void DataProcessor::write_data()
     {
-        if (data_writer_.is_binary())
+        const auto& bin_data = deserializers_.get_data<Deserializers::binary>().data();
+        if (data_writer_.has_binary())
         {
-            data_writer_.write_binary(a_frame.data());
+            data_writer_.write_binary(bin_data);
         }
 
-        if (data_writer_.is_struct())
+        if (data_writer_.has_struct())
         {
 
             data_writer_.write_struct(export_data_);
         }
-    }
-
-    void DataProcessor::clear_data_buffer()
-    {
-        export_data_.header = ReceiveDataHeader{};
-        export_data_.marker_data.clear();
-        received_data_size_ = 0;
-        export_data_.hit_data.clear();
     }
 
     void DataProcessor::print_data()

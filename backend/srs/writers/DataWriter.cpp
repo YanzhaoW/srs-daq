@@ -58,17 +58,17 @@ namespace srs
     DataWriter::~DataWriter() = default;
     void DataWriter::write_binary(const BinaryData& read_data)
     {
-        if (write_option_ == binary)
+        if (write_option_ == bin)
         {
             write_binary_file(read_data);
         }
 
-        if (write_option_ == udp)
+        if (write_option_ == udp_bin)
         {
             write_binary_udp(read_data);
         }
 
-        if (not(write_option_ == binary) and not(write_option_ == udp))
+        if (not(write_option_ == bin) and not(write_option_ == udp_bin))
         {
             throw std::runtime_error(
                 R"(DataWriter: write_binary is called but write option is not set to either "binary" or "udp")");
@@ -136,7 +136,7 @@ namespace srs
     {
         if (binary_file_ == nullptr)
         {
-            const auto& bin_files = output_filenames.at(binary);
+            const auto& bin_files = output_filenames.at(bin);
             if (bin_files.size() > 1)
             {
                 spdlog::warn("DataWriter: Multiple binary output files detected: {:?}. Only the first one is used",
@@ -150,6 +150,21 @@ namespace srs
                             static_cast<int64_t>(read_data.size() * sizeof(BufferElementType) / sizeof(char)));
     }
 
+    auto DataWriter::has_deserialize_type(DataDeserializeOptions option) const -> bool
+    {
+        switch (option)
+        {
+            case binary:
+                return write_option_ == bin or write_option_ == udp_bin;
+            case structure:
+                return write_option_ == root or write_option_ == json;
+            case proto:
+                return write_option_ == bin_pd or write_option_ == udp_pd;
+            default:
+                return false;
+        }
+    }
+
     void DataWriter::set_output_filenames(std::vector<std::string> filenames)
     {
         for (auto& filename : filenames)
@@ -157,8 +172,8 @@ namespace srs
             const auto file_ext = fs::path{ filename }.extension();
             if (file_ext == ".bin" or file_ext == ".lmd")
             {
-                output_filenames[binary].push_back(std::move(filename));
-                write_option_ |= binary;
+                output_filenames[bin].push_back(std::move(filename));
+                write_option_ |= bin;
             }
             else if (file_ext == ".root")
             {
@@ -178,8 +193,8 @@ namespace srs
             }
             else if (check_is_ip_address(filename))
             {
-                output_filenames[udp].push_back(std::move(filename));
-                write_option_ |= udp;
+                output_filenames[udp_bin].push_back(std::move(filename));
+                write_option_ |= udp_bin;
             }
             else
             {

@@ -13,6 +13,7 @@
 #include <srs/serializers/SerializableBuffer.hpp>
 #include <srs/serializers/StructDeserializer.hpp>
 #include <tbb/concurrent_queue.h>
+#include <srs/serializers/Deserializers.hpp>
 
 namespace srs
 {
@@ -91,19 +92,17 @@ namespace srs
         DataWriter data_writer_{ this };
         DataMonitor monitor_;
 
+        Deserializers deserializers_;
         // buffer variables
         StructDeserializer struct_serializer;
-        // ReceiveDataSquence receive_raw_data_;
         StructData export_data_;
 
         // should run on a different task
         void analysis_loop();
-        // void translate_raw_data(const ReceiveDataSquence& data_seq);
-        void analyse_one_frame(const SerializableMsgBuffer& a_frame);
-        void write_data(const SerializableMsgBuffer& a_frame);
+        void analyse_one_frame();
+        void write_data();
         void print_data();
         void clear_data_buffer();
-        // static bool check_is_hit(const DataElementType& element);
     };
 
 } // namespace srs

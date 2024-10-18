@@ -7,11 +7,13 @@ class DataWriterOption
   public:
     enum class Option : uint8_t
     {
-        no_output = 0x0,
-        root = 0x1,
-        json = 0x2,
-        binary = 0x4,
-        udp = 0x8
+        no_output = 0x00,
+        root = 0x01,
+        json = 0x02,
+        bin = 0x04,
+        bin_pd = 0x08,
+        udp_bin = 0x10,
+        udp_pd = 0x20
     };
     using enum Option;
 
@@ -21,19 +23,19 @@ class DataWriterOption
     {
     }
 
-    inline void operator|=(DataWriterOption right)
+    void operator|=(DataWriterOption right)
     {
         auto res_underlying = std::to_underlying(option_);
         res_underlying |= std::to_underlying(right.option_);
         option_ = Option{ res_underlying };
     }
 
-    inline auto operator==(DataWriterOption rhs) const -> bool { return ((*this) & rhs) != no_output; }
-    inline auto operator==(Option rhs) const -> bool { return (*this) == DataWriterOption{ rhs }; }
+    auto operator==(DataWriterOption rhs) const -> bool { return ((*this) & rhs) != no_output; }
+    auto operator==(Option rhs) const -> bool { return (*this) == DataWriterOption{ rhs }; }
 
   private:
     Option option_;
-    inline auto operator&(DataWriterOption right) const -> Option
+    auto operator&(DataWriterOption right) const -> Option
     {
         auto res_underlying = std::to_underlying(option_);
         res_underlying &= std::to_underlying(right.option_);
