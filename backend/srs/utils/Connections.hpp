@@ -15,11 +15,17 @@ namespace srs
         {
         }
 
-        void end_of_read();
+        void end_of_connection();
         void acq_on()
         {
             const auto data = std::vector<CommunicateEntryType>{ 0, 15, 1 };
             communicate(data, NULL_ADDRESS);
+        }
+        void on_fail()
+        {
+            const auto& endpoint = get_endpoint();
+            spdlog::critical(
+                "Cannot start the system: No connection to {}:{}!", endpoint.address().to_string(), endpoint.port());
         }
     };
 
@@ -36,10 +42,15 @@ namespace srs
         {
         }
 
-        ~Stopper() { spdlog::info("SRS system is turned off"); }
+        ~Stopper()
+        {
+            spdlog::info("SRS system is turned off");
+            get_app().set_status_acq_off();
+        }
 
+        static void on_fail() { spdlog::debug("on_fail of stopper is called"); }
         void acq_off();
-        void end_of_read() {}
+        void end_of_connection() {}
     };
 
     class DataReader : public ConnectionBase<LARGE_READ_MSG_BUFFER_SIZE>
@@ -49,14 +60,15 @@ namespace srs
             : data_processor_{ processor }
             , ConnectionBase(info, "DataReader")
         {
+            set_timeout_seconds(-1);
         }
 
         void start()
         {
-            get_control().set_status_is_reading(true);
+            get_app().set_status_is_reading(true);
             listen(true);
         }
-        void end_of_read();
+        void end_of_connection();
 
         void read_data_handle(std::span<BufferElementType> read_data);
 

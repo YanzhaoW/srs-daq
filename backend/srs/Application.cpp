@@ -34,19 +34,37 @@ namespace srs
                     exit();
                 });
             io_context_.join();
+            end_of_work();
         };
         working_thread_ = std::jthread{ monitoring_action };
+    }
+
+    void App::end_of_work()
+    {
+        if (not status_.is_acq_off.load())
+        {
+            spdlog::critical(
+                "Failed to close srs system! Please manually close the system with\n\nsrs_control --acq-off\n");
+        }
     }
 
     void App::exit()
     {
         signal_set_.cancel();
         data_processor_->stop();
-        spdlog::debug("Turning srs system off ...");
-        status_.is_acq_off.store(true);
+        spdlog::debug("Shutting down application ...");
+        status_.is_on_exit.store(true);
         status_.wait_for_status([](const auto& status) { return not status.is_reading.load(); });
 
-        switch_off();
+        if (status_.is_acq_on.load())
+        {
+            spdlog::debug("Turning srs system off ...");
+            switch_off();
+        }
+        else
+        {
+            set_status_acq_off(true);
+        }
         set_status_acq_on(false);
         io_work_guard_.reset();
     }

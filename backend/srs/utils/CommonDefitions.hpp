@@ -12,6 +12,7 @@ namespace srs
 
     // Connections:
     constexpr auto DEFAULT_SRS_IP = std::string_view{ "10.0.0.2" };
+    constexpr auto DEFAULT_TIMEOUT_SECONDS = 2;
     constexpr auto WRITE_COMMAND_BITS = uint8_t{ 0xaa };
     constexpr auto DEFAULT_TYPE_BITS = uint8_t{ 0xaa };
     constexpr auto DEFAULT_CHANNEL_ADDRE = uint16_t{ 0xff };
@@ -28,7 +29,7 @@ namespace srs
     constexpr auto NULL_ADDRESS = uint16_t{ 0x000f }; /* device address = 0x21 */
 
     constexpr auto INIT_COUNT_VALUE = uint32_t{ 0x80000000 };
-    constexpr auto DEFAULT_STATUS_WAITING_TIME_SECONDS = std::chrono::seconds{ 4 };
+    constexpr auto DEFAULT_STATUS_WAITING_TIME_SECONDS = std::chrono::seconds{ 5 };
 
     // port numbers:
     constexpr auto DEFAULT_SRS_CONTROL_PORT = 6600;

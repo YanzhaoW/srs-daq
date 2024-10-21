@@ -38,6 +38,7 @@ namespace srs
         // setters:
         void set_remote_endpoint(std::string_view remote_ip, int port_number);
         void set_status_acq_on(bool val = true) { status_.is_acq_on.store(val); }
+        void set_status_acq_off(bool val = true) { status_.is_acq_off.store(val); }
         void set_status_is_reading(bool val = true) { status_.is_reading.store(val); }
         void set_print_mode(DataPrintMode mode);
         void set_output_filenames(std::vector<std::string> filenames);
@@ -62,5 +63,6 @@ namespace srs
         udp::endpoint remote_endpoint_;
 
         void start_work();
+        void end_of_work();
     };
 } // namespace srs

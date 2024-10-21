@@ -3,10 +3,10 @@
 
 namespace srs
 {
-    void Starter::end_of_read()
+    void Starter::end_of_connection()
     {
         close_socket();
-        auto& control = get_control();
+        auto& control = get_app();
         control.set_status_acq_on();
         control.notify_status_change();
         spdlog::info("SRS system is turned on");
@@ -15,16 +15,16 @@ namespace srs
     void Stopper::acq_off()
     {
         const auto waiting_time = std::chrono::seconds{ 4 };
-        get_control().wait_for_status([](const Status& status) { return status.is_acq_on.load(); }, waiting_time);
+        get_app().wait_for_status([](const Status& status) { return status.is_acq_on.load(); }, waiting_time);
         const auto data = std::vector<CommunicateEntryType>{ 0, 15, 0 };
         communicate(data, NULL_ADDRESS);
     }
 
-    void DataReader::end_of_read()
+    void DataReader::end_of_connection()
     {
         spdlog::debug("Stopping data reading ...");
         close_socket();
-        auto& control = get_control();
+        auto& control = get_app();
         control.set_status_is_reading(false);
         control.notify_status_change();
         spdlog::info("Data reading is stopped.");

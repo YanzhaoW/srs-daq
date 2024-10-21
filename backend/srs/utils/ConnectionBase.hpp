@@ -20,38 +20,49 @@ namespace srs
         explicit ConnectionBase(const ConnectionInfo& info, std::string name)
             : local_port_number_{ info.local_port_number }
             , name_{ std::move(name) }
-            , control_{ info.control }
+            , app_{ info.control }
             , endpoint_{ info.endpoint }
         {
             spdlog::debug("Creating connection {} with buffer size: {}", name_, buffer_size);
         }
 
+        // possible overload from derived class
+        void read_data_handle(std::span<BufferElementType> read_data) {}
+        void end_of_connection() {}
+        void on_fail() {spdlog::debug("default on_fail is called!");}
+
         void listen(this auto&& self, bool is_continuous = false);
         void communicate(this auto&& self, const std::vector<CommunicateEntryType>& data, uint16_t address);
         void close_socket();
-        void read_data_handle(std::span<BufferElementType> read_data) {}
+        void set_timeout_seconds(int val) { timeout_seconds_ = val; }
 
         [[nodiscard]] auto get_read_msg_buffer() const -> const auto& { return read_msg_buffer_; }
         [[nodiscard]] auto get_name() const -> const auto& { return name_; }
-        [[nodiscard]] auto get_control() -> auto& { return *control_; }
+        [[nodiscard]] auto get_app() -> auto& { return *app_; }
+        auto get_socket() -> const udp::socket& { return *socket_; }
+        auto get_endpoint() -> const udp::endpoint& { return *endpoint_; }
 
       private:
         int local_port_number_ = 0;
         uint32_t counter_ = INIT_COUNT_VALUE;
         std::string name_ = "ConnectionBase";
-        gsl::not_null<App*> control_;
+        gsl::not_null<App*> app_;
         std::unique_ptr<udp::socket> socket_;
         udp::endpoint* endpoint_;
         SerializableMsgBuffer write_msg_buffer_;
         ReadBufferType<buffer_size> read_msg_buffer_{};
+        int timeout_seconds_ = DEFAULT_TIMEOUT_SECONDS;
 
         static auto send_message(std::shared_ptr<ConnectionBase> connection) -> asio::awaitable<void>;
         void encode_write_msg(const std::vector<CommunicateEntryType>& data, uint16_t address);
         auto new_shared_socket(int port_number) -> std::unique_ptr<udp::socket>;
         static auto signal_handling(auto* connection) -> asio::awaitable<void>;
+        static auto timer_countdown(auto* connection) -> asio::awaitable<void>;
         static auto listen_message(SharedPtr auto connection, bool is_continuous = false) -> asio::awaitable<void>;
         void reset_read_msg_buffer() { std::fill(read_msg_buffer_.begin(), read_msg_buffer_.end(), 0); }
     };
+
+    // Member function definitions:
 
     template <int size>
     auto ConnectionBase<size>::send_message(std::shared_ptr<ConnectionBase<size>> connection) -> asio::awaitable<void>
@@ -78,12 +89,31 @@ namespace srs
             // spdlog::info("Connection {}: received {} bytes data", connection->get_name(), read_msg.size());
 
             connection->reset_read_msg_buffer();
-            if (not is_continuous or connection->get_control().get_status().is_acq_off.load())
+            if (not is_continuous or connection->get_app().get_status().is_on_exit.load())
             {
                 break;
             }
         }
-        connection->end_of_read();
+        connection->end_of_connection();
+    }
+
+    template <int size>
+    auto ConnectionBase<size>::timer_countdown(auto* connection) -> asio::awaitable<void>
+    {
+        auto io_context = co_await asio::this_coro::executor;
+        auto timer = asio::steady_timer{ io_context };
+        if (connection->timeout_seconds_ > 0)
+        {
+
+            timer.expires_after(std::chrono::seconds{ connection->timeout_seconds_ });
+        }
+        else
+        {
+            timer.expires_at(decltype(timer)::time_point::max());
+        }
+        co_await timer.async_wait(asio::use_awaitable);
+        spdlog::error("Connection {}: TIMEOUT after {} seconds.", connection->get_name(), connection->timeout_seconds_);
+        connection->on_fail();
     }
 
     template <int size>
@@ -99,15 +129,15 @@ namespace srs
         else
         {
             fmt::print("\n");
-            spdlog::trace("Connection {}: Signal with num {} is called!", sig_num, connection->get_name());
-            connection->end_of_read();
+            spdlog::trace("Connection {}: Signal ID {} is called!", connection->get_name(), sig_num);
+            connection->end_of_connection();
         }
     }
 
     template <int size>
     auto ConnectionBase<size>::new_shared_socket(int port_number) -> std::unique_ptr<udp::socket>
     {
-        return std::make_unique<udp::socket>(control_->get_io_context(),
+        return std::make_unique<udp::socket>(app_->get_io_context(),
                                              udp::endpoint{ udp::v4(), static_cast<asio::ip::port_type>(port_number) });
     }
 
@@ -125,11 +155,13 @@ namespace srs
         using asio::experimental::awaitable_operators::operator||;
         spdlog::debug("Connection {}: creating socket with local port number: {}", self.name_, self.local_port_number_);
         self.socket_ = self.new_shared_socket(self.local_port_number_);
-        co_spawn(self.control_->get_io_context(),
-                 listen_message(std::static_pointer_cast<std::remove_cvref_t<decltype(self)>>(self.shared_from_this()),
-                                is_continuous) ||
-                     signal_handling(&self),
-                 asio::detached);
+
+        co_spawn(
+            self.app_->get_io_context(),
+            signal_handling(&self) || timer_countdown(&self) ||
+                listen_message(std::static_pointer_cast<std::remove_cvref_t<decltype(self)>>(self.shared_from_this()),
+                               is_continuous),
+            asio::detached);
         spdlog::debug("Connection {}: spawned listen coroutine", self.name_);
     }
 
@@ -142,7 +174,7 @@ namespace srs
         if (self.endpoint_ != nullptr)
         {
             self.encode_write_msg(data, address);
-            co_spawn(self.control_->get_io_context(), send_message(self.shared_from_this()), asio::detached);
+            co_spawn(self.app_->get_io_context(), send_message(self.shared_from_this()), asio::detached);
             spdlog::debug("Connection {}: spawned write coroutine", self.name_);
         }
     }

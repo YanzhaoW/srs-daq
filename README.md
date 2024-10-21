@@ -44,6 +44,8 @@ conda activate srs
 
 #### Step 3: Build the project
 
+*Make sure conda environment `srs` is activated.*
+
 ```bash
 cmake --preset default . [optional settings]
 cmake --build ./build -- -j[nproc]

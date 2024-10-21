@@ -11,6 +11,7 @@ namespace srs
         std::atomic<bool> is_acq_on = false;
         std::atomic<bool> is_reading = false;
         std::atomic<bool> is_acq_off = false;
+        std::atomic<bool> is_on_exit = false;
         std::condition_variable status_change;
 
         void wait_for_status(auto&& condition, std::chrono::seconds time_duration = DEFAULT_STATUS_WAITING_TIME_SECONDS)
