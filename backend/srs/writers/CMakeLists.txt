@@ -1,4 +1,4 @@
-target_sources(srs PRIVATE DataWriter.cpp)
+target_sources(srscpp PRIVATE DataWriter.cpp)
 
-target_link_libraries(srs PRIVATE glaze::glaze)
-target_include_directories(srs PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(srscpp PRIVATE glaze::glaze)
+target_include_directories(srscpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

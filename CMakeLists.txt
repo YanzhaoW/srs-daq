@@ -5,16 +5,21 @@ project(
     VERSION 0.0.2
     LANGUAGES CXX)
 
+include(cmake/install_packages.cmake)
+include(GNUInstallDirs)
+include(cmake/project_config.cmake)
+include(cmake/option_settings.cmake)
+
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_EXTENSIONS ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
-option(USE_ROOT "Force to use ROOT dependency." OFF)
-option(NO_ROOT "Disable the usage of ROOT dependency." OFF)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    list(APPEND CMAKE_CXX_FLAGS "-fexperimental-library")
+endif()
 
-include(GNUInstallDirs)
-include(cmake/project_config.cmake)
+list(APPEND CMAKE_PREFIX_PATH ENV${CONDA_PREFIX})
 
 add_subdirectory(frontend)
 add_subdirectory(backend)

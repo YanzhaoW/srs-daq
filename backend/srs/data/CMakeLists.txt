@@ -1,15 +1,15 @@
-target_link_libraries(srs PRIVATE protobuf::protobuf)
+target_link_libraries(srscpp PRIVATE protobuf::protobuf)
 
 protobuf_generate(
     TARGET
-    srs
+    srscpp
     PROTOS
     message.proto
     PROTOC_OUT_DIR
     ${CMAKE_CURRENT_BINARY_DIR})
 
 target_sources(
-    srs
+    srscpp
     PRIVATE FILE_SET
             HEADERS
             BASE_DIRS

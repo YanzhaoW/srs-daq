@@ -1,5 +1,5 @@
 # target_sources(srs PRIVATE Application.cpp utils/Connections.cpp)
-target_sources(srs PRIVATE Application.cpp)
+target_sources(srscpp PRIVATE Application.cpp)
 
 add_subdirectory(utils)
 add_subdirectory(analysis)
@@ -7,7 +7,7 @@ add_subdirectory(serializers)
 add_subdirectory(writers)
 
 target_sources(
-    srs
+    srscpp
     PRIVATE FILE_SET
             HEADERS
             BASE_DIRS
@@ -19,4 +19,4 @@ target_sources(
             devices/VmmDevice.hpp
             Application.hpp)
 
-target_include_directories(srs PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/devices)
+target_include_directories(srscpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/devices)

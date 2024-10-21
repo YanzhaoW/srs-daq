@@ -1,17 +1,17 @@
-target_sources(srs PRIVATE DataProcessor.cpp DataStructs.cpp)
+target_sources(srscpp PRIVATE DataProcessor.cpp DataStructs.cpp)
 
-target_link_libraries(srs PRIVATE onetbb::onetbb)
-target_include_directories(srs PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(srscpp PRIVATE onetbb::onetbb)
+target_include_directories(srscpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 if(ROOT_FOUND)
-    target_link_libraries(srs PRIVATE ROOT::RIO ROOT::Tree)
-    target_compile_definitions(srs PRIVATE HAS_ROOT=1)
-    target_compile_options(srs PRIVATE "-Wno-cpp")
+    target_link_libraries(srscpp PRIVATE ROOT::RIO ROOT::Tree)
+    target_compile_definitions(srscpp PRIVATE HAS_ROOT=1)
+    target_compile_options(srscpp PRIVATE "-Wno-cpp")
     root_generate_dictionary(
         srs_dict
         DataStructs.hpp
         MODULE
-        srs
+        srscpp
         LINKDEF
         SRSLinkDef.hpp)
 endif()

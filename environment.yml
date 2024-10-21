@@ -6,3 +6,4 @@ dependencies:
   - conan=2.8.0
   - cmake=3.30.5
   - ninja=1.12.1
+  - anaconda::protobuf=4.25.3

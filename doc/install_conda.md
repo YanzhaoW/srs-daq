@@ -2,7 +2,7 @@
 
 Conda is a package manager for easily installing required libraries and software.
 
-### Step 1: Install mini-conda
+### Install mini-conda
 
 Go to [mini-conda quick command line install](https://docs.anaconda.com/free/miniconda/#quick-command-line-install) and choose the method for your operating system. For example, Linux users can do
 
@@ -24,38 +24,7 @@ and for zsh user:
 ```bash
 ~/miniconda3/bin/conda init zsh
 ```
-
 Once all is done successfully, log out and restart your shell.
-
-### Step 2: Install dependencies
-
-Install ROOT and Conan with:
-
-```bash
-conda install -c conda-forge root conan
-```
-
-### Step 3: Define the correct environment
-
-Put the following lines **after** `<<< conda initialize <<<` line in the `.bashrc`:
-
-```bash
-export CC=[gcc command]
-export CXX=[g++ command]
-```
-where `[g++/gcc command]` is the command used to run a specific version of gcc. Please make sure it exists in the system by checking
-
-```bash
-[g++ command] --version
-```
-
-for example:
-
-```bash
-export CC=gcc-14.2.0
-export CXX=g++-14.2.0
-```
-Finally, restart the shell before you build the project.
 
 ## Troubleshooting
 

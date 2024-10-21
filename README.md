@@ -15,28 +15,11 @@ srs-daq is an asynchronous data IO program for SRS system.
 
 ### Prerequisites
 
-- C++ compiler 
+- C++ compiler (choose either one below)
   - gcc <span>&#8805;</span> 14.2.
   - clang <span>&#8805;</span> 18
 
-  To check the version of compiler, use
-  ```bash
-  gcc --version # if gcc is used
-  clang --version # if clang is used
-  ```
-  if the version is less than 14.2, use the correct version by
-  ```bash
-  export CXX=[g++ command] # e.g. export CXX=g++-14.2.0
-  export CC=[gcc command] # e.g. export CC=gcc-14.2.0
-  ```
-- Conan <span>&#8805;</span> 2.2. To install Conan
-    ```bash
-    python -m pip install conan
-    ```
-- cmake <span>&#8805;</span> 3.26. The version can be checked with
-  ```bash
-  cmake --version # please make sure the output is larger than 3.26
-  ```
+- (mini) Conda. See [this instruction](doc/install_conda.md) to install miniconda quickly.
 - **(Optional)** ROOT <span>&#8805;</span> 6.32
 
 > [!CAUTION]
@@ -44,17 +27,31 @@ srs-daq is an asynchronous data IO program for SRS system.
 
 ### Installation
 
+#### Step 1: Clone the latest version
+
 ```bash
-git clone -b dev https://github.com/YanzhaoW/srs-daq.git
+git clone -b latest https://github.com/YanzhaoW/srs-daq.git
 cd srs-daq
 git submodule update --init
-cmake --preset default . [options]
+```
+
+#### Step 2: Prepare the environment
+
+```bash
+conda env create -f environment.yml
+conda activate srs
+```
+
+#### Step 3: Build the project
+
+```bash
+cmake --preset default . [optional settings]
 cmake --build ./build -- -j[nproc]
 ```
 
 The executable programs are compiled in the `build/bin` directory whereas the dynamic library in `build/lib`.
 
-Following CMake preset options are available:
+Following CMake preset optional settings are available:
 
 - `-DUSE_ROOT=`
   - `OFF` or `FALSE` (default). The program would only compile with ROOT if ROOT exists. 
@@ -71,7 +68,7 @@ cmake --preset default . -DNO_ROOT=TRUE
 
 ## srs_control - The control program
 
-To run the program, first go to `build/bin` directory and run
+<!-- To run the program, first make sure you have activated the conda environment `srs`, which can be checked by `conda info`. If not, run `conda activate srs` to activate `srs` environment. --> Go to `build/bin` directory and run
 
 ```bash
 ./srs_control [-p DATA_PRINT_OPTION] [-v LOG_LEVEL] [-h]
