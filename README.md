@@ -66,6 +66,18 @@ For example, to disable the ROOT dependency, run the `cmake --preset` with:
 cmake --preset default . -DNO_ROOT=TRUE
 ```
 
+### Update to the latest version
+
+srs-daq is under a continuous development. To update to the latest version, run the following git commands:
+
+```bash
+git fetch origin
+git checkout latest
+git submodule update --init
+```
+After this, build the project again from [Step 3](#step-3-build-the-project).
+
+
 ## srs_control - The control program
 
 <!-- To run the program, first make sure you have activated the conda environment `srs`, which can be checked by `conda info`. If not, run `conda activate srs` to activate `srs` environment. --> Go to `build/bin` directory and run
