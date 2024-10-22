@@ -51,7 +51,7 @@ namespace srs
             current_hits_ps_.store(hits_processed / time_duration_double * 1e6);
 
             set_speed_string(current_received_bytes_MBps_.load());
-            console_->info("Data reading rate: {}. Press \"Ctrl-C\" to stop.\r", speed_string_);
+            console_->info("Data reading rate: {}. Press \"Ctrl-C\" to stop the program.\r", speed_string_);
         }
     }
 
@@ -144,9 +144,11 @@ namespace srs
     void DataProcessor::analyse_one_frame()
     {
         const auto& bin_data = deserializers_.get_data<Deserializers::binary>().data();
-        struct_serializer.convert(bin_data, export_data_);
-        total_processed_hit_numer_ += export_data_.hit_data.size();
-        monitor_.update(export_data_);
+        struct_serializer.convert(bin_data);
+        const auto& export_data = struct_serializer.get_output_data();
+
+        total_processed_hit_numer_ += export_data.hit_data.size();
+        monitor_.update(export_data);
         if (print_mode_ == print_raw)
         {
             spdlog::info("data: {:x}", fmt::join(bin_data, ""));
@@ -156,6 +158,7 @@ namespace srs
     void DataProcessor::write_data()
     {
         const auto& bin_data = deserializers_.get_data<Deserializers::binary>().data();
+        const auto& export_data = struct_serializer.get_output_data();
         if (data_writer_.has_binary())
         {
             data_writer_.write_binary(bin_data);
@@ -164,24 +167,26 @@ namespace srs
         if (data_writer_.has_struct())
         {
 
-            data_writer_.write_struct(export_data_);
+            auto& export_data_nonconst = struct_serializer.get_output_data_ref();
+            data_writer_.write_struct(export_data_nonconst);
         }
     }
 
     void DataProcessor::print_data()
     {
+        const auto& export_data = struct_serializer.get_output_data();
         if (print_mode_ == print_header or print_mode_ == print_raw or print_mode_ == print_all)
         {
-            spdlog::info("frame header: [ {} ]. Data size: {}", export_data_.header, received_data_size_);
+            spdlog::info("frame header: [ {} ]. Data size: {}", export_data.header, received_data_size_);
         }
 
         if (print_mode_ == print_all)
         {
-            for (const auto& hit_data : export_data_.hit_data)
+            for (const auto& hit_data : export_data.hit_data)
             {
                 spdlog::info("Hit data: [ {} ]", hit_data);
             }
-            for (const auto& marker_data : export_data_.marker_data)
+            for (const auto& marker_data : export_data.marker_data)
             {
                 spdlog::info("Marker data: [ {} ]", marker_data);
             }

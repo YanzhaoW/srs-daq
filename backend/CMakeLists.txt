@@ -32,6 +32,9 @@ endif()
 
 add_library(srscpp STATIC)
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    target_compile_options(srscpp PRIVATE "-fclang-abi-compat=17")
+endif()
 add_subdirectory(srs)
 
 target_include_directories(srscpp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

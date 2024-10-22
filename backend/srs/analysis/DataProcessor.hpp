@@ -67,7 +67,7 @@ namespace srs
         // getters:
         [[nodiscard]] auto get_read_data_bytes() const -> uint64_t { return total_read_data_bytes_.load(); }
         [[nodiscard]] auto get_processed_hit_number() const -> uint64_t { return total_processed_hit_numer_.load(); }
-        [[nodiscard]] auto get_export_data() -> auto& { return export_data_; }
+        [[nodiscard]] auto get_export_data() -> auto& { return struct_serializer.get_output_data(); }
         [[nodiscard]] auto get_data_monitor() const -> const auto& { return monitor_; }
 
         // setters:
@@ -95,7 +95,6 @@ namespace srs
         Deserializers deserializers_;
         // buffer variables
         StructDeserializer struct_serializer;
-        StructData export_data_;
 
         // should run on a different task
         void analysis_loop();

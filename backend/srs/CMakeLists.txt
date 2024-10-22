@@ -5,6 +5,7 @@ add_subdirectory(utils)
 add_subdirectory(analysis)
 add_subdirectory(serializers)
 add_subdirectory(writers)
+add_subdirectory(data)
 
 target_sources(
     srscpp
@@ -20,3 +21,4 @@ target_sources(
             Application.hpp)
 
 target_include_directories(srscpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/devices)
+target_link_libraries(srscpp PRIVATE srs_data)

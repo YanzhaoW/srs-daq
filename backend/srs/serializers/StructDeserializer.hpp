@@ -18,13 +18,13 @@ namespace srs
         using InputType = BinaryData;
 
         // thread safe
-        auto convert(const InputType& binary_data, OutputType& struct_data) -> std::size_t
+        auto convert(const InputType& binary_data) -> std::size_t
         {
             auto translated_size = std::size_t{};
             auto deserialize_to = zpp::bits::in{ binary_data, zpp::bits::endian::network{}, zpp::bits::no_size{} };
 
             auto read_bytes = binary_data.size() * sizeof(BufferElementType);
-            constexpr auto header_bytes = sizeof(struct_data.header);
+            constexpr auto header_bytes = sizeof(output_data_.header);
             constexpr auto element_bytes = HIT_DATA_BIT_LENGTH / BYTE_BIT_LENGTH;
             auto vector_size = (read_bytes - header_bytes) / element_bytes;
             if (vector_size < 0)
@@ -36,17 +36,22 @@ namespace srs
             auto mutex_lock = std::scoped_lock{ mutex_ };
             receive_raw_data_.resize(vector_size);
             std::ranges::fill(receive_raw_data_, 0);
-            deserialize_to(struct_data.header, receive_raw_data_).or_throw();
+            deserialize_to(output_data_.header, receive_raw_data_).or_throw();
             byte_reverse_data_sq();
-            translate_raw_data(struct_data);
+            translate_raw_data(output_data_);
             translated_size = receive_raw_data_.size();
             receive_raw_data_.clear();
 
             return translated_size;
         }
 
+        void reset() { reset_struct_data(output_data_); }
+        [[nodiscard]] auto get_output_data() const -> const auto& { return output_data_; }
+        [[nodiscard]] auto get_output_data_ref()  -> auto& { return output_data_; }
+
       private:
         ReceiveDataSquence receive_raw_data_;
+        OutputType output_data_;
         std::mutex mutex_;
 
         void translate_raw_data(OutputType& struct_data)
