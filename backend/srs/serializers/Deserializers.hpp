@@ -17,48 +17,29 @@ namespace srs
         Deserializers() = default;
         using enum DataDeserializeOptions;
 
-        void deserialize(DataDeserializeOptions option)
+        void analysis_one(auto& data_queue)
         {
-            deserialize_struct();
-            convert_to_proto();
-            convert_to_string();
+            data_queue.pop(binary_data_);
+            struct_deserializer_.convert(binary_data_.data());
+            struct_proto_converter_.convert(struct_deserializer_.get_output_data());
+            proto_deserializer_.convert(struct_proto_converter_.get_output_data());
         }
 
         // Getters:
         template <DataDeserializeOptions option>
         auto get_data() -> const auto&;
-        auto get_binary_ref() -> auto&
-        {
-            if (binary_data_.is_valid())
-            {
-                spdlog::warn("Binary data is already copied");
-            }
-            binary_data_.validate();
-            return binary_data_.value();
-        }
 
         void clear()
         {
-            if (binary_data_.is_valid())
-            {
-                binary_data_->clear();
-                binary_data_.invalidate();
-            }
             struct_deserializer_.reset();
             proto_deserializer_.reset();
         }
 
       private:
-        ValidData<SerializableMsgBuffer> binary_data_;
+        SerializableMsgBuffer binary_data_;
         StructDeserializer struct_deserializer_;
         Struct2ProtoConverter struct_proto_converter_;
         ProtoDeserializer proto_deserializer_;
-
-        void deserialize_struct() { struct_deserializer_.convert(binary_data_->data()); }
-
-        void convert_to_proto() { struct_proto_converter_.convert(struct_deserializer_.get_output_data()); }
-
-        void convert_to_string() { proto_deserializer_.convert(struct_proto_converter_.get_output_data()); }
     };
 
     template <DataDeserializeOptions option>
@@ -66,7 +47,7 @@ namespace srs
     {
         if constexpr (option == binary)
         {
-            return binary_data_.get();
+            return binary_data_.data();
         }
         else if constexpr (option == structure)
         {

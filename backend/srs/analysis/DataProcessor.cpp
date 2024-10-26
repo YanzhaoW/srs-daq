@@ -122,8 +122,8 @@ namespace srs
 
             while (not is_stopped)
             {
-                data_queue_.pop(deserializers_.get_binary_ref());
-                analyse_one_frame();
+                deserializers_.analysis_one(data_queue_);
+                update_monitor();
                 print_data();
                 write_data();
 
@@ -141,24 +141,18 @@ namespace srs
         }
     }
 
-    void DataProcessor::analyse_one_frame()
+    void DataProcessor::update_monitor()
     {
-        const auto& bin_data = deserializers_.get_data<Deserializers::binary>().data();
-        struct_serializer.convert(bin_data);
-        const auto& export_data = struct_serializer.get_output_data();
+        const auto& struct_data = deserializers_.get_data<Deserializers::structure>();
 
-        total_processed_hit_numer_ += export_data.hit_data.size();
-        monitor_.update(export_data);
-        if (print_mode_ == print_raw)
-        {
-            spdlog::info("data: {:x}", fmt::join(bin_data, ""));
-        }
+        total_processed_hit_numer_ += struct_data.hit_data.size();
+        monitor_.update(struct_data);
     }
 
     void DataProcessor::write_data()
     {
-        const auto& bin_data = deserializers_.get_data<Deserializers::binary>().data();
-        const auto& export_data = struct_serializer.get_output_data();
+        const auto& bin_data = deserializers_.get_data<Deserializers::binary>();
+        const auto& struct_data = deserializers_.get_data<Deserializers::structure>();
         if (data_writer_.has_binary())
         {
             data_writer_.write_binary(bin_data);
@@ -166,15 +160,18 @@ namespace srs
 
         if (data_writer_.has_struct())
         {
-
-            auto& export_data_nonconst = struct_serializer.get_output_data_ref();
-            data_writer_.write_struct(export_data_nonconst);
+            data_writer_.write_struct(struct_data);
         }
     }
 
     void DataProcessor::print_data()
     {
-        const auto& export_data = struct_serializer.get_output_data();
+        const auto& export_data = deserializers_.get_data<Deserializers::structure>();
+        const auto& raw_data = deserializers_.get_data<Deserializers::binary>();
+        if (print_mode_ == print_raw)
+        {
+            spdlog::info("data: {:x}", fmt::join(raw_data, ""));
+        }
         if (print_mode_ == print_header or print_mode_ == print_raw or print_mode_ == print_all)
         {
             spdlog::info("frame header: [ {} ]. Data size: {}", export_data.header, received_data_size_);

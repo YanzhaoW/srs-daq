@@ -10,10 +10,10 @@
 #include <gsl/gsl-lite.hpp>
 #include <span>
 #include <spdlog/logger.h>
+#include <srs/serializers/Deserializers.hpp>
 #include <srs/serializers/SerializableBuffer.hpp>
 #include <srs/serializers/StructDeserializer.hpp>
 #include <tbb/concurrent_queue.h>
-#include <srs/serializers/Deserializers.hpp>
 
 namespace srs
 {
@@ -83,22 +83,23 @@ namespace srs
         using enum DataPrintMode;
 
         std::atomic<bool> is_stopped{ false };
-        std::size_t received_data_size_ {};
+        std::size_t received_data_size_{};
         DataPrintMode print_mode_ = DataPrintMode::print_speed;
-        tbb::concurrent_bounded_queue<SerializableMsgBuffer> data_queue_;
         std::atomic<uint64_t> total_read_data_bytes_ = 0;
         std::atomic<uint64_t> total_processed_hit_numer_ = 0;
         gsl::not_null<App*> control_;
         DataWriter data_writer_{ this };
         DataMonitor monitor_;
 
+        // Data buffer
+        tbb::concurrent_bounded_queue<SerializableMsgBuffer> data_queue_;
         Deserializers deserializers_;
         // buffer variables
         StructDeserializer struct_serializer;
 
         // should run on a different task
         void analysis_loop();
-        void analyse_one_frame();
+        void update_monitor();
         void write_data();
         void print_data();
         void clear_data_buffer();

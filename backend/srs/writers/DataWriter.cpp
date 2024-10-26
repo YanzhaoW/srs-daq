@@ -75,7 +75,7 @@ namespace srs
         }
     }
 
-    void DataWriter::write_struct(StructData& read_data)
+    void DataWriter::write_struct(const StructData& read_data)
     {
         if (write_option_ == json)
         {
@@ -112,7 +112,7 @@ namespace srs
         json_file_->write(data_struct);
     }
 
-    void DataWriter::write_struct_root(StructData& data_struct)
+    void DataWriter::write_struct_root(const StructData& data_struct)
     {
 #ifdef HAS_ROOT
         if (root_file_ == nullptr)

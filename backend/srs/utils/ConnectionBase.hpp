@@ -4,10 +4,12 @@
 #include "ConnectionTypeDef.hpp"
 #include "gsl/gsl-lite.hpp"
 #include <asio/experimental/awaitable_operators.hpp>
+#include <asio/experimental/coro.hpp>
 #include <fmt/ranges.h>
 #include <spdlog/spdlog.h>
 #include <srs/Application.hpp>
 #include <srs/serializers/SerializableBuffer.hpp>
+#include <srs/utils/CommonConcepts.hpp>
 
 namespace srs
 {
@@ -21,7 +23,7 @@ namespace srs
             : local_port_number_{ info.local_port_number }
             , name_{ std::move(name) }
             , app_{ info.control }
-            , endpoint_{ info.endpoint }
+            , endpoint_{ *info.endpoint }
         {
             spdlog::debug("Creating connection {} with buffer size: {}", name_, buffer_size);
         }
@@ -29,18 +31,31 @@ namespace srs
         // possible overload from derived class
         void read_data_handle(std::span<BufferElementType> read_data) {}
         void end_of_connection() {}
-        void on_fail() {spdlog::debug("default on_fail is called!");}
+        void on_fail() { spdlog::debug("default on_fail is called!"); }
+        auto get_executor() { return app_->get_io_context().get_executor(); }
 
         void listen(this auto&& self, bool is_continuous = false);
         void communicate(this auto&& self, const std::vector<CommunicateEntryType>& data, uint16_t address);
         void close_socket();
+
+        auto send_continuous_message() -> asio::experimental::coro<int>;
+
+        // Settters:
+        void set_socket(std::unique_ptr<asio::ip::udp::socket> socket) { socket_ = std::move(socket); }
+        void set_remote_endpoint(asio::ip::udp::endpoint endpoint) { endpoint_ = std::move(endpoint); }
         void set_timeout_seconds(int val) { timeout_seconds_ = val; }
 
+        void set_send_message(const RangedData auto& msg)
+        {
+            continuous_send_msg_ = std::span{ msg.begin(), msg.end() };
+        }
+
+        // Getters:
         [[nodiscard]] auto get_read_msg_buffer() const -> const auto& { return read_msg_buffer_; }
         [[nodiscard]] auto get_name() const -> const auto& { return name_; }
         [[nodiscard]] auto get_app() -> auto& { return *app_; }
         auto get_socket() -> const udp::socket& { return *socket_; }
-        auto get_endpoint() -> const udp::endpoint& { return *endpoint_; }
+        auto get_endpoint() -> const udp::endpoint& { return endpoint_; }
 
       private:
         int local_port_number_ = 0;
@@ -48,17 +63,18 @@ namespace srs
         std::string name_ = "ConnectionBase";
         gsl::not_null<App*> app_;
         std::unique_ptr<udp::socket> socket_;
-        udp::endpoint* endpoint_;
+        udp::endpoint endpoint_;
         SerializableMsgBuffer write_msg_buffer_;
+        std::span<const char> continuous_send_msg_;
         ReadBufferType<buffer_size> read_msg_buffer_{};
         int timeout_seconds_ = DEFAULT_TIMEOUT_SECONDS;
 
-        static auto send_message(std::shared_ptr<ConnectionBase> connection) -> asio::awaitable<void>;
         void encode_write_msg(const std::vector<CommunicateEntryType>& data, uint16_t address);
         auto new_shared_socket(int port_number) -> std::unique_ptr<udp::socket>;
         static auto signal_handling(auto* connection) -> asio::awaitable<void>;
         static auto timer_countdown(auto* connection) -> asio::awaitable<void>;
         static auto listen_message(SharedPtr auto connection, bool is_continuous = false) -> asio::awaitable<void>;
+        static auto send_message(std::shared_ptr<ConnectionBase> connection) -> asio::awaitable<void>;
         void reset_read_msg_buffer() { std::fill(read_msg_buffer_.begin(), read_msg_buffer_.end(), 0); }
     };
 
@@ -69,11 +85,22 @@ namespace srs
     {
         spdlog::debug("Connection {}: Sending data ...", connection->get_name());
         auto data_size = co_await connection->socket_->async_send_to(
-            asio::buffer(connection->write_msg_buffer_.data()), *(connection->endpoint_), asio::use_awaitable);
+            asio::buffer(connection->write_msg_buffer_.data()), connection->endpoint_, asio::use_awaitable);
         spdlog::debug("Connection {}: {} bytes data sent with {:02x}",
                       connection->get_name(),
                       data_size,
                       fmt::join(connection->write_msg_buffer_.data(), " "));
+    }
+
+    template <int size>
+    auto ConnectionBase<size>::send_continuous_message() -> asio::experimental::coro<int>
+    {
+        while (true)
+        {
+            auto data_size =
+                co_await socket_->async_send_to(asio::buffer(write_msg_buffer_.data()), endpoint_, asio::use_awaitable);
+            co_yield data_size;
+        }
     }
 
     template <int size>
@@ -171,12 +198,9 @@ namespace srs
                                            uint16_t address)
     {
         self.listen();
-        if (self.endpoint_ != nullptr)
-        {
-            self.encode_write_msg(data, address);
-            co_spawn(self.app_->get_io_context(), send_message(self.shared_from_this()), asio::detached);
-            spdlog::debug("Connection {}: spawned write coroutine", self.name_);
-        }
+        self.encode_write_msg(data, address);
+        co_spawn(self.app_->get_io_context(), send_message(self.shared_from_this()), asio::detached);
+        spdlog::debug("Connection {}: spawned write coroutine", self.name_);
     }
 
     template <int size>

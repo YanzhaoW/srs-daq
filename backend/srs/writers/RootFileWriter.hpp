@@ -22,7 +22,10 @@ namespace srs
         RootFileWriter& operator=(RootFileWriter&&) = delete;
         ~RootFileWriter() { root_file.Write(); }
 
-        void register_branch(StructData& data) { tree.Branch("srs_frame_data", &data); }
+        // The data register with Branch must be non-const, which is insane.
+        // NOLINTBEGIN
+        void register_branch(const StructData& data) { tree.Branch("srs_frame_data", const_cast<StructData*>(&data)); }
+        // NOLINTEND
 
         void fill() { tree.Fill(); }
 

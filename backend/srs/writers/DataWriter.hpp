@@ -26,7 +26,7 @@ namespace srs
         DataWriter& operator=(DataWriter&&) = default;
 
         void write_binary(const BinaryData& read_data);
-        void write_struct(StructData& read_data);
+        void write_struct(const StructData& read_data);
 
         // setters:
         void set_write_option(DataWriterOption option);
@@ -53,7 +53,7 @@ namespace srs
         DataProcessor* data_processor_ = nullptr;
 
         void write_struct_json(const StructData& data_struct);
-        void write_struct_root(StructData& data_struct);
+        void write_struct_root(const StructData& data_struct);
 
         void write_binary_file(const BinaryData& read_data);
         static void write_binary_udp(const BinaryData& read_data);

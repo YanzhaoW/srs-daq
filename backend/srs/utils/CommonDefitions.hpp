@@ -62,6 +62,10 @@ namespace srs
         print_all
     };
 
+    class Empty
+    {
+    };
+
     using io_context_type = asio::thread_pool;
 
 } // namespace srs

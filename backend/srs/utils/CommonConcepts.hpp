@@ -15,4 +15,11 @@ namespace srs
 
     template <typename T>
     concept StreamableDeserializer = Deserializer<T> and StreamableOutput<typename T::OutputType>;
+
+    template <typename T>
+    concept RangedData = requires(T obj) {
+        std::contiguous_iterator<decltype(obj.begin())>;
+        std::contiguous_iterator<decltype(obj.end())>;
+    };
+
 }; // namespace srs
