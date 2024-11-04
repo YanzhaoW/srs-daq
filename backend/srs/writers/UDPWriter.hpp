@@ -29,9 +29,10 @@ namespace srs
                 app.get_io_context(), asio::ip::udp::endpoint{ asio::ip::udp::v4(), 0 }));
             connection_.set_remote_endpoint(asio::ip::udp::endpoint{ asio::ip::make_address(ip_addr), port_num });
             coro_ = connection_.send_continuous_message();
-            coro_sync_start(coro_, asio::use_awaitable);
+            coro_sync_start(coro_, std::optional<std::string_view>{}, asio::use_awaitable);
         }
 
+        static constexpr auto IsStructType = false;
         auto is_deserialize_valid() { return deser_mode_ == raw or deser_mode_ == proto; }
 
         auto get_deserialize_mode() const -> DataDeserializeOptions { return deser_mode_; }

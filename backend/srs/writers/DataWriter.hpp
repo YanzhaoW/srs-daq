@@ -30,7 +30,7 @@ namespace srs
         DataWriter(DataWriter&&) = default;
         DataWriter& operator=(DataWriter&&) = default;
 
-        void write_with(DataProcessManager& manager);
+        void write_with(auto make_future);
         void wait_for_finished();
         void reset() { write_futures_.clear(); }
 
@@ -73,16 +73,15 @@ namespace srs
                 write_futures_.emplace_back(std::move(fut));
             }
         }
-
-        void write_with(auto make_future)
-        {
-            write_to_files(binary_files_, make_future);
-            write_to_files(udp_files_, make_future);
-            write_to_files(json_files_, make_future);
-#ifdef HAS_ROOT
-            write_to_files(root_files_, make_future);
-#endif
-        }
     };
 
+    void DataWriter::write_with(auto make_future)
+    {
+        write_to_files(binary_files_, make_future);
+        write_to_files(udp_files_, make_future);
+        write_to_files(json_files_, make_future);
+#ifdef HAS_ROOT
+        write_to_files(root_files_, make_future);
+#endif
+    }
 } // namespace srs

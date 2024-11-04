@@ -13,17 +13,17 @@ namespace srs
     class StructDeserializer
     {
       public:
-        explicit StructDeserializer(asio::thread_pool& thread_pool)
-        {
-            coro_ = generate_coro(thread_pool.get_executor());
-            coro_sync_start(coro_);
-        }
-
         using OutputType = const StructData*;
         using InputType = std::string_view;
         using CoroType = asio::experimental::coro<OutputType(std::optional<InputType>)>;
         using InputFuture = boost::shared_future<std::optional<InputType>>;
         using OutputFuture = boost::shared_future<std::optional<OutputType>>;
+
+        explicit StructDeserializer(asio::thread_pool& thread_pool)
+        {
+            coro_ = generate_coro(thread_pool.get_executor());
+            coro_sync_start(coro_, std::optional<InputType>{}, asio::use_awaitable);
+        }
 
         auto create_future(InputFuture& pre_fut) -> OutputFuture { return create_coro_future(coro_, pre_fut); }
 

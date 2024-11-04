@@ -4,6 +4,7 @@
 #include "DataStructs.hpp"
 #include <TFile.h>
 #include <TTree.h>
+#include <srs/analysis/DataProcessManager.hpp>
 
 namespace srs
 {
@@ -16,11 +17,14 @@ namespace srs
             tree.SetDirectory(&root_file);
         }
 
+        static constexpr auto IsStructType = true;
         RootFileWriter(const RootFileWriter&) = delete;
         RootFileWriter(RootFileWriter&&) = delete;
         RootFileWriter& operator=(const RootFileWriter&) = delete;
         RootFileWriter& operator=(RootFileWriter&&) = delete;
         ~RootFileWriter() { root_file.Write(); }
+        auto write(auto fut) -> boost::unique_future<std::optional<int>> { return {}; }
+        [[nodiscard]] static auto get_deserialize_mode()  -> DataDeserializeOptions { return DataDeserializeOptions::structure; }
 
         // The data register with Branch must be non-const, which is insane.
         // NOLINTBEGIN

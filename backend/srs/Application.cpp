@@ -23,7 +23,7 @@ namespace srs
         auto monitoring_action = [this]()
         {
             signal_set_.async_wait(
-                [this](const asio::error_code& error, auto)
+                [this](const boost::system::error_code& error, auto)
                 {
                     if (error == asio::error::operation_aborted)
                     {

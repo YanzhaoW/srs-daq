@@ -5,6 +5,7 @@
 #include <glaze/glaze.hpp>
 #include <map>
 #include <spdlog/spdlog.h>
+#include <srs/analysis/DataProcessManager.hpp>
 
 namespace srs
 {
@@ -80,6 +81,12 @@ namespace srs
             }
             file_stream_ << "[\n";
         }
+        static constexpr auto IsStructType = true;
+        [[nodiscard]] static auto get_deserialize_mode() -> DataDeserializeOptions
+        {
+            return DataDeserializeOptions::structure;
+        }
+        auto write(auto fut) -> boost::unique_future<std::optional<int>> { return {}; }
 
         ~JsonWriter()
         {

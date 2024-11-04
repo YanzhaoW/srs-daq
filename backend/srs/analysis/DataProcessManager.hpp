@@ -10,6 +10,7 @@
 #include <srs/serializers/StructDeserializer.hpp>
 #include <srs/serializers/StructToProtoConverter.hpp>
 #include <srs/utils/ValidData.hpp>
+#include <tbb/concurrent_queue.h>
 
 namespace srs
 {
@@ -21,7 +22,7 @@ namespace srs
         using enum DataDeserializeOptions;
         using StartingCoroType = asio::experimental::coro<std::string_view(bool)>;
 
-        void analysis_one(auto& data_queue);
+        void analysis_one(tbb::concurrent_bounded_queue<SerializableMsgBuffer>& data_queue);
 
         // Getters:
         template <DataDeserializeOptions option>

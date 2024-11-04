@@ -8,17 +8,17 @@ namespace srs
     class Struct2ProtoConverter
     {
       public:
-        explicit Struct2ProtoConverter(asio::thread_pool& thread_pool)
-        {
-            coro_ = generate_coro(thread_pool.get_executor());
-            coro_sync_start(coro_);
-        }
-
         using InputType = const StructData*;
         using OutputType = const proto::Data*;
         using CoroType = asio::experimental::coro<OutputType(std::optional<InputType>)>;
         using InputFuture = boost::shared_future<std::optional<InputType>>;
         using OutputFuture = boost::shared_future<std::optional<OutputType>>;
+
+        explicit Struct2ProtoConverter(asio::thread_pool& thread_pool)
+        {
+            coro_ = generate_coro(thread_pool.get_executor());
+            coro_sync_start(coro_, std::optional<InputType>{}, asio::use_awaitable);
+        }
 
         auto create_future(InputFuture& pre_fut) -> OutputFuture { return create_coro_future(coro_, pre_fut); }
         [[nodiscard]] auto data() const -> const auto& { return output_data_; }

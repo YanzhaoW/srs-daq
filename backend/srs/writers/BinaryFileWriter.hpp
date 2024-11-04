@@ -25,8 +25,10 @@ namespace srs
                 throw std::runtime_error(fmt::format("Filename {:?} cannot be open!", filename));
             }
             coro_ = write_string_to_file(thread_pool.get_executor());
-            coro_sync_start(coro_, asio::use_awaitable);
+            coro_sync_start(coro_, std::optional<std::string_view>{}, asio::use_awaitable);
         }
+
+        static constexpr auto IsStructType = false;
 
         auto write(auto pre_future) -> boost::unique_future<std::optional<int>>
         {
@@ -34,6 +36,8 @@ namespace srs
         }
 
         auto is_deserialize_valid() { return deser_mode_ == raw or deser_mode_ == proto_frame; }
+
+        auto get_deserialize_mode() const -> DataDeserializeOptions { return deser_mode_; }
 
         void close() { ofstream_.close(); }
 

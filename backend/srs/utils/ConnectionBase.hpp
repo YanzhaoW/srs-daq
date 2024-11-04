@@ -101,9 +101,7 @@ namespace srs
         auto data_size = -1;
         while (true)
         {
-            data_size = (not send_msg.empty()) ? co_await socket_->async_send_to(
-                                                     asio::buffer(continuous_send_msg_), endpoint_, asio::use_awaitable)
-                                               : -1;
+            data_size = (not send_msg.empty()) ? socket_->send_to(asio::buffer(send_msg), endpoint_) : -1;
             auto msg = co_yield data_size;
 
             if (not msg.has_value())

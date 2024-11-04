@@ -81,7 +81,7 @@ namespace srs
 
     void coro_sync_start(auto& coro, auto&&... args)
     {
-        asio::co_spawn(coro.get_executor(), coro.async_resume(std::forward<declytpe(args)>(args)...), asio::use_future)
+        asio::co_spawn(coro.get_executor(), coro.async_resume(std::forward<decltype(args)>(args)...), asio::use_future)
             .get();
     }
 
