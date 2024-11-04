@@ -3,12 +3,13 @@ cmake_minimum_required(VERSION 3.28)
 project(
     srs
     VERSION 0.0.3
-    LANGUAGES CXX)
+    LANGUAGES CXX C)
 
 include(cmake/install_packages.cmake)
 include(GNUInstallDirs)
 include(cmake/project_config.cmake)
 include(cmake/option_settings.cmake)
+include(cmake/check_compilers.cmake)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_EXTENSIONS ON)
