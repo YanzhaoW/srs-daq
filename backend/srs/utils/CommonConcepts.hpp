@@ -18,8 +18,8 @@ namespace srs
 
     template <typename T>
     concept RangedData = requires(T obj) {
-        std::contiguous_iterator<decltype(obj.begin())>;
-        std::contiguous_iterator<decltype(obj.end())>;
+        requires std::contiguous_iterator<decltype(obj.begin())>;
+        requires std::contiguous_iterator<decltype(obj.end())>;
     };
 
     template <typename DataType, typename TaskType>

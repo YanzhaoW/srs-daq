@@ -98,10 +98,10 @@ namespace srs
         -> asio::experimental::coro<int(std::optional<std::string_view>)>
     {
         auto send_msg = std::string_view{};
-        auto data_size = -1;
+        auto data_size = 0;
         while (true)
         {
-            data_size = (not send_msg.empty()) ? socket_->send_to(asio::buffer(send_msg), endpoint_) : -1;
+            data_size = (not send_msg.empty()) ? socket_->send_to(asio::buffer(send_msg), endpoint_) : 0;
             auto msg = co_yield data_size;
 
             if (not msg.has_value())

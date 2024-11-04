@@ -19,13 +19,17 @@ if(NOT NO_ROOT)
                        Gpad)
     else()
         find_package(
-            ROOT
+            ROOT QUIET
             COMPONENTS RIO
                        Tree
                        Hist
                        RHTTP
                        Gpad)
     endif()
+endif()
+
+if(ROOT_FOUND)
+    message(STATUS "ROOT depenedency is eabled!")
 else()
     message(STATUS "ROOT depenedency is disabled!")
 endif()
