@@ -1,6 +1,8 @@
 #pragma once
 
+#include "DataWriter.hpp"
 #include <spdlog/spdlog.h>
+#include <srs/Application.hpp>
 #include <srs/analysis/DataStructs.hpp>
 #include <srs/serializers/DataDeserializeOptions.hpp>
 #include <srs/serializers/ProtoDeserializer.hpp>
@@ -11,28 +13,24 @@
 
 namespace srs
 {
-    class Deserializers
+    class DataProcessManager
     {
       public:
-        Deserializers() = default;
-        using enum DataDeserializeOptions;
+        explicit DataProcessManager(DataProcessor* data_processor, asio::thread_pool& thread_pool);
 
-        void analysis_one(auto& data_queue)
-        {
-            data_queue.pop(binary_data_);
-            struct_deserializer_.convert(binary_data_.data());
-            struct_proto_converter_.convert(struct_deserializer_.get_output_data());
-            proto_deserializer_.convert(struct_proto_converter_.get_output_data());
-        }
+        using enum DataDeserializeOptions;
+        using StartingCoroType = asio::experimental::coro<std::string_view(bool)>;
+
+        void analysis_one(auto& data_queue);
 
         // Getters:
         template <DataDeserializeOptions option>
         auto get_data() -> const auto&;
 
-        void clear()
+        void reset()
         {
-            struct_deserializer_.reset();
-            proto_deserializer_.reset();
+            writers_.reset();
+            binary_data_.clear();
         }
 
       private:
@@ -40,22 +38,28 @@ namespace srs
         StructDeserializer struct_deserializer_;
         Struct2ProtoConverter struct_proto_converter_;
         ProtoDeserializer proto_deserializer_;
+
+        StartingCoroType coro_;
+
+        DataWriter writers_;
+
+        auto generate_starting_coro(asio::any_io_executor /*unused*/) -> StartingCoroType;
     };
 
     template <DataDeserializeOptions option>
-    auto Deserializers::get_data() -> const auto&
+    auto DataProcessManager::get_data() -> const auto&
     {
-        if constexpr (option == binary)
+        if constexpr (option == raw)
         {
             return binary_data_.data();
         }
         else if constexpr (option == structure)
         {
-            return struct_deserializer_.get_output_data();
+            return struct_deserializer_.data();
         }
         else if constexpr (option == proto)
         {
-            return proto_deserializer_.get_output_data();
+            return std::string_view{ proto_deserializer_.data() };
         }
         else
         {

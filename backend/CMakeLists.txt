@@ -1,4 +1,4 @@
-find_package(asio REQUIRED)
+find_package(Boost REQUIRED CONFIG COMPONENTS system thread)
 find_package(fmt REQUIRED)
 find_package(zpp_bits REQUIRED)
 find_package(gsl-lite REQUIRED)

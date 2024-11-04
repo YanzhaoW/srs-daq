@@ -1,12 +1,12 @@
 #pragma once
 
-#include <asio.hpp>
+#include <boost/asio.hpp>
 
 namespace srs
 {
     class App;
 
-    using udp = asio::ip::udp;
+    using udp = boost::asio::ip::udp;
 
     template <typename T>
     struct is_shared_ptr : std::false_type

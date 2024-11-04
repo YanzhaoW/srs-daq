@@ -1,7 +1,7 @@
 #include "DataProcessor.hpp"
 #include "DataStructs.hpp"
-#include <asio/co_spawn.hpp>
-#include <asio/detached.hpp>
+#include <boost/asio/co_spawn.hpp>
+#include <boost/asio/detached.hpp>
 #include <fmt/chrono.h>
 #include <fmt/color.h>
 #include <fmt/ranges.h>
@@ -77,8 +77,9 @@ namespace srs
     }
 
     DataProcessor::DataProcessor(App* control)
-        : control_{ control }
-        , monitor_{ this, &control_->get_io_context() }
+        : app_{ control }
+        , monitor_{ this, &(control->get_io_context()) }
+        , data_processes_{ this, control->get_io_context() }
     {
     }
 
@@ -89,7 +90,7 @@ namespace srs
         {
             monitor_.start();
         }
-        asio::post(control_->get_io_context(), [this]() { analysis_loop(); });
+        asio::post(app_->get_io_context(), [this]() { analysis_loop(); });
     }
 
     void DataProcessor::stop()
@@ -122,12 +123,11 @@ namespace srs
 
             while (not is_stopped)
             {
-                deserializers_.analysis_one(data_queue_);
+                data_processes_.analysis_one(data_queue_);
                 update_monitor();
                 print_data();
-                write_data();
 
-                deserializers_.clear();
+                data_processes_.reset();
             }
         }
         catch (oneapi::tbb::user_abort& ex)
@@ -137,37 +137,22 @@ namespace srs
         catch (std::exception& ex)
         {
             spdlog::critical(ex.what());
-            control_->exit();
+            app_->exit();
         }
     }
 
     void DataProcessor::update_monitor()
     {
-        const auto& struct_data = deserializers_.get_data<Deserializers::structure>();
+        const auto& struct_data = data_processes_.get_data<DataProcessManager::structure>();
 
         total_processed_hit_numer_ += struct_data.hit_data.size();
         monitor_.update(struct_data);
     }
 
-    void DataProcessor::write_data()
-    {
-        const auto& bin_data = deserializers_.get_data<Deserializers::binary>();
-        const auto& struct_data = deserializers_.get_data<Deserializers::structure>();
-        if (data_writer_.has_binary())
-        {
-            data_writer_.write_binary(bin_data);
-        }
-
-        if (data_writer_.has_struct())
-        {
-            data_writer_.write_struct(struct_data);
-        }
-    }
-
     void DataProcessor::print_data()
     {
-        const auto& export_data = deserializers_.get_data<Deserializers::structure>();
-        const auto& raw_data = deserializers_.get_data<Deserializers::binary>();
+        const auto& export_data = data_processes_.get_data<DataProcessManager::structure>();
+        const auto& raw_data = data_processes_.get_data<DataProcessManager::raw>();
         if (print_mode_ == print_raw)
         {
             spdlog::info("data: {:x}", fmt::join(raw_data, ""));

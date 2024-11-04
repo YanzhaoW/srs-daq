@@ -1,7 +1,8 @@
 #pragma once
 
 #include <algorithm>
-#include <mutex>
+#include <boost/asio/experimental/coro.hpp>
+#include <srs/Application.hpp>
 #include <srs/analysis/DataStructs.hpp>
 #include <srs/utils/CommonFunctions.hpp>
 
@@ -12,13 +13,53 @@ namespace srs
     class StructDeserializer
     {
       public:
-        StructDeserializer() = default;
+        explicit StructDeserializer(asio::thread_pool& thread_pool)
+        {
+            coro_ = generate_coro(thread_pool.get_executor());
+            coro_sync_start(coro_);
+        }
 
-        using OutputType = StructData;
-        using InputType = BinaryData;
+        using OutputType = const StructData*;
+        using InputType = std::string_view;
+        using CoroType = asio::experimental::coro<OutputType(std::optional<InputType>)>;
+        using InputFuture = boost::shared_future<std::optional<InputType>>;
+        using OutputFuture = boost::shared_future<std::optional<OutputType>>;
+
+        auto create_future(InputFuture& pre_fut) -> OutputFuture { return create_coro_future(coro_, pre_fut); }
+
+        [[nodiscard]] auto data() const -> const auto& { return output_data_; }
+
+      private:
+        ReceiveDataSquence receive_raw_data_;
+        StructData output_data_;
+        CoroType coro_;
+
+        void reset() { reset_struct_data(output_data_); }
+
+        auto generate_coro(asio::any_io_executor /*unused*/) -> CoroType
+        {
+            InputType temp_data{};
+            while (true)
+            {
+                if (not temp_data.empty())
+                {
+                    reset();
+                    convert(temp_data);
+                }
+                auto data = co_yield (&output_data_);
+                if (data.has_value())
+                {
+                    temp_data = data.value();
+                }
+                else
+                {
+                    co_return;
+                }
+            }
+        }
 
         // thread safe
-        auto convert(const InputType& binary_data) -> std::size_t
+        auto convert(std::string_view binary_data) -> std::size_t
         {
             auto translated_size = std::size_t{};
             auto deserialize_to = zpp::bits::in{ binary_data, zpp::bits::endian::network{}, zpp::bits::no_size{} };
@@ -33,7 +74,6 @@ namespace srs
             }
 
             // locking mutex to prevent data racing
-            auto mutex_lock = std::scoped_lock{ mutex_ };
             receive_raw_data_.resize(vector_size);
             std::ranges::fill(receive_raw_data_, 0);
             deserialize_to(output_data_.header, receive_raw_data_).or_throw();
@@ -45,16 +85,7 @@ namespace srs
             return translated_size;
         }
 
-        void reset() { reset_struct_data(output_data_); }
-        [[nodiscard]] auto get_output_data() const -> const auto& { return output_data_; }
-        [[nodiscard]] auto get_output_data_ref()  -> auto& { return output_data_; }
-
-      private:
-        ReceiveDataSquence receive_raw_data_;
-        OutputType output_data_;
-        std::mutex mutex_;
-
-        void translate_raw_data(OutputType& struct_data)
+        void translate_raw_data(StructData& struct_data)
         {
             for (const auto& element : receive_raw_data_)
             {

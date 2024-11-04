@@ -2,10 +2,11 @@
 
 #include "CommonDefitions.hpp"
 #include "ConnectionTypeDef.hpp"
-#include "gsl/gsl-lite.hpp"
-#include <asio/experimental/awaitable_operators.hpp>
-#include <asio/experimental/coro.hpp>
+
+#include <boost/asio/experimental/awaitable_operators.hpp>
+#include <boost/asio/experimental/coro.hpp>
 #include <fmt/ranges.h>
+#include <gsl/gsl-lite.hpp>
 #include <spdlog/spdlog.h>
 #include <srs/Application.hpp>
 #include <srs/serializers/SerializableBuffer.hpp>
@@ -38,7 +39,7 @@ namespace srs
         void communicate(this auto&& self, const std::vector<CommunicateEntryType>& data, uint16_t address);
         void close_socket();
 
-        auto send_continuous_message() -> asio::experimental::coro<int>;
+        auto send_continuous_message() -> asio::experimental::coro<int(std::optional<std::string_view>)>;
 
         // Settters:
         void set_socket(std::unique_ptr<asio::ip::udp::socket> socket) { socket_ = std::move(socket); }
@@ -93,13 +94,27 @@ namespace srs
     }
 
     template <int size>
-    auto ConnectionBase<size>::send_continuous_message() -> asio::experimental::coro<int>
+    auto ConnectionBase<size>::send_continuous_message()
+        -> asio::experimental::coro<int(std::optional<std::string_view>)>
     {
+        auto send_msg = std::string_view{};
+        auto data_size = -1;
         while (true)
         {
-            auto data_size =
-                co_await socket_->async_send_to(asio::buffer(write_msg_buffer_.data()), endpoint_, asio::use_awaitable);
-            co_yield data_size;
+            data_size = (not send_msg.empty()) ? co_await socket_->async_send_to(
+                                                     asio::buffer(continuous_send_msg_), endpoint_, asio::use_awaitable)
+                                               : -1;
+            auto msg = co_yield data_size;
+
+            if (not msg.has_value())
+            {
+                close_socket();
+                co_return;
+            }
+            else
+            {
+                send_msg = msg.value();
+            }
         }
     }
 
@@ -148,7 +163,7 @@ namespace srs
     {
         auto interrupt_signal = asio::signal_set(co_await asio::this_coro::executor, SIGINT);
         spdlog::trace("Connection {}: waiting for signals", connection->get_name());
-        auto [error, sig_num] = co_await interrupt_signal.async_wait(as_tuple(asio::use_awaitable));
+        auto [error, sig_num] = co_await interrupt_signal.async_wait(asio::as_tuple(asio::use_awaitable));
         if (error)
         {
             spdlog::trace("Connection {}: Signal ended with {}", connection->get_name(), error.message());

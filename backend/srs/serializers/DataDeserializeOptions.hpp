@@ -6,8 +6,10 @@ namespace srs
 {
     enum class DataDeserializeOptions : uint8_t
     {
-        binary,
+        none,
+        raw,
         structure,
-        proto
+        proto,
+        proto_frame
     };
 }

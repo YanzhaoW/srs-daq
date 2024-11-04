@@ -22,4 +22,9 @@ namespace srs
         std::contiguous_iterator<decltype(obj.end())>;
     };
 
+    template <typename DataType, typename TaskType>
+    concept OutputCompatible = requires(DataType, TaskType task) {
+        std::is_same_v<DataType, std::remove_cvref_t<decltype(task.get_output_data())>>;
+    };
+
 }; // namespace srs

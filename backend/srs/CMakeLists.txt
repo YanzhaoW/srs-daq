@@ -22,3 +22,5 @@ target_sources(
 
 target_include_directories(srscpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/devices)
 target_link_libraries(srscpp PRIVATE srs_data)
+target_compile_definitions(srscpp PUBLIC BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION
+                                         BOOST_THREAD_PROVIDES_FUTURE_WHEN_ALL_WHEN_ANY)

@@ -8,12 +8,29 @@ namespace srs
     class Struct2ProtoConverter
     {
       public:
-        explicit Struct2ProtoConverter() = default;
+        explicit Struct2ProtoConverter(asio::thread_pool& thread_pool)
+        {
+            coro_ = generate_coro(thread_pool.get_executor());
+            coro_sync_start(coro_);
+        }
 
-        using InputType = StructData;
-        using OutputType = proto::Data;
+        using InputType = const StructData*;
+        using OutputType = const proto::Data*;
+        using CoroType = asio::experimental::coro<OutputType(std::optional<InputType>)>;
+        using InputFuture = boost::shared_future<std::optional<InputType>>;
+        using OutputFuture = boost::shared_future<std::optional<OutputType>>;
 
-        auto convert(const InputType& struct_data) -> const OutputType&
+        auto create_future(InputFuture& pre_fut) -> OutputFuture { return create_coro_future(coro_, pre_fut); }
+        [[nodiscard]] auto data() const -> const auto& { return output_data_; }
+
+      private:
+        proto::StructHeader header_buffer_;
+        proto::Data output_data_;
+        asio::experimental::coro<OutputType(std::optional<InputType>)> coro_;
+
+        void reset() { output_data_.Clear(); }
+
+        auto convert(const StructData& struct_data) -> const proto::Data&
         {
             set_header(struct_data);
             set_marker_data(struct_data);
@@ -21,14 +38,29 @@ namespace srs
             return output_data_;
         }
 
-        // void reset() { output_data_.clear(); }
-        [[nodiscard]] auto get_output_data() const -> const auto& { return output_data_; }
+        auto generate_coro(asio::any_io_executor /*unused*/) -> CoroType
+        {
+            InputType temp_data{};
+            while (true)
+            {
+                if (temp_data == nullptr)
+                {
+                    reset();
+                    convert(*temp_data);
+                }
+                auto data = co_yield (&output_data_);
+                if (data.has_value())
+                {
+                    temp_data = data.value();
+                }
+                else
+                {
+                    co_return;
+                }
+            }
+        }
 
-      private:
-        proto::StructHeader header_buffer_;
-        OutputType output_data_;
-
-        void set_header(const InputType& struct_data)
+        void set_header(const StructData& struct_data)
         {
             const auto& input_header = struct_data.header;
             header_buffer_.set_frame_counter(input_header.frame_counter);
@@ -38,7 +70,7 @@ namespace srs
             output_data_.set_allocated_header(&header_buffer_);
         }
 
-        void set_marker_data(const InputType& struct_data)
+        void set_marker_data(const StructData& struct_data)
         {
             const auto& input_marker_data = struct_data.marker_data;
             for (const auto& input_data : input_marker_data)
@@ -49,7 +81,7 @@ namespace srs
             }
         }
 
-        void set_hit_data(const InputType& struct_data)
+        void set_hit_data(const StructData& struct_data)
         {
             const auto& input_hit_data = struct_data.hit_data;
             for (const auto& input_data : input_hit_data)

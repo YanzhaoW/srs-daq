@@ -1,8 +1,10 @@
 #pragma once
 
-#include "CommonDefitions.hpp"
 #include <bit>
 #include <bitset>
+#include <boost/asio.hpp>
+#include <boost/thread/future.hpp>
+#include <srs/utils/CommonDefitions.hpp>
 
 namespace srs
 {
@@ -20,8 +22,8 @@ namespace srs
     }
 
     template <std::size_t high_size, std::size_t low_size>
-    constexpr auto merge_bits(const std::bitset<high_size>& high_bits,
-                                     const std::bitset<low_size>& low_bits) -> std::bitset<high_size + low_size>
+    constexpr auto merge_bits(const std::bitset<high_size>& high_bits, const std::bitset<low_size>& low_bits)
+        -> std::bitset<high_size + low_size>
     {
         using NewBit = std::bitset<high_size + low_size>;
         constexpr auto max_size = 64;
@@ -52,6 +54,35 @@ namespace srs
             bin_val ^= gray_val;
         }
         return bin_val;
+    }
+
+    auto create_coro_future(auto& coro, auto&& pre_fut)
+    {
+        return pre_fut.then(
+            [&coro](std::remove_cvref_t<decltype(pre_fut)> fut)
+            {
+                ;
+                return asio::co_spawn(
+                           coro.get_executor(), coro.async_resume(fut.get(), asio::use_awaitable), asio::use_future)
+                    .get();
+            });
+    }
+
+    auto create_coro_future(auto& coro, bool is_terminated)
+    {
+        return boost::async(
+            [&coro, is_terminated]()
+            {
+                return asio::co_spawn(
+                           coro.get_executor(), coro.async_resume(is_terminated, asio::use_awaitable), asio::use_future)
+                    .get();
+            });
+    }
+
+    void coro_sync_start(auto& coro, auto&&... args)
+    {
+        asio::co_spawn(coro.get_executor(), coro.async_resume(std::forward<declytpe(args)>(args)...), asio::use_future)
+            .get();
     }
 
 } // namespace srs

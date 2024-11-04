@@ -3,14 +3,14 @@
 #include "CommonDefitions.hpp"
 #include "DataStructs.hpp"
 #include "DataWriter.hpp"
-#include <asio/awaitable.hpp>
-#include <asio/steady_timer.hpp>
 #include <atomic>
+#include <boost/asio/awaitable.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <chrono>
 #include <gsl/gsl-lite.hpp>
 #include <span>
 #include <spdlog/logger.h>
-#include <srs/serializers/Deserializers.hpp>
+#include <srs/analysis/DataProcessManager.hpp>
 #include <srs/serializers/SerializableBuffer.hpp>
 #include <srs/serializers/StructDeserializer.hpp>
 #include <tbb/concurrent_queue.h>
@@ -67,16 +67,17 @@ namespace srs
         // getters:
         [[nodiscard]] auto get_read_data_bytes() const -> uint64_t { return total_read_data_bytes_.load(); }
         [[nodiscard]] auto get_processed_hit_number() const -> uint64_t { return total_processed_hit_numer_.load(); }
-        [[nodiscard]] auto get_export_data() -> auto& { return struct_serializer.get_output_data(); }
+        // [[nodiscard]] auto get_export_data() -> auto& { return struct_serializer.get_output_data(); }
         [[nodiscard]] auto get_data_monitor() const -> const auto& { return monitor_; }
+        [[nodiscard]] auto get_app() -> auto& { return *app_; }
 
         // setters:
         void set_print_mode(DataPrintMode mode) { print_mode_ = mode; }
         void set_show_data_speed(bool val = true) { monitor_.show_data_speed(val); }
         void set_monitor_display_period(std::chrono::milliseconds duration) { monitor_.set_display_period(duration); }
-        void set_output_filenames(std::vector<std::string> filenames)
+        void set_output_filenames(const std::vector<std::string>& filenames)
         {
-            data_writer_.set_output_filenames(std::move(filenames));
+            data_writer_.set_output_filenames(filenames);
         }
 
       private:
@@ -87,15 +88,13 @@ namespace srs
         DataPrintMode print_mode_ = DataPrintMode::print_speed;
         std::atomic<uint64_t> total_read_data_bytes_ = 0;
         std::atomic<uint64_t> total_processed_hit_numer_ = 0;
-        gsl::not_null<App*> control_;
+        gsl::not_null<App*> app_;
         DataWriter data_writer_{ this };
         DataMonitor monitor_;
 
         // Data buffer
         tbb::concurrent_bounded_queue<SerializableMsgBuffer> data_queue_;
-        Deserializers deserializers_;
-        // buffer variables
-        StructDeserializer struct_serializer;
+        DataProcessManager data_processes_;
 
         // should run on a different task
         void analysis_loop();
