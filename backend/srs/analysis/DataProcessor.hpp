@@ -77,7 +77,7 @@ namespace srs
         void set_monitor_display_period(std::chrono::milliseconds duration) { monitor_.set_display_period(duration); }
         void set_output_filenames(const std::vector<std::string>& filenames)
         {
-            data_writer_.set_output_filenames(filenames);
+            data_processes_.set_output_filenames(filenames);
         }
 
       private:
@@ -89,7 +89,6 @@ namespace srs
         std::atomic<uint64_t> total_read_data_bytes_ = 0;
         std::atomic<uint64_t> total_processed_hit_numer_ = 0;
         gsl::not_null<App*> app_;
-        DataWriter data_writer_{ this };
         DataMonitor monitor_;
 
         // Data buffer

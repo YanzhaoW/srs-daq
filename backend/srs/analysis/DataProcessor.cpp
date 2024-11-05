@@ -136,7 +136,7 @@ namespace srs
         }
         catch (std::exception& ex)
         {
-            spdlog::critical(ex.what());
+            spdlog::critical("Exception occured: {}", ex.what());
             app_->exit();
         }
     }

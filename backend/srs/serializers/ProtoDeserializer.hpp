@@ -44,7 +44,7 @@ namespace srs
             InputType temp_data{};
             while (true)
             {
-                if (temp_data == nullptr)
+                if (temp_data != nullptr)
                 {
                     reset();
                     convert(*temp_data);

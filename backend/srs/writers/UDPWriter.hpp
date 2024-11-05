@@ -20,14 +20,14 @@ namespace srs
     class UDPWriter
     {
       public:
-        UDPWriter(App& app, std::string_view ip_addr, asio::ip::port_type port_num, DataDeserializeOptions derser_mode)
+        UDPWriter(App& app, asio::ip::udp::endpoint endpoint, DataDeserializeOptions derser_mode)
             : deser_mode_{ derser_mode }
             , connection_{ ConnectionInfo{ &app } }
             , app_{ app }
         {
             connection_.set_socket(std::make_unique<asio::ip::udp::socket>(
                 app.get_io_context(), asio::ip::udp::endpoint{ asio::ip::udp::v4(), 0 }));
-            connection_.set_remote_endpoint(asio::ip::udp::endpoint{ asio::ip::make_address(ip_addr), port_num });
+            connection_.set_remote_endpoint(std::move(endpoint));
             coro_ = connection_.send_continuous_message();
             coro_sync_start(coro_, std::optional<std::string_view>{}, asio::use_awaitable);
         }

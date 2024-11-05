@@ -28,7 +28,6 @@ namespace srs
         }
         App* control = nullptr;
         int local_port_number = 0;
-        udp::endpoint* endpoint = nullptr;
     };
 
 } // namespace srs

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "message.pb.h"
+#include <print>
 #include <srs/serializers/StructDeserializer.hpp>
 
 namespace srs
@@ -24,7 +25,6 @@ namespace srs
         [[nodiscard]] auto data() const -> const auto& { return output_data_; }
 
       private:
-        proto::StructHeader header_buffer_;
         proto::Data output_data_;
         asio::experimental::coro<OutputType(std::optional<InputType>)> coro_;
 
@@ -43,7 +43,7 @@ namespace srs
             InputType temp_data{};
             while (true)
             {
-                if (temp_data == nullptr)
+                if (temp_data != nullptr)
                 {
                     reset();
                     convert(*temp_data);
@@ -63,11 +63,15 @@ namespace srs
         void set_header(const StructData& struct_data)
         {
             const auto& input_header = struct_data.header;
-            header_buffer_.set_frame_counter(input_header.frame_counter);
-            header_buffer_.set_fec_id(input_header.fec_id);
-            header_buffer_.set_udp_timestamp(input_header.udp_timestamp);
-            header_buffer_.set_overflow(input_header.overflow);
-            output_data_.set_allocated_header(&header_buffer_);
+            auto* header = output_data_.mutable_header();
+            if (header == nullptr)
+            {
+                throw std::runtime_error("header is nullptr!");
+            }
+            header->set_frame_counter(input_header.frame_counter);
+            header->set_fec_id(input_header.fec_id);
+            header->set_udp_timestamp(input_header.udp_timestamp);
+            header->set_overflow(input_header.overflow);
         }
 
         void set_marker_data(const StructData& struct_data)

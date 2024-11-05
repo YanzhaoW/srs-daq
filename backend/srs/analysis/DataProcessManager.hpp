@@ -24,6 +24,11 @@ namespace srs
 
         void analysis_one(tbb::concurrent_bounded_queue<SerializableMsgBuffer>& data_queue);
 
+        void set_output_filenames(const std::vector<std::string>& filenames)
+        {
+            writers_.set_output_filenames(filenames);
+        }
+
         // Getters:
         template <DataDeserializeOptions option>
         auto get_data() -> const auto&;

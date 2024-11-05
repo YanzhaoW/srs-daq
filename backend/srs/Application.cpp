@@ -87,8 +87,8 @@ namespace srs
     {
         auto connection_info = ConnectionInfo{ this };
         connection_info.local_port_number = FEC_CONTROL_LOCAL_PORT;
-        connection_info.endpoint = &remote_endpoint_;
         auto connection = std::make_shared<Starter>(connection_info);
+        connection->set_remote_endpoint(remote_endpoint_);
         connection->acq_on();
     }
 
@@ -96,8 +96,8 @@ namespace srs
     {
         auto connection_info = ConnectionInfo{ this };
         connection_info.local_port_number = FEC_CONTROL_LOCAL_PORT;
-        connection_info.endpoint = &remote_endpoint_;
         auto connection = std::make_shared<Stopper>(connection_info);
+        connection->set_remote_endpoint(remote_endpoint_);
         connection->acq_off();
     }
 

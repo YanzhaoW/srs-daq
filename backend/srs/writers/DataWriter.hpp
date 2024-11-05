@@ -54,11 +54,6 @@ namespace srs
         DataProcessor* data_processor_ = nullptr;
         std::vector<boost::unique_future<std::optional<int>>> write_futures_;
 
-        void write_struct_json(const StructData& data_struct);
-        void write_struct_root(const StructData& data_struct);
-
-        void write_binary_file(const BinaryData& read_data);
-        static void write_binary_udp(const BinaryData& read_data);
         [[nodiscard]] auto check_if_exist(DataDeserializeOptions option) const -> bool
         {
             return output_num_trackers_.at(option) > 0;

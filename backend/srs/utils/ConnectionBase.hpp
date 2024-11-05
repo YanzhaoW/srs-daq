@@ -24,7 +24,6 @@ namespace srs
             : local_port_number_{ info.local_port_number }
             , name_{ std::move(name) }
             , app_{ info.control }
-            , endpoint_{ *info.endpoint }
         {
             spdlog::debug("Creating connection {} with buffer size: {}", name_, buffer_size);
         }

@@ -3,7 +3,6 @@
 #include "JsonWriter.hpp"
 #include "RootFileWriter.hpp"
 #include <boost/asio/ip/address.hpp>
-#include <filesystem>
 #include <spdlog/spdlog.h>
 #include <srs/writers/BinaryFileWriter.hpp>
 #include <srs/writers/UDPWriter.hpp>
@@ -12,7 +11,8 @@ namespace srs
 {
     namespace
     {
-        auto get_ip_port(std::string_view ip_port) -> std::tuple<std::string_view, int>
+        auto convert_str_to_endpoint(asio::thread_pool& thread_pool, std::string_view ip_port)
+            -> std::optional<asio::ip::udp::endpoint>
         {
             const auto colon_pos = ip_port.find(':');
             if (colon_pos == std::string::npos)
@@ -21,23 +21,18 @@ namespace srs
                 return {};
             }
             auto ip_string = ip_port.substr(0, colon_pos);
-            auto port = 0;
             auto port_str = ip_port.substr(colon_pos + 1);
-            auto [_, port_ok_status] = std::from_chars(port_str.data(), port_str.data() + port_str.size(), port);
-            if (port_ok_status == std::errc::invalid_argument or port_ok_status == std::errc::result_out_of_range)
-            {
-                spdlog::error("Cannot convert {:?} to a port number", port_str);
-                return {};
-            }
 
             auto err_code = boost::system::error_code{};
-            const auto addr = asio::ip::make_address(ip_string, err_code);
+            auto resolver = asio::ip::udp::resolver{ thread_pool };
+            auto query = asio::ip::udp::resolver::query{ std::string{ ip_string }, std::string{ port_str } };
+            auto iter = resolver.resolve(query, err_code);
             if (err_code)
             {
-                spdlog::critical("Cannot parse ip address {:?}. Error code: {}", ip_string, err_code.message());
+                spdlog::critical("Cannot query the ip address {:?}. Error code: {}", ip_port, err_code.message());
                 return {};
             }
-            return { ip_string, port };
+            return *iter;
         }
 
     } // namespace
@@ -103,7 +98,7 @@ namespace srs
             switch (filetype)
             {
                 case no_output:
-                    spdlog::error("Extension of the filename {} cannot be recognized!");
+                    spdlog::error("Extension of the filename {:?} cannot be recognized!", filename);
                     break;
                 case bin:
                 {
@@ -116,12 +111,14 @@ namespace srs
                 }
                 case udp:
                 {
-                    auto [ip_addr, port] = get_ip_port(filename);
-                    if (not ip_addr.empty() and port != 0)
+                    auto endpoint = convert_str_to_endpoint(app.get_io_context(), filename);
+                    if (endpoint.has_value())
                     {
-                        is_ok = udp_files_
-                                    .try_emplace(filename, std::make_unique<UDPWriter>(app, ip_addr, port, deser_mode))
-                                    .second;
+                        is_ok =
+                            udp_files_
+                                .try_emplace(filename,
+                                             std::make_unique<UDPWriter>(app, std::move(endpoint.value()), deser_mode))
+                                .second;
                     }
                     break;
                 }
@@ -145,6 +142,7 @@ namespace srs
 
             if (is_ok)
             {
+                spdlog::info("Add the output source {:?}", filename);
                 ++(output_num_trackers_.at(deser_mode));
             }
             else
@@ -153,10 +151,4 @@ namespace srs
             }
         }
     }
-
-    void DataWriter::write_binary_udp(const BinaryData& /*read_data*/)
-    {
-        throw std::logic_error("DataWriter: udp file output is not yet implemented. Please use other write options.");
-    }
-
 } // namespace srs
