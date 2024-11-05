@@ -36,6 +36,7 @@ namespace srs
 
         void reset() { reset_struct_data(output_data_); }
 
+        // NOLINTNEXTLINE(readability-static-accessed-through-instance)
         auto generate_coro(asio::any_io_executor /*unused*/) -> CoroType
         {
             InputType temp_data{};

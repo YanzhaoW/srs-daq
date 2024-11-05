@@ -14,44 +14,39 @@ namespace srs
     class BinaryFileWriter
     {
       public:
+        using InputType = std::string_view;
+        using OutputType = int;
+        using CoroType = asio::experimental::coro<OutputType(std::optional<InputType>)>;
+        using InputFuture = boost::shared_future<std::optional<InputType>>;
+        using OutputFuture = boost::unique_future<std::optional<OutputType>>;
+        static constexpr auto IsStructType = false;
+
         explicit BinaryFileWriter(asio::thread_pool& thread_pool,
                                   const std::string& filename,
                                   DataDeserializeOptions deser_mode)
             : deser_mode_{ deser_mode }
+            , file_name_{ filename }
             , ofstream_{ filename, std::ios::trunc }
         {
             if (not ofstream_.is_open())
             {
                 throw std::runtime_error(fmt::format("Filename {:?} cannot be open!", filename));
             }
-            coro_ = write_string_to_file(thread_pool.get_executor());
-            coro_sync_start(coro_, std::optional<std::string_view>{}, asio::use_awaitable);
+            coro_ = generate_coro(thread_pool.get_executor());
+            coro_sync_start(coro_, std::optional<InputType>{}, asio::use_awaitable);
         }
-
-        static constexpr auto IsStructType = false;
-
-        auto write(auto pre_future) -> boost::unique_future<std::optional<int>>
-        {
-            return create_coro_future(coro_, pre_future);
-        }
-
-        auto is_deserialize_valid() { return deser_mode_ == raw or deser_mode_ == proto_frame; }
-
+        auto write(auto pre_future) -> OutputFuture { return create_coro_future(coro_, pre_future); }
         auto get_deserialize_mode() const -> DataDeserializeOptions { return deser_mode_; }
-
         void close() { ofstream_.close(); }
 
-        auto get_filetype() const -> DataDeserializeOptions { return deser_mode_; }
-
       private:
-        using enum DataDeserializeOptions;
         DataDeserializeOptions deser_mode_ = DataDeserializeOptions::none;
+        std::string file_name_;
         std::ofstream ofstream_;
-        // std::string_view continuous_send_msg_;
-        asio::experimental::coro<int(std::optional<std::string_view>)> coro_;
+        CoroType coro_;
 
-        auto write_string_to_file(asio::any_io_executor /*unused*/)
-            -> asio::experimental::coro<int(std::optional<std::string_view>)>
+        // NOLINTNEXTLINE(readability-static-accessed-through-instance)
+        auto generate_coro(asio::any_io_executor /*unused*/) -> CoroType
         {
             auto write_msg = std::string_view{};
             while (true)
@@ -69,6 +64,7 @@ namespace srs
                 else
                 {
                     close();
+                    spdlog::info("Binary file {} is closed successfully", file_name_);
                     co_return;
                 }
             }

@@ -26,7 +26,7 @@ namespace srs
 
       private:
         proto::Data output_data_;
-        asio::experimental::coro<OutputType(std::optional<InputType>)> coro_;
+        CoroType coro_;
 
         void reset() { output_data_.Clear(); }
 
@@ -38,6 +38,7 @@ namespace srs
             return output_data_;
         }
 
+        // NOLINTNEXTLINE(readability-static-accessed-through-instance)
         auto generate_coro(asio::any_io_executor /*unused*/) -> CoroType
         {
             InputType temp_data{};

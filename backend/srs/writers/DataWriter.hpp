@@ -33,8 +33,6 @@ namespace srs
         void write_with(auto make_future);
         void wait_for_finished();
         void reset() { write_futures_.clear(); }
-
-        // setters:
         void set_output_filenames(const std::vector<std::string>& filenames);
 
         // Getter:
@@ -53,6 +51,11 @@ namespace srs
 #endif
         DataProcessor* data_processor_ = nullptr;
         std::vector<boost::unique_future<std::optional<int>>> write_futures_;
+
+        auto add_binary_file(const std::string& filename, DataDeserializeOptions deser_mode) -> bool;
+        auto add_udp_file(const std::string& filename, DataDeserializeOptions deser_mode) -> bool;
+        auto add_root_file(const std::string& filename) -> bool;
+        auto add_json_file(const std::string& filename) -> bool;
 
         [[nodiscard]] auto check_if_exist(DataDeserializeOptions option) const -> bool
         {

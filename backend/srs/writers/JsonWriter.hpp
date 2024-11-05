@@ -71,8 +71,16 @@ namespace srs
     class JsonWriter
     {
       public:
-        explicit JsonWriter(std::string_view filename)
-            : file_stream_{ filename.data(), std::ios::out | std::ios::trunc }
+        using InputType = const StructData*;
+        using OutputType = int;
+        using CoroType = asio::experimental::coro<OutputType(std::optional<InputType>)>;
+        using InputFuture = boost::shared_future<std::optional<InputType>>;
+        using OutputFuture = boost::unique_future<std::optional<OutputType>>;
+        static constexpr auto IsStructType = true;
+
+        explicit JsonWriter(asio::thread_pool& thread_pool, const std::string& filename)
+            : filename_{ filename }
+            , file_stream_{ filename, std::ios::out | std::ios::trunc }
         {
             if (not file_stream_.is_open())
             {
@@ -80,22 +88,64 @@ namespace srs
                 throw std::runtime_error("Error occured with JsonWriter");
             }
             file_stream_ << "[\n";
+            coro_ = generate_coro(thread_pool.get_executor());
+            coro_sync_start(coro_, std::optional<InputType>{}, asio::use_awaitable);
         }
-        static constexpr auto IsStructType = true;
+
         [[nodiscard]] static auto get_deserialize_mode() -> DataDeserializeOptions
         {
             return DataDeserializeOptions::structure;
         }
+
         auto write(auto fut) -> boost::unique_future<std::optional<int>> { return {}; }
 
-        ~JsonWriter()
+      private:
+        bool is_first_item = true;
+        std::string filename_;
+        std::fstream file_stream_;
+        CompactExportData data_buffer_;
+        std::string string_buffer_;
+        CoroType coro_;
+
+        // NOLINTNEXTLINE(readability-static-accessed-through-instance)
+        auto generate_coro(asio::any_io_executor /*unused*/) -> CoroType
         {
-            file_stream_ << "]\n";
-            file_stream_.close();
+            InputType data_struct{};
+            auto res = 0;
+            while (true)
+            {
+                res = 0;
+                if (data_struct != nullptr)
+                {
+                    write_json(*data_struct);
+                    res = 1;
+                }
+                auto data_temp = co_yield res;
+                if (data_temp.has_value())
+                {
+                    data_struct = data_temp.value();
+                }
+                else
+                {
+                    file_stream_ << "]\n";
+                    file_stream_.close();
+                    spdlog::info("JSON file {} is closed successfully", filename_);
+                    co_return;
+                }
+            }
         }
 
-        void write(const StructData& data_struct)
+        void write_json(const StructData& data_struct)
         {
+            if (not is_first_item)
+            {
+                file_stream_ << ", ";
+            }
+            else
+            {
+                is_first_item = false;
+            }
+
             data_buffer_.set_value(data_struct);
             auto error_code =
                 glz::write<glz::opts{ .prettify = 1, .new_lines_in_arrays = 0 }>(data_buffer_, string_buffer_);
@@ -108,19 +158,6 @@ namespace srs
             file_stream_ << string_buffer_;
             string_buffer_.clear();
         }
-
-        void write(std::string_view str) { file_stream_ << str; }
-
-      private:
-        std::fstream file_stream_;
-        CompactExportData data_buffer_;
-        std::string string_buffer_;
-
-      public:
-        JsonWriter(const JsonWriter&) = delete;
-        JsonWriter(JsonWriter&&) = delete;
-        JsonWriter& operator=(const JsonWriter&) = delete;
-        JsonWriter& operator=(JsonWriter&&) = delete;
     };
 
 } // namespace srs

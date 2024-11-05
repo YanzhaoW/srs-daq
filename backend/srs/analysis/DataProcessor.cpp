@@ -121,7 +121,7 @@ namespace srs
             spdlog::trace("entering analysis loop");
             // TODO: Use direct binary data
 
-            while (not is_stopped)
+            while (not is_stopped.load())
             {
                 data_processes_.analysis_one(data_queue_);
                 update_monitor();
@@ -129,6 +129,9 @@ namespace srs
 
                 data_processes_.reset();
             }
+            spdlog::info("Stopping analysis loop ...");
+            data_processes_.stop();
+            spdlog::info("Analysis loop is stopped");
         }
         catch (oneapi::tbb::user_abort& ex)
         {

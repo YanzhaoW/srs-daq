@@ -44,26 +44,6 @@ namespace srs
 
     DataWriter::~DataWriter() = default;
 
-    //     void DataWriter::write_struct_root(const StructData& data_struct)
-    //     {
-    // #ifdef HAS_ROOT
-    //         if (root_file_ == nullptr)
-    //         {
-    //             const auto& root_files = output_filenames.at(root);
-    //             if (root_files.size() > 1)
-    //             {
-    //                 spdlog::warn("DataWriter: Multiple root output files detected: {:?}. Only the first one is used",
-    //                              fmt::join(root_files, ", "));
-    //             }
-    //             spdlog::info("DataWriter: Writing data structure to a root file {:?}", root_files.front());
-    //             root_file_ = std::make_unique<RootFileWriter>(root_files.front().c_str(), "recreate");
-    //             root_file_->register_branch(data_struct);
-    //         }
-
-    //         root_file_->fill();
-    // #endif
-    //     }
-
     auto DataWriter::has_deserialize_type(DataDeserializeOptions option) const -> bool
     {
         switch (option)
@@ -84,10 +64,49 @@ namespace srs
 
     void DataWriter::wait_for_finished() { boost::wait_for_all(write_futures_.begin(), write_futures_.end()); }
 
+    auto DataWriter::add_binary_file(const std::string& filename, DataDeserializeOptions deser_mode) -> bool
+    {
+        auto& app = data_processor_->get_app();
+        return binary_files_
+            .try_emplace(filename, std::make_unique<BinaryFileWriter>(app.get_io_context(), filename, deser_mode))
+            .second;
+    }
+
+    auto DataWriter::add_udp_file(const std::string& filename, DataDeserializeOptions deser_mode) -> bool
+    {
+        auto& app = data_processor_->get_app();
+        auto endpoint = convert_str_to_endpoint(app.get_io_context(), filename);
+        if (endpoint.has_value())
+        {
+            return udp_files_
+                .try_emplace(filename, std::make_unique<UDPWriter>(app, std::move(endpoint.value()), deser_mode))
+                .second;
+        }
+        return false;
+    }
+
+    auto DataWriter::add_root_file(const std::string& filename) -> bool
+    {
+#ifdef HAS_ROOT
+        auto& app = data_processor_->get_app();
+        return root_files_
+            .try_emplace(filename, std::make_unique<RootFileWriter>(app.get_io_context(), filename.c_str(), "RECREATE"))
+            .second;
+#else
+        throw std::runtime_error("DataWriter: cannot output to a root file. Please make sure srs-daq is "
+                                 "built with ROOT library.");
+#endif
+    }
+
+    auto DataWriter::add_json_file(const std::string& filename) -> bool
+    {
+        auto& app = data_processor_->get_app();
+        return json_files_.try_emplace(filename, std::make_unique<JsonWriter>(app.get_io_context(), filename)).second;
+    }
+
     void DataWriter::set_output_filenames(const std::vector<std::string>& filenames)
     {
         auto& app = data_processor_->get_app();
-        // auto executor = app.get_io_context().get_executor();
 
         for (const auto& filename : filenames)
         {
@@ -101,43 +120,17 @@ namespace srs
                     spdlog::error("Extension of the filename {:?} cannot be recognized!", filename);
                     break;
                 case bin:
-                {
-                    is_ok =
-                        binary_files_
-                            .try_emplace(filename,
-                                         std::make_unique<BinaryFileWriter>(app.get_io_context(), filename, deser_mode))
-                            .second;
+                    is_ok = add_binary_file(filename, deser_mode);
                     break;
-                }
                 case udp:
-                {
-                    auto endpoint = convert_str_to_endpoint(app.get_io_context(), filename);
-                    if (endpoint.has_value())
-                    {
-                        is_ok =
-                            udp_files_
-                                .try_emplace(filename,
-                                             std::make_unique<UDPWriter>(app, std::move(endpoint.value()), deser_mode))
-                                .second;
-                    }
+                    is_ok = add_udp_file(filename, deser_mode);
                     break;
-                }
                 case root:
-                {
-#ifndef HAS_ROOT
-                    throw std::runtime_error("DataWriter: cannot output to a root file. Please make sure srs-daq is "
-                                             "built with ROOT library.");
-#else
-                    spdlog::debug("DataWriter: Write to root file is viable.");
-#endif
-                    // TODO: to be implemented
-                    // increament_output_tracker(is_ok, filename, filetype);
+                    is_ok = add_root_file(filename);
                     break;
-                }
                 case json:
-                {
-                    // TODO: to be implemented
-                }
+                    is_ok = add_json_file(filename);
+                    break;
             }
 
             if (is_ok)

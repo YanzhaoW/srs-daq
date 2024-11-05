@@ -6,6 +6,7 @@
 #include <srs/analysis/DataStructs.hpp>
 #include <srs/serializers/DataDeserializeOptions.hpp>
 #include <srs/serializers/ProtoDeserializer.hpp>
+#include <srs/serializers/ProtoDelimDeserializer.hpp>
 #include <srs/serializers/SerializableBuffer.hpp>
 #include <srs/serializers/StructDeserializer.hpp>
 #include <srs/serializers/StructToProtoConverter.hpp>
@@ -22,34 +23,29 @@ namespace srs
         using enum DataDeserializeOptions;
         using StartingCoroType = asio::experimental::coro<std::string_view(bool)>;
 
-        void analysis_one(tbb::concurrent_bounded_queue<SerializableMsgBuffer>& data_queue);
-
-        void set_output_filenames(const std::vector<std::string>& filenames)
-        {
-            writers_.set_output_filenames(filenames);
-        }
+        void analysis_one(tbb::concurrent_bounded_queue<SerializableMsgBuffer>& data_queue, bool is_stopped = false);
+        void set_output_filenames(const std::vector<std::string>& filenames);
+        void reset();
+        void stop() { run_processes(true); }
 
         // Getters:
         template <DataDeserializeOptions option>
         auto get_data() -> const auto&;
 
-        void reset()
-        {
-            writers_.reset();
-            binary_data_.clear();
-        }
 
       private:
         SerializableMsgBuffer binary_data_;
         StructDeserializer struct_deserializer_;
         Struct2ProtoConverter struct_proto_converter_;
         ProtoDeserializer proto_deserializer_;
+        ProtoDelimDeserializer proto_delim_deserializer_;
 
         StartingCoroType coro_;
 
         DataWriter writers_;
 
         auto generate_starting_coro(asio::any_io_executor /*unused*/) -> StartingCoroType;
+        void run_processes(bool is_stopped);
     };
 
     template <DataDeserializeOptions option>
