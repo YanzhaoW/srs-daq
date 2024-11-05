@@ -34,7 +34,7 @@ namespace srs
         {
             return { bin, raw };
         }
-        if (file_ext == ".binpd")
+        if (file_ext == ".binpb")
         {
             return { bin, proto_frame };
         }

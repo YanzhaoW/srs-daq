@@ -35,6 +35,17 @@ namespace srs
             return *iter;
         }
 
+        auto check_root_dependency() -> bool
+        {
+#ifdef HAS_ROOT
+            return true;
+#else
+            spdlog::error("Cannot output to a root file. Please make sure the program is "
+                          "built with the ROOT library.");
+            return false;
+#endif
+        }
+
     } // namespace
 
     DataWriter::DataWriter(DataProcessor* processor)
@@ -93,8 +104,7 @@ namespace srs
             .try_emplace(filename, std::make_unique<RootFileWriter>(app.get_io_context(), filename.c_str(), "RECREATE"))
             .second;
 #else
-        throw std::runtime_error("DataWriter: cannot output to a root file. Please make sure srs-daq is "
-                                 "built with ROOT library.");
+        return false;
 #endif
     }
 
@@ -118,6 +128,7 @@ namespace srs
             {
                 case no_output:
                     spdlog::error("Extension of the filename {:?} cannot be recognized!", filename);
+                    continue;
                     break;
                 case bin:
                     is_ok = add_binary_file(filename, deser_mode);
@@ -126,6 +137,10 @@ namespace srs
                     is_ok = add_udp_file(filename, deser_mode);
                     break;
                 case root:
+                    if (not check_root_dependency())
+                    {
+                        continue;
+                    }
                     is_ok = add_root_file(filename);
                     break;
                 case json:

@@ -104,12 +104,13 @@ After this, build the project again from [Step 3](#step-3-build-the-project).
 srs-daq can output received data into multiple files with different types at the same time. Currently, following output types are available (or planned):
 
 - **binary**. File extensions: `.lmd` or `.bin`
+  - raw data if `.lmd` or `.bin`
+  - protobuf data if `.binpb`
 - **json**. File extensions: `.json` (NOTE: JSON file could be very large)
 - **root**. File extensions: `.root` (require ROOT library)
-- **UDP socket**. Input format: `[ip]:[port]` (not yet implemented)
-- **Google's protobuf**. (planned)
+- **UDP socket** (protobuf). Input format: `[ip]:[port]`
 
-Users have to use the correct file extensions to enable the corresponding output types. Except the UDP socket, each output type should only have one file.
+Users have to use the correct file extensions to enable the corresponding output types.
 
 For example, to output data both to a binary file and a root file:
 

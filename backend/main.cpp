@@ -27,15 +27,12 @@ auto main(int argc, char** argv) -> int
 
         spdlog::set_level(spdlog_level);
 
-        for (const auto& filename : output_filenames)
-        {
-            spdlog::info("output file: {}", filename);
-        }
-
         auto app = srs::App{};
         app.set_remote_endpoint(srs::DEFAULT_SRS_IP, srs::DEFAULT_SRS_CONTROL_PORT);
         app.set_print_mode(print_mode);
-        app.set_output_filenames(std::move(output_filenames));
+        app.set_output_filenames(output_filenames);
+
+
         app.read_data();
         app.switch_on();
         app.run();

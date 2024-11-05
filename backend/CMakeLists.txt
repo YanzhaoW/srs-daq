@@ -29,7 +29,7 @@ if(NOT NO_ROOT)
 endif()
 
 if(ROOT_FOUND)
-    message(STATUS "ROOT depenedency is eabled!")
+    message(STATUS "ROOT depenedency is enabled!")
 else()
     message(STATUS "ROOT depenedency is disabled!")
 endif()

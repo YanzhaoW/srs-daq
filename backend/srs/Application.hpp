@@ -41,7 +41,7 @@ namespace srs
         void set_status_acq_off(bool val = true) { status_.is_acq_off.store(val); }
         void set_status_is_reading(bool val = true) { status_.is_reading.store(val); }
         void set_print_mode(DataPrintMode mode);
-        void set_output_filenames(std::vector<std::string> filenames);
+        void set_output_filenames(const std::vector<std::string>& filenames);
 
         // getters:
         [[nodiscard]] auto get_channel_address() const -> uint16_t { return channel_address_; }

@@ -101,6 +101,9 @@ namespace srs
         {
             monitor_.stop();
             data_queue_.abort();
+            spdlog::info("Stopping analysis loop ...");
+            data_processes_.stop();
+            spdlog::info("Analysis loop is stopped");
         }
     }
 
@@ -129,9 +132,6 @@ namespace srs
 
                 data_processes_.reset();
             }
-            spdlog::info("Stopping analysis loop ...");
-            data_processes_.stop();
-            spdlog::info("Analysis loop is stopped");
         }
         catch (oneapi::tbb::user_abort& ex)
         {
