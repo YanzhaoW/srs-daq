@@ -34,7 +34,7 @@ else()
     message(STATUS "ROOT depenedency is disabled!")
 endif()
 
-add_library(srscpp STATIC)
+add_library(srscpp SHARED)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     target_compile_options(srscpp PRIVATE "-fclang-abi-compat=17")
