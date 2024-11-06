@@ -1,9 +1,9 @@
 #pragma once
 
-#include "DataWriter.hpp"
+#include <srs/writers/DataWriter.hpp>
 #include <spdlog/spdlog.h>
 #include <srs/Application.hpp>
-#include <srs/analysis/DataStructs.hpp>
+#include <srs/data/DataStructs.hpp>
 #include <srs/serializers/DataDeserializeOptions.hpp>
 #include <srs/serializers/ProtoDeserializer.hpp>
 #include <srs/serializers/ProtoDelimDeserializer.hpp>

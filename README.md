@@ -16,7 +16,7 @@ srs-daq is an asynchronous data IO program for SRS system.
 ### Prerequisites
 
 - C++ compiler (choose either one below)
-  - gcc <span>&#8805;</span> 14.2.
+  - gcc <span>&#8805;</span> 14.3.
   - clang <span>&#8805;</span> 18
 
 - (mini) Conda. See [this instruction](doc/install_conda.md) to install miniconda quickly.

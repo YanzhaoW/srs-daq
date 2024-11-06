@@ -1,5 +1,3 @@
-#include "DataProcessor.hpp"
-#include "DataStructs.hpp"
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/detached.hpp>
 #include <fmt/chrono.h>
@@ -9,6 +7,8 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 #include <srs/Application.hpp>
+#include <srs/analysis/DataProcessor.hpp>
+#include <srs/data/DataStructs.hpp>
 
 namespace srs
 {

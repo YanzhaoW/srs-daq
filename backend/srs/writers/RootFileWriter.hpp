@@ -1,7 +1,7 @@
 #pragma once
 
 #ifdef HAS_ROOT
-#include "DataStructs.hpp"
+#include <srs/data/DataStructs.hpp>
 #include <TFile.h>
 #include <TTree.h>
 #include <srs/analysis/DataProcessManager.hpp>

@@ -1,6 +1,6 @@
-#include "DataStructs.hpp"
-#include "CommonFunctions.hpp"
 #include <bit>
+#include <srs/data/DataStructs.hpp>
+#include <srs/utils/CommonFunctions.hpp>
 
 namespace srs
 {
@@ -13,7 +13,7 @@ namespace srs
             static_assert(HIT_DATA_BIT_LENGTH <= BYTE_BIT_LENGTH * struct_size);
             static_assert(sizeof(T) == struct_size);
             auto expanded_raw_data = std::bitset<BYTE_BIT_LENGTH * struct_size>(raw_data.to_ullong());
-            constexpr auto shifted_bits = struct_size * BYTE_BIT_LENGTH - HIT_DATA_BIT_LENGTH;
+            constexpr auto shifted_bits = (struct_size * BYTE_BIT_LENGTH) - HIT_DATA_BIT_LENGTH;
             expanded_raw_data = expanded_raw_data << shifted_bits;
             return std::bit_cast<T>(expanded_raw_data.to_ullong());
         }

@@ -1,8 +1,5 @@
 #pragma once
 
-#include "CommonDefitions.hpp"
-#include "DataStructs.hpp"
-#include "DataWriter.hpp"
 #include <atomic>
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/steady_timer.hpp>
@@ -11,8 +8,11 @@
 #include <span>
 #include <spdlog/logger.h>
 #include <srs/analysis/DataProcessManager.hpp>
+#include <srs/data/DataStructs.hpp>
 #include <srs/serializers/SerializableBuffer.hpp>
 #include <srs/serializers/StructDeserializer.hpp>
+#include <srs/utils/CommonDefitions.hpp>
+#include <srs/writers/DataWriter.hpp>
 #include <tbb/concurrent_queue.h>
 
 namespace srs

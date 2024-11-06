@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <boost/asio/experimental/coro.hpp>
 #include <srs/Application.hpp>
-#include <srs/analysis/DataStructs.hpp>
+#include <srs/data/DataStructs.hpp>
 #include <srs/utils/CommonFunctions.hpp>
 
 #include <zpp_bits.h>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DataStructs.hpp"
+#include <srs/data/DataStructs.hpp>
 #include <fstream>
 #include <glaze/glaze.hpp>
 #include <map>

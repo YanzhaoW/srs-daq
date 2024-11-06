@@ -24,3 +24,4 @@ list(APPEND CMAKE_PREFIX_PATH ENV${CONDA_PREFIX})
 
 add_subdirectory(frontend)
 add_subdirectory(backend)
+add_subdirectory(test)

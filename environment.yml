@@ -8,3 +8,4 @@ dependencies:
   - ninja=1.12.1
   - nodejs=22.9.0
   - anaconda::protobuf=4.25.3
+  - delimited-protobuf

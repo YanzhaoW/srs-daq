@@ -1,11 +1,10 @@
 #pragma once
 
-#include "DataStructs.hpp"
-#include "DataWriterOptions.hpp"
 #include <boost/thread/future.hpp>
 #include <map>
-// #include <srs/analysis/DataProcessManager.hpp>
+#include <srs/data/DataStructs.hpp>
 #include <srs/serializers/DataDeserializeOptions.hpp>
+#include <srs/writers/DataWriterOptions.hpp>
 
 namespace srs
 {

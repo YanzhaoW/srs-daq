@@ -1,5 +1,6 @@
 #pragma once
 
+#include <google/protobuf/io/gzip_stream.h>
 #include <google/protobuf/util/delimited_message_util.h>
 #include <srs/serializers/ProtoDeserializerBase.hpp>
 
@@ -11,7 +12,19 @@ namespace srs
         namespace protobuf = google::protobuf;
         namespace io = protobuf::io;
         auto output_stream = io::StringOutputStream{ &output_data };
-        protobuf::util::SerializeDelimitedToZeroCopyStream(proto_data, &output_stream);
+
+        if constexpr (PROTOBUF_ENABLE_GZIP)
+        {
+            auto option = io::GzipOutputStream::Options{};
+            option.compression_level = GZIP_DEFAULT_COMPRESSION_LEVEL;
+            auto gzip_output = io::GzipOutputStream{ &output_stream, option };
+            protobuf::util::SerializeDelimitedToZeroCopyStream(proto_data, &gzip_output);
+            gzip_output.Flush();
+        }
+        else
+        {
+            protobuf::util::SerializeDelimitedToZeroCopyStream(proto_data, &output_stream);
+        }
         return 0;
     };
 
