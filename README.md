@@ -35,7 +35,7 @@ cd srs-daq
 git submodule update --init
 ```
 
-#### Step 2: Prepare the environment
+#### Step 2: Activate the Conda environment
 
 ```bash
 conda env create -f environment.yml
@@ -44,7 +44,13 @@ conda activate srs
 
 #### Step 3: Build the project
 
-*Make sure conda environment `srs` is activated.*
+**Make sure conda environment `srs` is activated.**
+
+```bash
+cmake --workflow --preset default
+```
+
+or
 
 ```bash
 cmake --preset default . [optional settings]
@@ -56,11 +62,11 @@ The executable programs are compiled in the `build/bin` directory whereas the dy
 Following CMake preset optional settings are available:
 
 - `-DUSE_ROOT=`
-  - `OFF` or `FALSE` (default). The program would only compile with ROOT if ROOT exists. 
-  - `ON` or `TRUE`. CMake configuration will fail if `ROOT` is not found. 
+  * `OFF` or `FALSE` (default). The program would only compile with ROOT if ROOT exists. 
+  * `ON` or `TRUE`. CMake configuration will fail if `ROOT` is not found. 
 - `-DNO_ROOT=`
-  - `OFF` or `FALSE` (default). Same as `-DUSE_ROOT=OFF`.
-  - `ON` or `TRUE`. The program does NOT compiler with ROOT even if ROOT exists.
+  * `OFF` or `FALSE` (default). Same as `-DUSE_ROOT=OFF`.
+  * `ON` or `TRUE`. The program does NOT compiler with ROOT even if ROOT exists.
 
 For example, to disable the ROOT dependency, run the `cmake --preset` with:
 
@@ -80,7 +86,7 @@ git submodule update --init
 After this, build the project again from [Step 3](#step-3-build-the-project).
 
 
-## srs_control - The control program
+## srs_control - The main program
 
 <!-- To run the program, first make sure you have activated the conda environment `srs`, which can be checked by `conda info`. If not, run `conda activate srs` to activate `srs` environment. --> Go to `build/bin` directory and run
 
@@ -99,11 +105,11 @@ After this, build the project again from [Step 3](#step-3-build-the-project).
   - all: print all data, including header, hit and marker data, but no raw data.
 - `-o` or `--output-files`: set the file outputs (more detail below).
 
-#### Data output to multiple files
+### Data output to multiple files
 
 srs-daq can output received data into multiple files with different types at the same time. Currently, following output types are available (or planned):
 
-- **binary**. File extensions: `.lmd` or `.bin`
+- **binary**:
   - raw data if `.lmd` or `.bin`
   - protobuf data if `.binpb`
 - **json**. File extensions: `.json` (NOTE: JSON file could be very large)
@@ -112,10 +118,30 @@ srs-daq can output received data into multiple files with different types at the
 
 Users have to use the correct file extensions to enable the corresponding output types.
 
-For example, to output data both to a binary file and a root file:
+For example, to output data to different output types:
 
 ```bash
-./srs_control -o "output.root" -o "output.bin"
+./srs_control -o "output1.root" -o "output2.root" \
+              -o "output.bin" -o "output.binpb" \
+              -o "output.json" -o "localhost:9999"
+```
+
+## Usage of other executables
+
+### `srs_check_binpb`
+
+This is used for checking the contents of a Protobuf binary file.
+
+```bash
+./srs_check_binpb -f filename.binpb
+```
+
+### `srs_check_udp`
+
+The executable checks the data output from a UDP socket.
+
+```bash
+./srs_check_udp --port [port number] --ip "localhost"
 ```
 
 ### Custom configuration
