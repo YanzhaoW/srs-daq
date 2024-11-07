@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package srs.proto;
+
+message StructHeader
+{
+    uint32 frame_counter = 1;
+    uint32 fec_id = 2;
+    uint32 udp_timestamp = 3;
+    uint32 overflow = 4;
+}
+
+message MarkerData
+{
+    uint32 vmm_id = 1;
+    uint64 srs_timestamp = 2;
+}
+
+message HitData
+{
+    bool is_over_threshold = 1;
+    uint32 channel_num = 2;
+    uint32 tdc = 3;
+    uint32 offset = 4;
+    uint32 vmm_id = 5;
+    uint32 adc = 6;
+    uint32 bc_id = 7;
+}
+
+message Data
+{
+    StructHeader header = 1;
+    repeated MarkerData marker_data = 2;
+    repeated HitData hit_data = 3;
+}

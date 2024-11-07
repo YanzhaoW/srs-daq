@@ -1,8 +1,8 @@
 {
-    "version": 4,
+    "version": 6,
     "cmakeMinimumRequired": {
         "major": 3,
-        "minor": 24,
+        "minor": 28,
         "patch": 0
     },
     "configurePresets": [
@@ -14,7 +14,8 @@
             "cacheVariables": {
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
                 "CMAKE_BUILD_TYPE": "RelWithDebInfo",
-                "CMAKE_PROJECT_TOP_LEVEL_INCLUDES": "utils/conan/conan_provider.cmake"
+                "CMAKE_PROJECT_TOP_LEVEL_INCLUDES": "utils/conan/conan_provider.cmake",
+                "CONAN_INSTALL_ARGS": "--build=missing;-scompiler.cppstd=gnu23"
             }
         }
     ],
@@ -22,6 +23,21 @@
         {
             "name": "default",
             "configurePreset": "default"
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "default",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "default"
+                },
+                {
+                    "type": "build",
+                    "name": "default"
+                }
+            ]
         }
     ]
 }

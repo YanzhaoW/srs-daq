@@ -2,3 +2,5 @@ compile_commands.json
 CMakeUserPresets.json
 build
 .cache
+tsconfig.app.tsbuildinfo
+__pycache__

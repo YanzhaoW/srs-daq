@@ -1,0 +1,119 @@
+/* .ruler { */
+/*     color: black; */
+/*     margin-top: 0.5em; */
+/*     margin-bottom: 0.5em; */
+/*     margin-left: 0px; */
+/*     margin-right: 0px; */
+/*     border-left-width: 0px; */
+/*     border-right-width: 0px; */
+/*     padding: 0px; */
+/*     display: block; */
+/* } */
+
+.headline {
+    border-left-width: 0px;
+    border-right-width: 0px;
+    border-top-width: 0px;
+    border-bottom-width: 1px;
+    margin: 0em;
+    border-style: solid;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    align-items: center;
+    /* text-align: top; */
+    display: flex;
+}
+
+.right_div {
+    display: inline-flex;
+    margin-left: auto;
+    margin-right: 1em;
+    align-items: flex-start;
+}
+
+.tabs_div {
+    margin-left: 15px;
+    display: inline-block;
+    text-align: center;
+}
+
+.start_div {
+    align-items: start;
+    margin: 0px;
+    padding: 0px;
+    display: inline-block;
+    margin-left: 2em;
+}
+
+.button,
+.start_button {
+    font-family: Helvetica, Arial, sans-serif;
+    border-width: 0px;
+    cursor: pointer;
+}
+
+.button {
+    font-size: 20px;
+    background-color: white;
+    margin: 1px;
+    padding-left: 1em;
+    padding-right: 1em;
+    padding-top: 0.8em;
+    padding-bottom: 0.8em;
+    /* padding: 0.5em; */
+    border-radius: 9999px;
+}
+
+.start_button {
+    background-color: #1ff218;
+    font-size: 20px;
+    padding: 0.5em;
+    height: 50px;
+    width: 160px;
+    border-radius: 10px;
+}
+
+.start_button:hover {
+    box-shadow: '10px 5px 5px #BEBEBE';
+    background-color: #18ba13;
+}
+
+.button:hover {
+    /* text-shadow: 2px, 2px, 4px, grey; */
+    background-color: #edebe4;
+}
+
+.start_button_caption {
+    font-family: Helvetica, Arial, sans-serif;
+    font-style: italic;
+    margin: 0px;
+    padding: 0px;
+    font-size: 10px;
+    color: grey;
+}
+
+.icon_text {
+    font-family: Helvetica, Arial, sans-serif;
+    font-style: italic;
+    font-weight: bold;
+    font-size: 25px;
+}
+
+.log_window {
+    background: white;
+    overflow-y: hidden;
+    height: 70px;
+    width: 450px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: white;
+    margin-right: 1em;
+    margin-left: auto;
+    display: inline-block;
+    white-space: pre-line;
+}
+
+.log_window:hover {
+    overflow-y: scroll;
+    border-color: #ededed;
+}

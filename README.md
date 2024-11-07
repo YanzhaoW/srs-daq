@@ -1,6 +1,6 @@
 # srs-daq - A data acquisition program for SRS FEC & VMM3
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/7e8c956af1bc46c7836524f1ace32c11)](https://app.codacy.com/gh/YanzhaoW/srs-daq/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/7e8c956af1bc46c7836524f1ace32c11)](https://app.codacy.com/gh/YanzhaoW/srs-daq/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Introduction
 
@@ -15,28 +15,11 @@ srs-daq is an asynchronous data IO program for SRS system.
 
 ### Prerequisites
 
-- C++ compiler 
-  - gcc <span>&#8805;</span> 14.2.
+- C++ compiler (choose either one below)
+  - gcc <span>&#8805;</span> 14.3.
   - clang <span>&#8805;</span> 18
 
-  To check the version of compiler, use
-  ```bash
-  gcc --version # if gcc is used
-  clang --version # if clang is used
-  ```
-  if the version is less than 14.2, use the correct version by
-  ```bash
-  export CXX=[g++ command] # e.g. export CXX=g++-14.2.0
-  export CC=[gcc command] # e.g. export CC=gcc-14.2.0
-  ```
-- Conan <span>&#8805;</span> 2.2. To install Conan
-    ```bash
-    python -m pip install conan
-    ```
-- cmake <span>&#8805;</span> 3.26. The version can be checked with
-  ```bash
-  cmake --version # please make sure the output is larger than 3.26
-  ```
+- (mini) Conda. See [this instruction](doc/install_conda.md) to install miniconda quickly.
 - **(Optional)** ROOT <span>&#8805;</span> 6.32
 
 > [!CAUTION]
@@ -44,24 +27,46 @@ srs-daq is an asynchronous data IO program for SRS system.
 
 ### Installation
 
+#### Step 1: Clone the latest version
+
 ```bash
-git clone -b dev https://github.com/YanzhaoW/srs-daq.git
+git clone -b latest https://github.com/YanzhaoW/srs-daq.git
 cd srs-daq
 git submodule update --init
-cmake --preset default . [options]
+```
+
+#### Step 2: Activate the Conda environment
+
+```bash
+conda env create -f environment.yml
+conda activate srs
+```
+
+#### Step 3: Build the project
+
+**Make sure conda environment `srs` is activated.**
+
+```bash
+cmake --workflow --preset default
+```
+
+or
+
+```bash
+cmake --preset default . [optional settings]
 cmake --build ./build -- -j[nproc]
 ```
 
 The executable programs are compiled in the `build/bin` directory whereas the dynamic library in `build/lib`.
 
-Following CMake preset options are available:
+Following CMake preset optional settings are available:
 
 - `-DUSE_ROOT=`
-  - `OFF` or `FALSE` (default). The program would only compile with ROOT if ROOT exists. 
-  - `ON` or `TRUE`. CMake configuration will fail if `ROOT` is not found. 
+  * `OFF` or `FALSE` (default). The program would only compile with ROOT if ROOT exists. 
+  * `ON` or `TRUE`. CMake configuration will fail if `ROOT` is not found. 
 - `-DNO_ROOT=`
-  - `OFF` or `FALSE` (default). Same as `-DUSE_ROOT=OFF`.
-  - `ON` or `TRUE`. The program does NOT compiler with ROOT even if ROOT exists.
+  * `OFF` or `FALSE` (default). Same as `-DUSE_ROOT=OFF`.
+  * `ON` or `TRUE`. The program does NOT compiler with ROOT even if ROOT exists.
 
 For example, to disable the ROOT dependency, run the `cmake --preset` with:
 
@@ -69,9 +74,21 @@ For example, to disable the ROOT dependency, run the `cmake --preset` with:
 cmake --preset default . -DNO_ROOT=TRUE
 ```
 
-## srs_control - The control program
+### Update to the latest version
 
-To run the program, first go to `build/bin` directory and run
+srs-daq is under a continuous development. To update to the latest version, run the following git commands:
+
+```bash
+git fetch origin
+git checkout latest
+git submodule update --init
+```
+After this, build the project again from [Step 3](#step-3-build-the-project).
+
+
+## srs_control - The main program
+
+<!-- To run the program, first make sure you have activated the conda environment `srs`, which can be checked by `conda info`. If not, run `conda activate srs` to activate `srs` environment. --> Go to `build/bin` directory and run
 
 ```bash
 ./srs_control [-p DATA_PRINT_OPTION] [-v LOG_LEVEL] [-h]
@@ -88,22 +105,43 @@ To run the program, first go to `build/bin` directory and run
   - all: print all data, including header, hit and marker data, but no raw data.
 - `-o` or `--output-files`: set the file outputs (more detail below).
 
-#### Data output to multiple files
+### Data output to multiple files
 
 srs-daq can output received data into multiple files with different types at the same time. Currently, following output types are available (or planned):
 
-- **binary**. File extensions: `.lmd` or `.bin`
+- **binary**:
+  - raw data if `.lmd` or `.bin`
+  - protobuf data if `.binpb`
 - **json**. File extensions: `.json` (NOTE: JSON file could be very large)
 - **root**. File extensions: `.root` (require ROOT library)
-- **UDP socket**. Input format: `[ip]:[port]` (not yet implemented)
-- **Google's protobuf**. (planned)
+- **UDP socket** (protobuf). Input format: `[ip]:[port]`
 
-Users have to use the correct file extensions to enable the corresponding output types. Except the UDP socket, each output type should only have one file.
+Users have to use the correct file extensions to enable the corresponding output types.
 
-For example, to output data both to a binary file and a root file:
+For example, to output data to different output types:
 
 ```bash
-./srs_control -o "output.root" -o "output.bin"
+./srs_control -o "output1.root" -o "output2.root" \
+              -o "output.bin" -o "output.binpb" \
+              -o "output.json" -o "localhost:9999"
+```
+
+## Usage of other executables
+
+### `srs_check_binpb`
+
+This is used for checking the contents of a Protobuf binary file.
+
+```bash
+./srs_check_binpb -f filename.binpb
+```
+
+### `srs_check_udp`
+
+The executable checks the data output from a UDP socket.
+
+```bash
+./srs_check_udp --port [port number] --ip "localhost"
 ```
 
 ### Custom configuration
