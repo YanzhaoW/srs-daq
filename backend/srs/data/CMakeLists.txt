@@ -1,4 +1,9 @@
-add_library(srs_data SHARED)
+if(BUILD_STATIC)
+    add_library(srs_data STATIC)
+else()
+    add_library(srs_data SHARED)
+endif()
+
 target_link_libraries(srs_data PUBLIC protobuf::libprotobuf)
 
 target_include_directories(srs_data PUBLIC ${CMAKE_CURRENT_BINARY_DIR})

@@ -1,4 +1,8 @@
-find_package(Boost REQUIRED CONFIG COMPONENTS system thread)
+if(BUILD_STATIC)
+    set(Boost_USE_STATIC_LIBS ON)
+endif()
+
+find_package(Boost REQUIRED CONFIG COMPONENTS thread)
 find_package(fmt REQUIRED)
 find_package(zpp_bits REQUIRED)
 find_package(gsl-lite REQUIRED)
@@ -34,7 +38,12 @@ else()
     message(STATUS "ROOT depenedency is disabled!")
 endif()
 
-add_library(srscpp SHARED)
+if(BUILD_STATIC)
+    add_library(srscpp STATIC)
+    target_compile_options(srscpp PRIVATE "-static")
+else()
+    add_library(srscpp SHARED)
+endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     target_compile_options(srscpp PRIVATE "-fclang-abi-compat=17")
