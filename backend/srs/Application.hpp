@@ -3,7 +3,7 @@
 #include <boost/asio/ip/udp.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/asio/thread_pool.hpp>
-#include <srs/devices/Fec.hpp>
+// #include <srs/devices/Fec.hpp>
 #include <srs/utils/AppStatus.hpp>
 #include <thread>
 
@@ -45,7 +45,7 @@ namespace srs
 
         // getters:
         [[nodiscard]] auto get_channel_address() const -> uint16_t { return channel_address_; }
-        [[nodiscard]] auto get_fec_config() const -> const auto& { return fec_config_; }
+        // [[nodiscard]] auto get_fec_config() const -> const auto& { return fec_config_; }
         [[nodiscard]] auto get_status() const -> const auto& { return status_; }
         [[nodiscard]] auto get_io_context() -> auto& { return io_context_; }
 
@@ -54,7 +54,7 @@ namespace srs
 
         Status status_;
         uint16_t channel_address_ = DEFAULT_CHANNEL_ADDRE;
-        fec::Config fec_config_;
+        // fec::Config fec_config_;
         std::unique_ptr<DataProcessor> data_processor_;
         io_context_type io_context_{ 4 };
         asio::executor_work_guard<io_context_type::executor_type> io_work_guard_;
@@ -63,6 +63,6 @@ namespace srs
         udp::endpoint remote_endpoint_;
 
         void start_work();
-        void end_of_work();
+        void end_of_work() const;
     };
 } // namespace srs

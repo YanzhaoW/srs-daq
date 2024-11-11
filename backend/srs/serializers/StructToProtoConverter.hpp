@@ -1,7 +1,7 @@
 #pragma once
 
-#include "message.pb.h"
 #include <print>
+#include <srs/data/message.pb.h>
 #include <srs/serializers/StructDeserializer.hpp>
 
 namespace srs

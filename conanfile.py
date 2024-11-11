@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain
+import os
 
 class CompressorRecipe(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
@@ -11,7 +12,9 @@ class CompressorRecipe(ConanFile):
         self.requires("spdlog/1.14.1")
         self.requires("zpp_bits/4.4.24")
         self.requires("fmt/11.0.1", override=True)
-        self.requires("onetbb/2021.12.0")
+
+        if os.environ['CONDA_DEFAULT_ENV'] != 'srs-static':
+            self.requires("onetbb/2021.12.0")
 
     def generate(self):
         tc = CMakeToolchain(self)

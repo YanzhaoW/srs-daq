@@ -6,7 +6,17 @@ endif()
 
 target_link_libraries(srs_data PUBLIC protobuf::libprotobuf)
 
-target_include_directories(srs_data PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+target_sources(
+    srs_data
+    PUBLIC FILE_SET
+           HEADERS
+           BASE_DIRS
+           ${CMAKE_SOURCE_DIR}/backend
+           ${CMAKE_BINARY_DIR}/backend
+           FILES
+           DataStructs.hpp
+           ${CMAKE_CURRENT_BINARY_DIR}/message.pb.h)
+
 protobuf_generate(
     TARGET
     srs_data
@@ -34,7 +44,7 @@ if(ROOT_FOUND)
         srs_dict
         DataStructs.hpp
         MODULE
-        srscpp
+        srs_data
         LINKDEF
         SRSLinkDef.hpp)
 endif()

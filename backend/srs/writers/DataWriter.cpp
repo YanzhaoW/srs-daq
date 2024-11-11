@@ -1,10 +1,10 @@
-#include "DataProcessor.hpp"
-#include "DataWriter.hpp"
-#include "JsonWriter.hpp"
-#include "RootFileWriter.hpp"
 #include <boost/asio/ip/address.hpp>
 #include <spdlog/spdlog.h>
+#include <srs/analysis/DataProcessor.hpp>
 #include <srs/writers/BinaryFileWriter.hpp>
+#include <srs/writers/DataWriter.hpp>
+#include <srs/writers/JsonWriter.hpp>
+#include <srs/writers/RootFileWriter.hpp>
 #include <srs/writers/UDPWriter.hpp>
 
 namespace srs

@@ -1,5 +1,6 @@
 if(BUILD_STATIC)
     set(Boost_USE_STATIC_LIBS ON)
+    set(CMAKE_EXE_LINKER_FLAGS "-static-libstdc++")
 endif()
 
 find_package(Boost REQUIRED CONFIG COMPONENTS thread)
@@ -38,19 +39,7 @@ else()
     message(STATUS "ROOT depenedency is disabled!")
 endif()
 
-if(BUILD_STATIC)
-    add_library(srscpp STATIC)
-    target_compile_options(srscpp PRIVATE "-static")
-else()
-    add_library(srscpp SHARED)
-endif()
-
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_compile_options(srscpp PRIVATE "-fclang-abi-compat=17")
-endif()
 add_subdirectory(srs)
-
-target_include_directories(srscpp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(srs_control main.cpp)
 target_link_libraries(srs_control PRIVATE srscpp spdlog::spdlog CLI11::CLI11)

@@ -1,8 +1,8 @@
 #include "Application.hpp"
-#include "DataProcessor.hpp"
-#include "spdlog/spdlog.h"
-#include <Connections.hpp>
 #include <fmt/ranges.h>
+#include <spdlog/spdlog.h>
+#include <srs/analysis/DataProcessor.hpp>
+#include <srs/utils/Connections.hpp>
 #include <string_view>
 
 namespace srs
@@ -39,7 +39,7 @@ namespace srs
         working_thread_ = std::jthread{ monitoring_action };
     }
 
-    void App::end_of_work()
+    void App::end_of_work() const
     {
         if (not status_.is_acq_off.load())
         {

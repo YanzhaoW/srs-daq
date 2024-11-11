@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CommonDefitions.hpp"
+#include <srs/utils/CommonDefitions.hpp>
 #include <array>
 #include <bitset>
 #include <cstdint>
