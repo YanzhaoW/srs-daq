@@ -56,6 +56,7 @@ namespace srs
                 }
                 else
                 {
+                    spdlog::debug("Shutting struct to proto converter.");
                     co_return;
                 }
             }

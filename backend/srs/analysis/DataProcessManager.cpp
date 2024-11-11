@@ -14,6 +14,7 @@ namespace srs
         , writers_{ data_processor }
     {
         coro_ = generate_starting_coro(thread_pool.get_executor());
+        coro_sync_start(coro_, false, asio::use_awaitable);
     }
 
     void DataProcessManager::analysis_one(tbb::concurrent_bounded_queue<SerializableMsgBuffer>& data_queue,
@@ -33,6 +34,11 @@ namespace srs
         auto proto_converter_fut = struct_proto_converter_.create_future(struct_deser_fut);
         auto proto_deser_fut = proto_deserializer_.create_future(proto_converter_fut);
         auto proto_delim_deser_fut = proto_delim_deserializer_.create_future(proto_converter_fut);
+
+        if (is_stopped)
+        {
+            spdlog::info("Shutting down all data writers...");
+        }
 
         auto make_writer_future =
             [&starting_fut, &struct_deser_fut, &proto_converter_fut, &proto_deser_fut, &proto_delim_deser_fut](
@@ -65,6 +71,10 @@ namespace srs
 
         writers_.write_with(make_writer_future);
         writers_.wait_for_finished();
+        if (is_stopped)
+        {
+            spdlog::debug("All data writers are shutdown.");
+        }
     }
 
     // NOLINTNEXTLINE(readability-static-accessed-through-instance)

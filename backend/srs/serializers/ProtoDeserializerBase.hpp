@@ -50,6 +50,7 @@ namespace srs
                 }
                 else
                 {
+                    spdlog::debug("Shutting down proto deserializer.");
                     co_return;
                 }
             }

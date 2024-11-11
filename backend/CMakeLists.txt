@@ -1,5 +1,4 @@
 if(BUILD_STATIC)
-    set(Boost_USE_STATIC_LIBS ON)
     set(CMAKE_EXE_LINKER_FLAGS "-static-libstdc++")
 endif()
 

@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <boost/asio/experimental/coro.hpp>
+#include <spdlog/spdlog.h>
 #include <srs/Application.hpp>
 #include <srs/data/DataStructs.hpp>
 #include <srs/utils/CommonFunctions.hpp>
@@ -54,6 +55,7 @@ namespace srs
                 }
                 else
                 {
+                    spdlog::debug("Shutting down struct deserializer.");
                     co_return;
                 }
             }

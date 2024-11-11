@@ -1,10 +1,10 @@
 if(BUILD_STATIC)
-    add_library(srs_data STATIC)
+    add_library(srs_data STATIC DataStructs.cpp)
 else()
-    add_library(srs_data SHARED)
+    add_library(srs_data SHARED DataStructs.cpp)
 endif()
 
-target_link_libraries(srs_data PUBLIC protobuf::libprotobuf)
+target_link_libraries(srs_data PUBLIC protobuf::libprotobuf fmt::fmt PRIVATE Boost::thread)
 
 target_sources(
     srs_data
@@ -35,11 +35,10 @@ protobuf_generate(
     PROTOC_OUT_DIR
     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_sources(srscpp PRIVATE DataStructs.cpp)
 if(ROOT_FOUND)
-    target_link_libraries(srscpp PRIVATE ROOT::RIO ROOT::Tree)
-    target_compile_definitions(srscpp PRIVATE HAS_ROOT=1)
-    target_compile_options(srscpp PRIVATE "-Wno-cpp")
+    target_link_libraries(srs_data PUBLIC ROOT::RIO ROOT::Tree)
+    target_compile_definitions(srs_data PUBLIC HAS_ROOT=1)
+    target_compile_options(srs_data PUBLIC "-Wno-cpp")
     root_generate_dictionary(
         srs_dict
         DataStructs.hpp

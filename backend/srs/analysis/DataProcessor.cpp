@@ -86,6 +86,7 @@ namespace srs
     void DataProcessor::start()
     {
         is_stopped.store(false);
+        spdlog::debug("Data processor starts.");
         if (print_mode_ == print_speed)
         {
             monitor_.start();
