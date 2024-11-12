@@ -2,7 +2,7 @@
 
 #include <google/protobuf/io/gzip_stream.h>
 #include <google/protobuf/util/delimited_message_util.h>
-#include <srs/serializers/ProtoSerializerBase.hpp>
+#include <srs/converters/ProtoSerializerBase.hpp>
 
 namespace srs
 {

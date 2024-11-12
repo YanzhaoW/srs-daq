@@ -1,6 +1,6 @@
 #pragma once
 
-#include <srs/serializers/ProtoSerializerBase.hpp>
+#include <srs/converters/ProtoSerializerBase.hpp>
 
 namespace srs
 {

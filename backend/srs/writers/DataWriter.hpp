@@ -3,7 +3,7 @@
 #include <boost/thread/future.hpp>
 #include <map>
 #include <srs/data/DataStructs.hpp>
-#include <srs/serializers/DataDeserializeOptions.hpp>
+#include <srs/converters/DataDeserializeOptions.hpp>
 #include <srs/writers/DataWriterOptions.hpp>
 
 namespace srs

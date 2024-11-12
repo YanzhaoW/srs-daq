@@ -2,7 +2,7 @@
 
 #include <print>
 #include <srs/data/message.pb.h>
-#include <srs/serializers/StructDeserializer.hpp>
+#include <srs/converters/StructDeserializer.hpp>
 
 namespace srs
 {

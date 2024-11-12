@@ -30,7 +30,7 @@ target_sources(
 
 add_subdirectory(utils)
 add_subdirectory(analysis)
-add_subdirectory(serializers)
+add_subdirectory(converters)
 add_subdirectory(writers)
 add_subdirectory(data)
 

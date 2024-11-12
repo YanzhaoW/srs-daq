@@ -6,9 +6,9 @@ target_sources(
             privateHeaders
             FILES
             DataDeserializeOptions.hpp
-            ProtoDelimDeserializer.hpp
-            ProtoDeserializer.hpp
-            ProtoDeserializerBase.hpp
+            ProtoDelimSerializer.hpp
+            ProtoSerializer.hpp
+            ProtoSerializerBase.hpp
             SerializableBuffer.hpp
             StructDeserializer.hpp
             StructToProtoConverter.hpp)
