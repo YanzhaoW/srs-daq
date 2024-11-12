@@ -5,35 +5,28 @@
 #include <spdlog/spdlog.h>
 #include <srs/Application.hpp>
 #include <srs/data/DataStructs.hpp>
+#include <srs/serializers/DataConverterBase.hpp>
 #include <srs/utils/CommonFunctions.hpp>
 
 #include <zpp_bits.h>
 
 namespace srs
 {
-    class StructDeserializer
+    class StructDeserializer : public DataConverterBase<std::string_view, const StructData*>
     {
       public:
-        using OutputType = const StructData*;
-        using InputType = std::string_view;
-        using CoroType = asio::experimental::coro<OutputType(std::optional<InputType>)>;
-        using InputFuture = boost::shared_future<std::optional<InputType>>;
-        using OutputFuture = boost::shared_future<std::optional<OutputType>>;
+        static constexpr auto ConverterOption = std::array{ structure };
 
         explicit StructDeserializer(asio::thread_pool& thread_pool)
+            : DataConverterBase{ generate_coro(thread_pool.get_executor()) }
         {
-            coro_ = generate_coro(thread_pool.get_executor());
-            coro_sync_start(coro_, std::optional<InputType>{}, asio::use_awaitable);
         }
-
-        auto create_future(InputFuture& pre_fut) -> OutputFuture { return create_coro_future(coro_, pre_fut); }
 
         [[nodiscard]] auto data() const -> const auto& { return output_data_; }
 
       private:
         ReceiveDataSquence receive_raw_data_;
         StructData output_data_;
-        CoroType coro_;
 
         void reset() { reset_struct_data(output_data_); }
 

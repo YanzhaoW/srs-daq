@@ -1,16 +1,16 @@
 #pragma once
 
-#include <srs/writers/DataWriter.hpp>
 #include <spdlog/spdlog.h>
 #include <srs/Application.hpp>
 #include <srs/data/DataStructs.hpp>
 #include <srs/serializers/DataDeserializeOptions.hpp>
-#include <srs/serializers/ProtoDeserializer.hpp>
-#include <srs/serializers/ProtoDelimDeserializer.hpp>
+#include <srs/serializers/ProtoDelimSerializer.hpp>
+#include <srs/serializers/ProtoSerializer.hpp>
 #include <srs/serializers/SerializableBuffer.hpp>
 #include <srs/serializers/StructDeserializer.hpp>
 #include <srs/serializers/StructToProtoConverter.hpp>
 #include <srs/utils/ValidData.hpp>
+#include <srs/writers/DataWriter.hpp>
 #include <tbb/concurrent_queue.h>
 
 namespace srs
@@ -32,13 +32,12 @@ namespace srs
         template <DataDeserializeOptions option>
         auto get_data() -> const auto&;
 
-
       private:
         SerializableMsgBuffer binary_data_;
         StructDeserializer struct_deserializer_;
         Struct2ProtoConverter struct_proto_converter_;
-        ProtoDeserializer proto_deserializer_;
-        ProtoDelimDeserializer proto_delim_deserializer_;
+        ProtoSerializer proto_serializer_;
+        ProtoDelimSerializer proto_delim_serializer_;
 
         StartingCoroType coro_;
 
@@ -61,7 +60,7 @@ namespace srs
         }
         else if constexpr (option == proto)
         {
-            return std::string_view{ proto_deserializer_.data() };
+            return std::string_view{ proto_serializer_.data() };
         }
         else
         {

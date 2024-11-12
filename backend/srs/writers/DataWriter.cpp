@@ -60,8 +60,8 @@ namespace srs
         switch (option)
         {
             case raw:
-                return check_if_exist(raw) or check_if_exist(structure) or check_if_exist(proto) or
-                       check_if_exist(proto_frame);
+                return check_if_exist(proto_frame) or check_if_exist(proto) or check_if_exist(structure) or
+                       check_if_exist(raw);
             case structure:
                 return check_if_exist(structure) or check_if_exist(proto) or check_if_exist(proto_frame);
             case proto:

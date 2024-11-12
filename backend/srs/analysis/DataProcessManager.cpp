@@ -9,8 +9,8 @@ namespace srs
     DataProcessManager::DataProcessManager(DataProcessor* data_processor, asio::thread_pool& thread_pool)
         : struct_deserializer_{ thread_pool }
         , struct_proto_converter_{ thread_pool }
-        , proto_deserializer_{ thread_pool }
-        , proto_delim_deserializer_{ thread_pool }
+        , proto_serializer_{ thread_pool }
+        , proto_delim_serializer_{ thread_pool }
         , writers_{ data_processor }
     {
         coro_ = generate_starting_coro(thread_pool.get_executor());
@@ -30,10 +30,10 @@ namespace srs
     void DataProcessManager::run_processes(bool is_stopped)
     {
         auto starting_fut = create_coro_future(coro_, is_stopped).share();
-        auto struct_deser_fut = struct_deserializer_.create_future(starting_fut);
-        auto proto_converter_fut = struct_proto_converter_.create_future(struct_deser_fut);
-        auto proto_deser_fut = proto_deserializer_.create_future(proto_converter_fut);
-        auto proto_delim_deser_fut = proto_delim_deserializer_.create_future(proto_converter_fut);
+        auto struct_deser_fut = struct_deserializer_.create_future(starting_fut, writers_);
+        auto proto_converter_fut = struct_proto_converter_.create_future(struct_deser_fut, writers_);
+        auto proto_deser_fut = proto_serializer_.create_future(proto_converter_fut, writers_);
+        auto proto_delim_deser_fut = proto_delim_serializer_.create_future(proto_converter_fut, writers_);
 
         if (is_stopped)
         {
@@ -86,6 +86,7 @@ namespace srs
             auto is_terminated = co_yield (data);
             if (is_terminated)
             {
+                spdlog::debug("Shutting down starting coroutine.");
                 co_return;
             }
         }
