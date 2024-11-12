@@ -9,7 +9,7 @@ find_package(gsl-lite REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(CLI11 REQUIRED)
 find_package(TBB REQUIRED)
-find_package(protobuf REQUIRED CONFIG)
+find_package(protobuf REQUIRED CONFIG COMPONENTS libprotobuf)
 
 if(NOT NO_ROOT)
     if(USE_ROOT)
