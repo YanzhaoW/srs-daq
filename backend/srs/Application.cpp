@@ -36,7 +36,7 @@ namespace srs
             io_context_.join();
             end_of_work();
         };
-        working_thread_ = std::jthread{ monitoring_action };
+        working_thread_ = std::thread{ monitoring_action };
     }
 
     void App::end_of_work() const

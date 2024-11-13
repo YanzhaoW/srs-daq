@@ -29,10 +29,11 @@ target_sources(
             ${CMAKE_SOURCE_DIR}/backend)
 
 add_subdirectory(utils)
-add_subdirectory(analysis)
+add_subdirectory(data)
 add_subdirectory(converters)
 add_subdirectory(writers)
-add_subdirectory(data)
+add_subdirectory(readers)
+add_subdirectory(analysis)
 
 target_sources(srscpp PUBLIC FILE_SET publicHeaders FILES Application.hpp)
 

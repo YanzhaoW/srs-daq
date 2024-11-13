@@ -1,10 +1,13 @@
 if(BUILD_STATIC)
-    add_library(srs_data STATIC DataStructs.cpp)
+    add_library(srs_data STATIC)
 else()
-    add_library(srs_data SHARED DataStructs.cpp)
+    add_library(srs_data SHARED)
 endif()
 
-target_link_libraries(srs_data PUBLIC protobuf::libprotobuf fmt::fmt PRIVATE Boost::thread)
+target_link_libraries(
+    srs_data
+    PUBLIC protobuf::libprotobuf fmt::fmt
+    PRIVATE Boost::thread)
 
 target_sources(
     srs_data
@@ -15,6 +18,7 @@ target_sources(
            ${CMAKE_BINARY_DIR}/backend
            FILES
            DataStructs.hpp
+           DataStructsFormat.hpp
            ${CMAKE_CURRENT_BINARY_DIR}/message.pb.h)
 
 protobuf_generate(

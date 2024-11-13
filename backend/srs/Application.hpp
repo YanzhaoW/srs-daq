@@ -59,7 +59,7 @@ namespace srs
         io_context_type io_context_{ 4 };
         asio::executor_work_guard<io_context_type::executor_type> io_work_guard_;
         asio::signal_set signal_set_{ io_context_, SIGINT, SIGTERM };
-        std::jthread working_thread_;
+        std::thread working_thread_;
         udp::endpoint remote_endpoint_;
 
         void start_work();

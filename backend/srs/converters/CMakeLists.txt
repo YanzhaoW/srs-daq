@@ -1,5 +1,7 @@
 target_link_libraries(srscpp PRIVATE zpp_bits::zpp_bits)
 
+target_sources(srscpp PRIVATE StructDeserializer.cpp)
+
 target_sources(
     srscpp
     PRIVATE FILE_SET
