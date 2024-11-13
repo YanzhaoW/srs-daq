@@ -15,11 +15,11 @@ set_target_properties(
 install(
     TARGETS srscpp
     EXPORT srs_export
-    FILE_SET publicHeaders RUNTIME_DEPENDENCIES)
+    FILE_SET publicHeaders)
 install(
     TARGETS srs_data
     EXPORT srs_export
-    FILE_SET HEADERS RUNTIME_DEPENDENCIES)
+    FILE_SET HEADERS)
 
 install(EXPORT srs_export DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/srs)
 

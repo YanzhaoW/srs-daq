@@ -1,6 +1,6 @@
-if(BUILD_STATIC)
-    set(CMAKE_EXE_LINKER_FLAGS "-static-libstdc++")
-endif()
+# if(BUILD_STATIC)
+#     set(CMAKE_EXE_LINKER_FLAGS "-static-libstdc++")
+# endif()
 
 find_package(Boost REQUIRED CONFIG COMPONENTS thread)
 find_package(fmt REQUIRED)
