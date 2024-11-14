@@ -40,4 +40,7 @@ install(
     [[libgcc_s\.so\..*]]
     [[libm\.so\..*]]
     [[libstdc\+\+\.so\..*]]
-    [[ld-linux-x86-64\.so\..*]])
+    [[ld-linux-x86-64\.so\..*]]
+    [[librt\.so\..*]]
+    [[libpthread\.so\..*]]
+    [[libdl\.so\..*]])
