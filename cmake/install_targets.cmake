@@ -23,7 +23,7 @@ install(
 
 install(EXPORT srs_export DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/srs)
 
-install(TARGETS srs_control RUNTIME_DEPENDENCIES)
+# install(TARGETS srs_control RUNTIME_DEPENDENCIES)
 
 install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/srs_check_udp
                  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/srs_check_binpb
@@ -32,12 +32,12 @@ install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/srs_check_udp
 install(FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/message_pb2.py DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 install(TARGETS srs_control RUNTIME_DEPENDENCY_SET appDeps)
-# install(
-#     RUNTIME_DEPENDENCY_SET
-#     appDeps
-#     PRE_EXCLUDE_REGEXES
-#     [[libc\.so\..*]]
-#     [[libgcc_s\.so\..*]]
-#     [[libm\.so\..*]]
-#     [[libstdc\+\+\.so\..*]]
-#     [[ld-linux-x86-64\.so\..*]])
+install(
+    RUNTIME_DEPENDENCY_SET
+    appDeps
+    PRE_EXCLUDE_REGEXES
+    [[libc\.so\..*]]
+    [[libgcc_s\.so\..*]]
+    [[libm\.so\..*]]
+    [[libstdc\+\+\.so\..*]]
+    [[ld-linux-x86-64\.so\..*]])
