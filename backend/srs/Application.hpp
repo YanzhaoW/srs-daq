@@ -6,6 +6,7 @@
 // #include <srs/devices/Fec.hpp>
 #include <srs/utils/AppStatus.hpp>
 #include <thread>
+#include <srs/utils/CommonAlias.hpp>
 
 namespace srs
 {

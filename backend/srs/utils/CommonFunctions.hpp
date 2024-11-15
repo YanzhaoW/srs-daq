@@ -4,7 +4,7 @@
 #include <bitset>
 #include <boost/asio.hpp>
 #include <boost/thread/future.hpp>
-#include <srs/utils/CommonDefitions.hpp>
+#include <srs/utils/CommonAlias.hpp>
 
 namespace srs
 {

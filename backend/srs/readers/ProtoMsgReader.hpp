@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <srs/data/DataStructs.hpp>
+#include <string_view>
 
 namespace srs
 {

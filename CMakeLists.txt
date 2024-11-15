@@ -20,8 +20,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     list(APPEND CMAKE_CXX_FLAGS "-fexperimental-library")
 endif()
 
-list(APPEND CMAKE_PREFIX_PATH ENV${CONDA_PREFIX})
-
 add_subdirectory(frontend)
 add_subdirectory(backend)
 add_subdirectory(test)

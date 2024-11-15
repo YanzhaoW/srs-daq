@@ -39,7 +39,8 @@ BOOST_LIBS = (
     "wave",
 )
 
-BOOST_OPTIONS = {f"without_{_name}": True for _name in BOOST_LIBS if _name not in ['thread', 'atomic', 'chrono', 'container', 'date_time', 'exception', 'system']}
+BOOST_OPTIONS = {f"without_{_name}": True for _name in BOOST_LIBS \
+        if _name not in ['thread', 'atomic', 'chrono', 'container', 'date_time', 'exception', 'system']}
 BOOST_OPTIONS.update({"shared": False})
 
 
@@ -53,9 +54,8 @@ class CompressorRecipe(ConanFile):
         self.requires("spdlog/1.14.1")
         self.requires("zpp_bits/4.4.24")
         self.requires("fmt/11.0.1", override=True)
-        self.requires("protobuf/5.27.0", options = {"with_zlib": True, "fPIC": True, "shared": False})
+        self.requires("protobuf/5.27.0", options = {"with_zlib": True, "fPIC": True, "shared": False, "lite": False})
         self.requires("boost/1.86.0", options = BOOST_OPTIONS)
-        self.requires("onetbb/2021.12.0")
 
     def generate(self):
         tc = CMakeToolchain(self)

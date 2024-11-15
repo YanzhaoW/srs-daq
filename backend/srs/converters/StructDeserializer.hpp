@@ -6,6 +6,7 @@
 #include <srs/converters/DataConverterBase.hpp>
 #include <srs/data/DataStructs.hpp>
 #include <srs/utils/CommonFunctions.hpp>
+#include <srs/utils/CommonAlias.hpp>
 
 #include <zpp_bits.h>
 

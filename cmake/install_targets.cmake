@@ -1,9 +1,18 @@
-set_target_properties(
-    srs_data
-    PROPERTIES OUTPUT_NAME srsdata
-               EXPORT_NAME data
-               SOVERSION ${PROJECT_VERSION_MAJOR}
-               VERSION ${PROJECT_VERSION})
+# create config file
+
+include(CMakePackageConfigHelpers)
+
+set(cmakeModulesDir cmake)
+
+configure_package_config_file(
+    ${CMAKE_SOURCE_DIR}/cmake/srsConfig.cmake.in srsConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/srs
+    PATH_VARS cmakeModulesDir
+    NO_SET_AND_CHECK_MACRO NO_CHECK_REQUIRED_COMPONENTS_MACRO)
+
+write_basic_package_version_file(srsConfig-version.cmake COMPATIBILITY SameMinorVersion)
+
+# install libraries
 
 set_target_properties(
     srscpp
@@ -14,22 +23,19 @@ set_target_properties(
 
 install(
     TARGETS srscpp
-    EXPORT srs_export
+    EXPORT srsTargets
     FILE_SET publicHeaders)
+
 install(
-    TARGETS srs_data
-    EXPORT srs_export
-    FILE_SET HEADERS)
+    EXPORT srsTargets
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/srs
+    NAMESPACE srs::
+    FILE srsConfig-targets.cmake)
 
-install(EXPORT srs_export DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/srs)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/srsConfig.cmake ${CMAKE_CURRENT_BINARY_DIR}/srsConfig-version.cmake
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/srs)
 
-# install(TARGETS srs_control RUNTIME_DEPENDENCIES)
-
-install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/srs_check_udp
-                 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/srs_check_binpb
-        DESTINATION ${CMAKE_INSTALL_BINDIR})
-
-install(FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/message_pb2.py DESTINATION ${CMAKE_INSTALL_BINDIR})
+# install executable
 
 install(TARGETS srs_control RUNTIME_DEPENDENCY_SET appDeps)
 install(
@@ -44,3 +50,11 @@ install(
     [[librt\.so\..*]]
     [[libpthread\.so\..*]]
     [[libdl\.so\..*]])
+
+install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/srs_check_udp
+                 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/srs_check_binpb
+        DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+# install miscellaneous
+
+install(FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/message_pb2.py DESTINATION ${CMAKE_INSTALL_BINDIR})

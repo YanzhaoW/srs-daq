@@ -21,6 +21,8 @@ target_sources(
            DataStructsFormat.hpp
            ${CMAKE_CURRENT_BINARY_DIR}/message.pb.h)
 
+target_sources(srscpp PUBLIC FILE_SET publicHeaders FILES DataStructs.hpp)
+
 protobuf_generate(
     TARGET
     srs_data

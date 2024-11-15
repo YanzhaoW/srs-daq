@@ -8,10 +8,9 @@
 #include <span>
 #include <spdlog/logger.h>
 #include <srs/analysis/DataProcessManager.hpp>
-#include <srs/data/DataStructs.hpp>
 #include <srs/converters/SerializableBuffer.hpp>
 #include <srs/converters/StructDeserializer.hpp>
-#include <srs/utils/CommonDefitions.hpp>
+#include <srs/data/DataStructs.hpp>
 #include <srs/writers/DataWriter.hpp>
 #include <tbb/concurrent_queue.h>
 

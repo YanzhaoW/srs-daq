@@ -35,8 +35,14 @@ add_subdirectory(writers)
 add_subdirectory(readers)
 add_subdirectory(analysis)
 
-target_sources(srscpp PUBLIC FILE_SET publicHeaders FILES Application.hpp)
+target_sources(
+    srscpp
+    PUBLIC FILE_SET
+           publicHeaders
+           FILES
+           Application.hpp
+           srs.hpp)
 
-target_link_libraries(srscpp PRIVATE srs_data)
+target_link_libraries(srscpp PRIVATE $<BUILD_LOCAL_INTERFACE:srs_data>)
 target_compile_definitions(srscpp PUBLIC BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION
                                          BOOST_THREAD_PROVIDES_FUTURE_WHEN_ALL_WHEN_ANY)

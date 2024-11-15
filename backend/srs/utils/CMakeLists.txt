@@ -1,9 +1,8 @@
 target_sources(srscpp PRIVATE Connections.cpp)
 
 target_link_libraries(
-    srscpp
-    PUBLIC Boost::thread gsl::gsl-lite
-    PRIVATE fmt::fmt spdlog::spdlog)
+    srscpp PRIVATE $<BUILD_LOCAL_INTERFACE:gsl::gsl-lite> $<BUILD_LOCAL_INTERFACE:Boost::thread>
+                   $<BUILD_LOCAL_INTERFACE:fmt::fmt> $<BUILD_LOCAL_INTERFACE:spdlog::spdlog>)
 
 target_sources(
     srscpp
