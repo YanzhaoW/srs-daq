@@ -1,5 +1,7 @@
 if(BUILD_STATIC)
-    set(CMAKE_EXE_LINKER_FLAGS "-static-libstdc++")
+    if(BUILD_STATIC_STDCXX)
+        set(CMAKE_EXE_LINKER_FLAGS "-static-libstdc++")
+    endif()
 endif()
 
 find_package(Boost REQUIRED CONFIG COMPONENTS thread)
@@ -17,19 +19,9 @@ endif()
 if(NOT NO_ROOT)
     if(USE_ROOT)
         message(STATUS "Force to use ROOT depenedency!")
-        find_package(
-            ROOT REQUIRED
-            COMPONENTS RIO
-                       Tree
-                       Hist
-                       Gpad)
+        find_package(ROOT REQUIRED COMPONENTS RIO Tree Hist Gpad)
     else()
-        find_package(
-            ROOT QUIET
-            COMPONENTS RIO
-                       Tree
-                       Hist
-                       Gpad)
+        find_package(ROOT QUIET COMPONENTS RIO Tree Hist Gpad)
     endif()
 endif()
 
