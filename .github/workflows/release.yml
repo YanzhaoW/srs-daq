@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       build_type: ${{ steps.build.outputs.build_type }}
+      tag_name: ${{ steps.build.outputs.tag_name }}
 
     steps:
       - name: Define envs
@@ -19,6 +20,11 @@ jobs:
         id: build
         run: |
           echo "build_type=${CMAKE_BUILD_TYPE}" >> $GITHUB_OUTPUT
+      - if: github.event_name == 'push' 
+        run: |
+          TAG_NAME=${{ github.ref }}
+          # echo "tag_name=${TAG_NAME#refs/tags/}" >> $GITHUB_OUTPUT
+          echo "tag_name=test" >> $GITHUB_OUTPUT
 
   build-artifacts:
     runs-on: ubuntu-latest
@@ -30,7 +36,13 @@ jobs:
       fail-fast: false
       matrix:
         os: [ debian-bullseye, fedora-41 ]
-        has_root: [ ON, OFF ]
+        root: [ "with-root", "no-root" ]
+        include:
+          - os: debian-bullseye
+            static-libstdcxx: ON
+          - os: fedora-41
+            static-libstdcxx: OFF
+    name: ${{ matrix.os }}-${{ matrix.root }}
     env:
       CMAKE_GENERATOR: Ninja
     container:
@@ -43,12 +55,11 @@ jobs:
       - name: recover envs
         run: |
           echo "CMAKE_BUILD_TYPE=${{ needs.setup.outputs.build_type }}" >> $GITHUB_ENV
+          echo "TAG_NAME=${{ needs.setup.outputs.tag_name }}" >> $GITHUB_ENV
           cd $GITHUB_WORKSPACE/..
           echo "PARENT_DIR=$PWD" >> $GITHUB_ENV
-      - if: github.event_name == 'push'
-        run: |
-          TAG_NAME=${{ github.ref }}
-          echo "TAG_NAME=${TAG_NAME#refs/tags/}" >> $GITHUB_ENV
+          if [[ ${{ matrix.root }} == "with-root" ]]; then export DISABLE_ROOT="OFF"; else export DISABLE_ROOT="ON"; fi
+          echo "DISABLE_ROOT=${DISABLE_ROOT}" >> $GITHUB_ENV
       - name: install miniconda
         run: |
           mkdir -p ${PARENT_DIR}/miniconda3
@@ -62,9 +73,9 @@ jobs:
           source $PARENT_DIR/miniconda3/bin/activate
           conda activate srs
           mkdir ${PARENT_DIR}/srs-install
-          cmake --preset static -DCMAKE_INSTALL_PREFIX=${PARENT_DIR}/srs-install
+          cmake --preset static -DCMAKE_INSTALL_PREFIX=${PARENT_DIR}/srs-install -DBUILD_STATIC_STDCXX=${{ matrix.static-libstdcxx }} -DNO_ROOT=$DISABLE_ROOT
           cmake --build ./build --target install -- -j2
-          tar czf "${{ env.PARENT_DIR }}/${{ matrix.os}}-x86-64-${{ env.TAG_NAME }}.tar.gz" ${PARENT_DIR}/srs-install
+          tar czf "${{ env.PARENT_DIR }}/${{ matrix.os}}-x86-64-${{ env.TAG_NAME }}-${{ matrix.root }}.tar.gz" ${PARENT_DIR}/srs-install
 
       - uses: actions/upload-artifact@v4
         with:

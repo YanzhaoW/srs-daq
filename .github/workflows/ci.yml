@@ -1,0 +1,38 @@
+name: ci
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    container:
+      image: yanzhaowang/srs-env:fedora-41
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: 'true'
+      - name: env vars
+        run: |
+          cd $GITHUB_WORKSPACE/..
+          echo "PARENT_DIR=$PWD" >> $GITHUB_ENV
+      - name: install miniconda
+        run: |
+          mkdir -p ${PARENT_DIR}/miniconda3
+          wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ${PARENT_DIR}/miniconda3/miniconda.sh
+          bash ${PARENT_DIR}/miniconda3/miniconda.sh -b -u -p ${PARENT_DIR}/miniconda3
+          rm -f ${PARENT_DIR}/miniconda3/miniconda.sh
+          source $PARENT_DIR/miniconda3/bin/activate
+          conda env create -f $GITHUB_WORKSPACE/environment.yml
+      - name: build
+        run: |
+          source $PARENT_DIR/miniconda3/bin/activate
+          conda activate srs
+          cmake --preset default
+          cmake --build ./build -- -j2

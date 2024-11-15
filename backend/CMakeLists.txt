@@ -1,7 +1,6 @@
-if(BUILD_STATIC)
-    if(BUILD_STATIC_STDCXX)
-        set(CMAKE_EXE_LINKER_FLAGS "-static-libstdc++")
-    endif()
+# some operating systems don't have static libstdc++.a library
+if(BUILD_STATIC AND BUILD_STATIC_STDCXX)
+    set(CMAKE_EXE_LINKER_FLAGS "-static-libstdc++")
 endif()
 
 find_package(Boost REQUIRED CONFIG COMPONENTS thread)
