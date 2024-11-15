@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - dev
+  workflow_dispatch:
 
 jobs:
   setup:
@@ -25,10 +26,15 @@ jobs:
       run:
         shell: bash
     needs: setup
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ debian-bullseye, fedora-41 ]
+        has_root: [ ON, OFF ]
     env:
       CMAKE_GENERATOR: Ninja
     container:
-      image: yanzhaowang/srs-env:debian-bullseye
+      image: yanzhaowang/srs-env:${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,12 +45,16 @@ jobs:
           echo "CMAKE_BUILD_TYPE=${{ needs.setup.outputs.build_type }}" >> $GITHUB_ENV
           cd $GITHUB_WORKSPACE/..
           echo "PARENT_DIR=$PWD" >> $GITHUB_ENV
+      - if: github.event_name == 'push'
+        run: |
+          TAG_NAME=${{ github.ref }}
+          echo "TAG_NAME=${TAG_NAME#refs/tags/}" >> $GITHUB_ENV
       - name: install miniconda
         run: |
           mkdir -p ${PARENT_DIR}/miniconda3
           wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ${PARENT_DIR}/miniconda3/miniconda.sh
           bash ${PARENT_DIR}/miniconda3/miniconda.sh -b -u -p ${PARENT_DIR}/miniconda3
-          rm ${PARENT_DIR}/miniconda3/miniconda.sh
+          rm -f ${PARENT_DIR}/miniconda3/miniconda.sh
           source $PARENT_DIR/miniconda3/bin/activate
           conda env create -f $GITHUB_WORKSPACE/environment.yml
       - name: build
@@ -54,10 +64,11 @@ jobs:
           mkdir ${PARENT_DIR}/srs-install
           cmake --preset static -DCMAKE_INSTALL_PREFIX=${PARENT_DIR}/srs-install
           cmake --build ./build --target install -- -j2
+          tar czf "${{ env.PARENT_DIR }}/${{ matrix.os}}-x86-64-${{ env.TAG_NAME }}.tar.gz" ${PARENT_DIR}/srs-install
 
       - uses: actions/upload-artifact@v4
         with:
           name: srs_control
-          path: ${{env.PARENT_DIR}}/srs-install
+          path: ${{ env.PARENT_DIR }}/${{ matrix.os}}-x86-64-${{ env.TAG_NAME }}.tar.gz
           retention-days: 1
 

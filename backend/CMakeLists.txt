@@ -22,7 +22,6 @@ if(NOT NO_ROOT)
             COMPONENTS RIO
                        Tree
                        Hist
-                       RHTTP
                        Gpad)
     else()
         find_package(
@@ -30,7 +29,6 @@ if(NOT NO_ROOT)
             COMPONENTS RIO
                        Tree
                        Hist
-                       RHTTP
                        Gpad)
     endif()
 endif()
