@@ -135,7 +135,7 @@ namespace srs
                 data_processes_.reset();
             }
         }
-        catch (oneapi::tbb::user_abort& ex)
+        catch (tbb::user_abort& ex)
         {
             spdlog::debug("Data processing: {}", ex.what());
         }
