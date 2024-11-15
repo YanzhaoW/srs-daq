@@ -16,14 +16,14 @@ jobs:
       - name: Define envs
         run:
           echo "CMAKE_BUILD_TYPE=Release" >> $GITHUB_ENV
-      - name: Setup build type
-        id: build
-        run: |
-          echo "build_type=${CMAKE_BUILD_TYPE}" >> $GITHUB_OUTPUT
       - if: github.event_name == 'push' 
         run: |
           TAG_NAME=${{ github.ref }}
           # echo "tag_name=${TAG_NAME#refs/tags/}" >> $GITHUB_OUTPUT
+      - name: Setup build type
+        id: build
+        run: |
+          echo "build_type=${CMAKE_BUILD_TYPE}" >> $GITHUB_OUTPUT
           echo "tag_name=test" >> $GITHUB_OUTPUT
 
   build-artifacts:
@@ -75,11 +75,12 @@ jobs:
           mkdir ${PARENT_DIR}/srs-install
           cmake --preset static -DCMAKE_INSTALL_PREFIX=${PARENT_DIR}/srs-install -DBUILD_STATIC_STDCXX=${{ matrix.static-libstdcxx }} -DNO_ROOT=$DISABLE_ROOT
           cmake --build ./build --target install -- -j2
-          tar czf "${{ env.PARENT_DIR }}/${{ matrix.os}}-x86-64-${{ env.TAG_NAME }}-${{ matrix.root }}.tar.gz" ${PARENT_DIR}/srs-install
+          cd ${{ env.PARENT_DIR }}
+          tar czf "${{ matrix.os}}-x86-64-${{ env.TAG_NAME }}-${{ matrix.root }}.tar.gz" srs-install
 
       - uses: actions/upload-artifact@v4
         with:
-          name: srs_control
-          path: ${{ env.PARENT_DIR }}/${{ matrix.os}}-x86-64-${{ env.TAG_NAME }}.tar.gz
+          name: srs-${{ matrix.os}}-x86-64-${{ env.TAG_NAME }}-${{ matrix.root }}
+          path: ${{ env.PARENT_DIR }}/${{ matrix.os}}-x86-64-${{ env.TAG_NAME }}-${{ matrix.root }}.tar.gz
           retention-days: 1
 
