@@ -1,8 +1,8 @@
 name: release
 on:
   push:
-    branches:
-      - dev
+    tags:
+      - v[0-9]+.[0-9]+.[0-9]+
   workflow_dispatch:
 
 jobs:
@@ -18,13 +18,13 @@ jobs:
           echo "CMAKE_BUILD_TYPE=Release" >> $GITHUB_ENV
       - if: github.event_name == 'push' 
         run: |
-          TAG_NAME=${{ github.ref }}
-          # echo "tag_name=${TAG_NAME#refs/tags/}" >> $GITHUB_OUTPUT
+          echo "TAG_NAME=${{ github.ref }}" >> $GITHUB_ENV
+          echo "TAG_NAME=${TAG_NAME#refs/tags/}" >> $GITHUB_OUTPUT
       - name: Setup build type
         id: build
         run: |
           echo "build_type=${CMAKE_BUILD_TYPE}" >> $GITHUB_OUTPUT
-          echo "tag_name=test" >> $GITHUB_OUTPUT
+          echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
 
   build-artifacts:
     runs-on: ubuntu-latest

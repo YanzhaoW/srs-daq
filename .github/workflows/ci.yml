@@ -20,7 +20,7 @@ jobs:
         with:
           fetch-depth: 0
           submodules: 'true'
-      - name: env vars
+      - name: install and env vars
         run: |
           dnf install -y conan nodejs
           cd $GITHUB_WORKSPACE/..
@@ -38,8 +38,6 @@ jobs:
       - name: build
         run: |
           git config --global --add safe.directory $GITHUB_WORKSPACE
-          source $PARENT_DIR/miniconda3/bin/activate
-          conda activate srs
           cmake --preset default
           cmake --build ./build -- -j2
           gh cache delete ${{ steps.cache-restore.outputs.cache-primary-key }} || true
