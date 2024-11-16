@@ -3,7 +3,11 @@ on:
   push:
     tags:
       - v[0-9]+.[0-9]+.[0-9]+
+    branches:
+      - dev
   workflow_dispatch:
+
+permissions: write-all
 
 jobs:
   setup:
@@ -16,13 +20,13 @@ jobs:
       - name: Define envs
         run:
           echo "CMAKE_BUILD_TYPE=Release" >> $GITHUB_ENV
-      - if: github.event_name == 'push' 
+      - if: github.event_name == 'push'
         run: |
-          echo "TAG_NAME=${{ github.ref }}" >> $GITHUB_ENV
-          echo "TAG_NAME=${TAG_NAME#refs/tags/}" >> $GITHUB_OUTPUT
+          echo "TAG_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
       - name: Setup build type
         id: build
         run: |
+          echo "tag name: ${TAG_NAME}"
           echo "build_type=${CMAKE_BUILD_TYPE}" >> $GITHUB_OUTPUT
           echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
 
@@ -76,11 +80,52 @@ jobs:
           cmake --preset static -DCMAKE_INSTALL_PREFIX=${PARENT_DIR}/srs-install -DBUILD_STATIC_STDCXX=${{ matrix.static-libstdcxx }} -DNO_ROOT=$DISABLE_ROOT
           cmake --build ./build --target install -- -j2
           cd ${{ env.PARENT_DIR }}
-          tar czf "${{ matrix.os}}-x86-64-${{ env.TAG_NAME }}-${{ matrix.root }}.tar.gz" srs-install
+          tar czf "srs-${{ matrix.os}}-x86-64-${{ env.TAG_NAME }}-${{ matrix.root }}.tar.gz" srs-install
 
       - uses: actions/upload-artifact@v4
         with:
-          name: srs-${{ matrix.os}}-x86-64-${{ env.TAG_NAME }}-${{ matrix.root }}
-          path: ${{ env.PARENT_DIR }}/${{ matrix.os}}-x86-64-${{ env.TAG_NAME }}-${{ matrix.root }}.tar.gz
+          name: ${{ matrix.os}}-${{ env.TAG_NAME }}-${{ matrix.root }}
+          path: ${{ env.PARENT_DIR }}/srs-${{ matrix.os}}-x86-64-${{ env.TAG_NAME }}-${{ matrix.root }}.tar.gz
           retention-days: 1
+
+  publish-release:
+    runs-on: ubuntu-latest
+    env:
+      GH_REPO: ${{ github.repository }}
+      GH_TOKEN: ${{ secrets.SRS_GH_TOKEN }}
+    defaults:
+      run:
+        shell: bash
+    permissions: write-all
+    needs: [ setup, build-artifacts ]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: envs
+        run: |
+          export TAG_NAME=${{ needs.setup.outputs.tag_name }}
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+          cd ${GITHUB_WORKSPACE}/..
+          mkdir download-cache && cd download-cache
+          echo "DOWNLOAD_DIR=$PWD" >> $GITHUB_ENV
+          if [ $TAG_NAME == "dev" ]; then
+            echo "TITLE=\"Release of unstable dev branch\"" >> $GITHUB_ENV
+            echo "PRERELEASE=--prerelease" >> $GITHUB_ENV
+          else
+            echo "TITLE=\"Release of version $TAG_NAME\"" >> $GITHUB_ENV
+            echo "PRERELEASE=" >> $GITHUB_ENV
+          fi
+
+      - uses: actions/download-artifact@v4
+        id: artifacts-download
+        with:
+          path: ${{ env.DOWNLOAD_DIR }}
+
+      - name: clean old releases
+        continue-on-error: true
+        run: gh release delete ${{ env.TAG_NAME }} || true
+
+      - name: create release
+        run: |
+          gh release create ${{ env.TAG_NAME }} ${{ env.PRERELEASE }} --generate-notes --title ${{ env.TITLE }} --target $GITHUB_SHA ${{ steps.artifacts-download.outputs.download-path}}/*/*.tar.gz
 
