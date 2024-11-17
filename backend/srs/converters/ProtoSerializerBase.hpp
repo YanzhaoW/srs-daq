@@ -16,7 +16,7 @@ namespace srs
             , converter_{ converter }
         {
         }
-        [[nodiscard]] auto data() const -> const auto& { return output_data_; }
+        [[nodiscard]] auto data() const -> std::string_view { return output_data_; }
 
       private:
         std::string name_;

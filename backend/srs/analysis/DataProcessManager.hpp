@@ -30,7 +30,9 @@ namespace srs
 
         // Getters:
         template <DataDeserializeOptions option>
-        auto get_data() -> const auto&;
+        auto get_data() -> std::string_view;
+
+        auto get_struct_data() -> const auto& { return struct_deserializer_.data(); }
 
       private:
         SerializableMsgBuffer binary_data_;
@@ -48,19 +50,15 @@ namespace srs
     };
 
     template <DataDeserializeOptions option>
-    auto DataProcessManager::get_data() -> const auto&
+    auto DataProcessManager::get_data() -> std::string_view
     {
         if constexpr (option == raw)
         {
             return binary_data_.data();
         }
-        else if constexpr (option == structure)
-        {
-            return struct_deserializer_.data();
-        }
         else if constexpr (option == proto)
         {
-            return std::string_view{ proto_serializer_.data() };
+            return proto_serializer_.data();
         }
         else
         {

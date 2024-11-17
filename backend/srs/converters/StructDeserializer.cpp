@@ -1,6 +1,6 @@
 #include <algorithm>
-#include <srs/converters/StructDeserializer.hpp>
 #include <bitset>
+#include <srs/converters/StructDeserializer.hpp>
 
 namespace srs
 {
@@ -97,7 +97,6 @@ namespace srs
     // thread safe
     auto StructDeserializer::convert(std::string_view binary_data) -> std::size_t
     {
-        auto translated_size = std::size_t{};
         auto deserialize_to = zpp::bits::in{ binary_data, zpp::bits::endian::network{}, zpp::bits::no_size{} };
 
         auto read_bytes = binary_data.size() * sizeof(BufferElementType);
@@ -115,7 +114,8 @@ namespace srs
         deserialize_to(output_data_.header, receive_raw_data_).or_throw();
         byte_reverse_data_sq();
         translate_raw_data(output_data_);
-        translated_size = receive_raw_data_.size();
+
+        auto translated_size = receive_raw_data_.size();
         receive_raw_data_.clear();
 
         return translated_size;
