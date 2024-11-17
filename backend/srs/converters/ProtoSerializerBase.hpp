@@ -1,33 +1,26 @@
 #pragma once
 
-#include "message.pb.h"
-#include <srs/serializers/StructDeserializer.hpp>
+#include <srs/data/message.pb.h>
+#include <srs/converters/StructDeserializer.hpp>
+#include <utility>
 
 namespace srs
 {
     template <typename Converter>
-    class ProtoDeserializerBase
+    class ProtoSerializerBase : public DataConverterBase<const proto::Data*, std::string_view>
     {
       public:
-        using InputType = const proto::Data*;
-        using OutputType = std::string_view;
-        using CoroType = asio::experimental::coro<OutputType(std::optional<InputType>)>;
-        using InputFuture = boost::shared_future<std::optional<InputType>>;
-        using OutputFuture = boost::shared_future<std::optional<OutputType>>;
-
-        explicit ProtoDeserializerBase(asio::thread_pool& thread_pool, Converter converter)
-            : converter_{ converter }
+        explicit ProtoSerializerBase(asio::thread_pool& thread_pool, std::string name, Converter converter)
+            : DataConverterBase{ generate_coro(thread_pool.get_executor()) }
+            , name_{ std::move(name) }
+            , converter_{ converter }
         {
-            coro_ = generate_coro(thread_pool.get_executor());
-            coro_sync_start(coro_, std::optional<InputType>{}, asio::use_awaitable);
         }
-
-        auto create_future(InputFuture& pre_fut) -> OutputFuture { return create_coro_future(coro_, pre_fut); }
-        [[nodiscard]] auto data() const -> const auto& { return output_data_; }
+        [[nodiscard]] auto data() const -> std::string_view { return output_data_; }
 
       private:
+        std::string name_;
         std::string output_data_;
-        CoroType coro_;
         Converter converter_;
 
         void reset() { output_data_.clear(); }
@@ -50,6 +43,7 @@ namespace srs
                 }
                 else
                 {
+                    spdlog::debug("Shutting down {:?} serializer.", name_);
                     co_return;
                 }
             }

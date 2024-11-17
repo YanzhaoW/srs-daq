@@ -9,7 +9,7 @@
 #include <gsl/gsl-lite.hpp>
 #include <spdlog/spdlog.h>
 #include <srs/Application.hpp>
-#include <srs/serializers/SerializableBuffer.hpp>
+#include <srs/converters/SerializableBuffer.hpp>
 #include <srs/utils/CommonConcepts.hpp>
 
 namespace srs

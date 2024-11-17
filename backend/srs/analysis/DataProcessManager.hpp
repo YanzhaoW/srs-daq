@@ -1,16 +1,16 @@
 #pragma once
 
-#include <srs/writers/DataWriter.hpp>
 #include <spdlog/spdlog.h>
 #include <srs/Application.hpp>
+#include <srs/converters/DataDeserializeOptions.hpp>
+#include <srs/converters/ProtoDelimSerializer.hpp>
+#include <srs/converters/ProtoSerializer.hpp>
+#include <srs/converters/SerializableBuffer.hpp>
+#include <srs/converters/StructDeserializer.hpp>
+#include <srs/converters/StructToProtoConverter.hpp>
 #include <srs/data/DataStructs.hpp>
-#include <srs/serializers/DataDeserializeOptions.hpp>
-#include <srs/serializers/ProtoDeserializer.hpp>
-#include <srs/serializers/ProtoDelimDeserializer.hpp>
-#include <srs/serializers/SerializableBuffer.hpp>
-#include <srs/serializers/StructDeserializer.hpp>
-#include <srs/serializers/StructToProtoConverter.hpp>
 #include <srs/utils/ValidData.hpp>
+#include <srs/writers/DataWriter.hpp>
 #include <tbb/concurrent_queue.h>
 
 namespace srs
@@ -30,15 +30,16 @@ namespace srs
 
         // Getters:
         template <DataDeserializeOptions option>
-        auto get_data() -> const auto&;
+        auto get_data() -> std::string_view;
 
+        auto get_struct_data() -> const auto& { return struct_deserializer_.data(); }
 
       private:
         SerializableMsgBuffer binary_data_;
         StructDeserializer struct_deserializer_;
         Struct2ProtoConverter struct_proto_converter_;
-        ProtoDeserializer proto_deserializer_;
-        ProtoDelimDeserializer proto_delim_deserializer_;
+        ProtoSerializer proto_serializer_;
+        ProtoDelimSerializer proto_delim_serializer_;
 
         StartingCoroType coro_;
 
@@ -49,19 +50,15 @@ namespace srs
     };
 
     template <DataDeserializeOptions option>
-    auto DataProcessManager::get_data() -> const auto&
+    auto DataProcessManager::get_data() -> std::string_view
     {
         if constexpr (option == raw)
         {
             return binary_data_.data();
         }
-        else if constexpr (option == structure)
-        {
-            return struct_deserializer_.data();
-        }
         else if constexpr (option == proto)
         {
-            return std::string_view{ proto_deserializer_.data() };
+            return proto_serializer_.data();
         }
         else
         {

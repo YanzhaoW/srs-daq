@@ -9,11 +9,12 @@ namespace srs
     DataProcessManager::DataProcessManager(DataProcessor* data_processor, asio::thread_pool& thread_pool)
         : struct_deserializer_{ thread_pool }
         , struct_proto_converter_{ thread_pool }
-        , proto_deserializer_{ thread_pool }
-        , proto_delim_deserializer_{ thread_pool }
+        , proto_serializer_{ thread_pool }
+        , proto_delim_serializer_{ thread_pool }
         , writers_{ data_processor }
     {
         coro_ = generate_starting_coro(thread_pool.get_executor());
+        coro_sync_start(coro_, false, asio::use_awaitable);
     }
 
     void DataProcessManager::analysis_one(tbb::concurrent_bounded_queue<SerializableMsgBuffer>& data_queue,
@@ -29,10 +30,15 @@ namespace srs
     void DataProcessManager::run_processes(bool is_stopped)
     {
         auto starting_fut = create_coro_future(coro_, is_stopped).share();
-        auto struct_deser_fut = struct_deserializer_.create_future(starting_fut);
-        auto proto_converter_fut = struct_proto_converter_.create_future(struct_deser_fut);
-        auto proto_deser_fut = proto_deserializer_.create_future(proto_converter_fut);
-        auto proto_delim_deser_fut = proto_delim_deserializer_.create_future(proto_converter_fut);
+        auto struct_deser_fut = struct_deserializer_.create_future(starting_fut, writers_);
+        auto proto_converter_fut = struct_proto_converter_.create_future(struct_deser_fut, writers_);
+        auto proto_deser_fut = proto_serializer_.create_future(proto_converter_fut, writers_);
+        auto proto_delim_deser_fut = proto_delim_serializer_.create_future(proto_converter_fut, writers_);
+
+        if (is_stopped)
+        {
+            spdlog::info("Shutting down all data writers...");
+        }
 
         auto make_writer_future =
             [&starting_fut, &struct_deser_fut, &proto_converter_fut, &proto_deser_fut, &proto_delim_deser_fut](
@@ -65,6 +71,10 @@ namespace srs
 
         writers_.write_with(make_writer_future);
         writers_.wait_for_finished();
+        if (is_stopped)
+        {
+            spdlog::debug("All data writers are shutdown.");
+        }
     }
 
     // NOLINTNEXTLINE(readability-static-accessed-through-instance)
@@ -76,6 +86,7 @@ namespace srs
             auto is_terminated = co_yield (data);
             if (is_terminated)
             {
+                spdlog::debug("Shutting down starting coroutine.");
                 co_return;
             }
         }

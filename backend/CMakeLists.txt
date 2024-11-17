@@ -1,30 +1,30 @@
-find_package(Boost REQUIRED CONFIG COMPONENTS system thread)
+# some operating systems don't have static libstdc++.a library
+if(BUILD_STATIC AND BUILD_STATIC_STDCXX)
+    set(CMAKE_EXE_LINKER_FLAGS "-static-libstdc++")
+endif()
+
+find_package(Boost REQUIRED CONFIG COMPONENTS thread)
 find_package(fmt REQUIRED)
 find_package(zpp_bits REQUIRED)
 find_package(gsl-lite REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(CLI11 REQUIRED)
 find_package(TBB REQUIRED)
-find_package(protobuf REQUIRED CONFIG)
+find_package(Protobuf CONFIG COMPONENTS libprotobuf)
+if(NOT Protobuf_FOUND)
+    find_package(Protobuf MODULE COMPONENTS libprotobuf)
+endif()
 
 if(NOT NO_ROOT)
     if(USE_ROOT)
         message(STATUS "Force to use ROOT depenedency!")
-        find_package(
-            ROOT REQUIRED
-            COMPONENTS RIO
-                       Tree
-                       Hist
-                       RHTTP
-                       Gpad)
+        set(CMAKE_MESSAGE_LOG_LEVEL ERROR) # turn off annoying root warnings
+        find_package(ROOT QUIET REQUIRED COMPONENTS RIO Tree Hist Gpad)
+        set(CMAKE_MESSAGE_LOG_LEVEL STATUS)
     else()
-        find_package(
-            ROOT QUIET
-            COMPONENTS RIO
-                       Tree
-                       Hist
-                       RHTTP
-                       Gpad)
+        set(CMAKE_MESSAGE_LOG_LEVEL ERROR)
+        find_package(ROOT QUIET COMPONENTS RIO Tree Hist Gpad)
+        set(CMAKE_MESSAGE_LOG_LEVEL STATUS)
     endif()
 endif()
 
@@ -34,14 +34,8 @@ else()
     message(STATUS "ROOT depenedency is disabled!")
 endif()
 
-add_library(srscpp SHARED)
-
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_compile_options(srscpp PRIVATE "-fclang-abi-compat=17")
-endif()
 add_subdirectory(srs)
 
-target_include_directories(srscpp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
 add_executable(srs_control main.cpp)
-target_link_libraries(srs_control PRIVATE srscpp spdlog::spdlog CLI11::CLI11)
+target_link_libraries(srs_control PRIVATE srscpp spdlog::spdlog CLI11::CLI11 Boost::thread)
+target_compile_definitions(srs_control PUBLIC SRS_PROJECT_VERSION="v${CMAKE_PROJECT_VERSION}")

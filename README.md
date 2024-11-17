@@ -11,84 +11,22 @@ srs-daq is an asynchronous data IO program for SRS system.
 - Readout of data
 - Data deserialization from SRS system
 
-## Building
+## Download the project
 
-### Prerequisites
-
-- C++ compiler (choose either one below)
-  - gcc <span>&#8805;</span> 14.3.
-  - clang <span>&#8805;</span> 18
-
-- (mini) Conda. See [this instruction](doc/install_conda.md) to install miniconda quickly.
-- **(Optional)** ROOT <span>&#8805;</span> 6.32
-
-> [!CAUTION]
-> DO NOT USE Conda to install ROOT. Use latest compiler to install ROOT from the source.
-
-### Installation
-
-#### Step 1: Clone the latest version
+Please visit the [release page](https://github.com/YanzhaoW/srs-daq/releases) and download the latest release for your operating system:
 
 ```bash
-git clone -b latest https://github.com/YanzhaoW/srs-daq.git
-cd srs-daq
-git submodule update --init
+wget [download-link]
+tar -xvzf [download-file]
 ```
+After unzipping the downloaded file, a new folder `srs-install` will be put in the current folder.
 
-#### Step 2: Activate the Conda environment
-
-```bash
-conda env create -f environment.yml
-conda activate srs
-```
-
-#### Step 3: Build the project
-
-**Make sure conda environment `srs` is activated.**
-
-```bash
-cmake --workflow --preset default
-```
-
-or
-
-```bash
-cmake --preset default . [optional settings]
-cmake --build ./build -- -j[nproc]
-```
-
-The executable programs are compiled in the `build/bin` directory whereas the dynamic library in `build/lib`.
-
-Following CMake preset optional settings are available:
-
-- `-DUSE_ROOT=`
-  * `OFF` or `FALSE` (default). The program would only compile with ROOT if ROOT exists. 
-  * `ON` or `TRUE`. CMake configuration will fail if `ROOT` is not found. 
-- `-DNO_ROOT=`
-  * `OFF` or `FALSE` (default). Same as `-DUSE_ROOT=OFF`.
-  * `ON` or `TRUE`. The program does NOT compiler with ROOT even if ROOT exists.
-
-For example, to disable the ROOT dependency, run the `cmake --preset` with:
-
-```bash
-cmake --preset default . -DNO_ROOT=TRUE
-```
-
-### Update to the latest version
-
-srs-daq is under a continuous development. To update to the latest version, run the following git commands:
-
-```bash
-git fetch origin
-git checkout latest
-git submodule update --init
-```
-After this, build the project again from [Step 3](#step-3-build-the-project).
+If your operating system is not in the download link list. Please either [build the project from source](doc/build_source.md) or create an issue to make the request.
 
 
 ## srs_control - The main program
 
-<!-- To run the program, first make sure you have activated the conda environment `srs`, which can be checked by `conda info`. If not, run `conda activate srs` to activate `srs` environment. --> Go to `build/bin` directory and run
+<!-- To run the program, first make sure you have activated the conda environment `srs`, which can be checked by `conda info`. If not, run `conda activate srs` to activate `srs` environment. --> Go to `srs-install/bin` directory and run
 
 ```bash
 ./srs_control [-p DATA_PRINT_OPTION] [-v LOG_LEVEL] [-h]
@@ -97,7 +35,8 @@ After this, build the project again from [Step 3](#step-3-build-the-project).
 ### Run-time options
 
 - `-h` or `--help`: print the help message.
-- `-v` or `--verbose-level`: set the verbose level. Available options: "critical", "error", "warn", "info" (default), "debug", "trace", "off".
+- `-v` or `--version`: show the current version.
+- `-l` or `--log-level`: set the verbose level. Available options: "critical", "error", "warn", "info" (default), "debug", "trace", "off".
 - `-p` or `--print-mode`: set the data printing mode. Available options:
   - speed (default): print the reading rate of received data.
   - header: print the header message of received data.
@@ -107,18 +46,18 @@ After this, build the project again from [Step 3](#step-3-build-the-project).
 
 ### Data output to multiple files
 
-srs-daq can output received data into multiple files with different types at the same time. Currently, following output types are available (or planned):
+`srs_control` can output received data into multiple files with different types at the same time. Currently, following output types are available (or planned):
 
 - **binary**:
   - raw data if `.lmd` or `.bin`
   - protobuf data if `.binpb`
 - **json**. File extensions: `.json` (NOTE: JSON file could be very large)
 - **root**. File extensions: `.root` (require ROOT library)
-- **UDP socket** (protobuf). Input format: `[ip]:[port]`
+- **UDP socket** (protobuf + gzip). Input format: `[ip]:[port]`
 
 Users have to use the correct file extensions to enable the corresponding output types.
 
-For example, to output data to different output types:
+To output the same data to multiple different output types at the same time:
 
 ```bash
 ./srs_control -o "output1.root" -o "output2.root" \
@@ -144,6 +83,14 @@ The executable checks the data output from a UDP socket.
 ./srs_check_udp --port [port number] --ip "localhost"
 ```
 
+## Usage of SRS library
+
+The program also has APIs to provide following functionality:
+
+- Convert binary `string_view` to the data structure `srs::StructData`.
+
+For more information, please check the [library usage](doc/library_usage.md).
+
 ### Custom configuration
 
 To be added ...
@@ -154,5 +101,6 @@ To be added ...
 
 ## TODO list
 
+- unit tests
 - Control/monitoring for SRS FEC & VMM3a hybrids
 - Graphical user interface (typescript + react + websocket).

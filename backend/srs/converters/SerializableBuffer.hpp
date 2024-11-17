@@ -1,8 +1,8 @@
 #pragma once
 
-#include "CommonDefitions.hpp"
 #include <algorithm>
 #include <boost/asio/buffer.hpp>
+#include <srs/utils/CommonAlias.hpp>
 #include <zpp_bits.h>
 
 namespace srs
@@ -29,7 +29,7 @@ namespace srs
             return asio::buffer(data_);
         }
 
-        [[nodiscard]] auto data() const -> const auto& { return data_; }
+        [[nodiscard]] auto data() const -> std::string_view { return std::string_view{ data_.data(), data_.size() }; }
 
         void clear() { data_.clear(); }
 

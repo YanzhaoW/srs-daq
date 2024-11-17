@@ -1,6 +1,6 @@
 #pragma once
 
-#include <srs/serializers/ProtoDeserializerBase.hpp>
+#include <srs/converters/ProtoSerializerBase.hpp>
 
 namespace srs
 {
@@ -13,12 +13,13 @@ namespace srs
         return 0;
     };
 
-    class ProtoDeserializer : public ProtoDeserializerBase<decltype(protobuf_deserializer_converter)>
+    class ProtoSerializer : public ProtoSerializerBase<decltype(protobuf_deserializer_converter)>
     {
       public:
-        explicit ProtoDeserializer(asio::thread_pool& thread_pool)
-            : ProtoDeserializerBase{ thread_pool, protobuf_deserializer_converter }
+        explicit ProtoSerializer(asio::thread_pool& thread_pool)
+            : ProtoSerializerBase{ thread_pool, "ProtoSerializer", protobuf_deserializer_converter }
         {
         }
+        static constexpr auto ConverterOption = std::array{ proto };
     };
 } // namespace srs

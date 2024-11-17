@@ -1,15 +1,12 @@
 #pragma once
 
-#include <boost/asio/thread_pool.hpp>
 #include <chrono>
 #include <cstdint>
-#include <vector>
 
 namespace srs
 {
     // General
     constexpr auto BYTE_BIT_LENGTH = 8;
-    namespace asio = boost::asio;
 
     // Connections:
     constexpr auto DEFAULT_SRS_IP = std::string_view{ "10.0.0.2" };
@@ -37,20 +34,12 @@ namespace srs
     constexpr auto FEC_DAQ_RECEIVE_PORT = 6006;
     static constexpr int FEC_CONTROL_LOCAL_PORT = 6007;
 
-    using BufferElementType = char;
-    using BinaryData = std::vector<BufferElementType>;
-
-    template <int buffer_size = SMALL_READ_MSG_BUFFER_SIZE>
-    using ReadBufferType = std::array<BufferElementType, buffer_size>;
-
-    using CommunicateEntryType = uint32_t;
 
     // Data processor:
     constexpr auto DEFAULT_DISPLAY_PERIOD = std::chrono::milliseconds{ 200 };
     constexpr auto DEFAULT_ROOT_HTTP_SERVER_PERIOD = std::chrono::milliseconds{ 1000 };
     constexpr auto FEC_ID_BIT_LENGTH = 8;
     constexpr auto HIT_DATA_BIT_LENGTH = 48;
-    constexpr auto VMM_TAG_BIT_LENGTH = 3;
     constexpr auto SRS_TIMESTAMP_HIGH_BIT_LENGTH = 32;
     constexpr auto SRS_TIMESTAMP_LOW_BIT_LENGTH = 10;
     constexpr auto FLAG_BIT_POSITION = 15; // zero based
@@ -64,11 +53,4 @@ namespace srs
         print_raw,
         print_all
     };
-
-    class Empty
-    {
-    };
-
-    using io_context_type = asio::thread_pool;
-
 } // namespace srs

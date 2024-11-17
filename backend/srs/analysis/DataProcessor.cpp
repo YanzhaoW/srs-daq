@@ -9,6 +9,7 @@
 #include <srs/Application.hpp>
 #include <srs/analysis/DataProcessor.hpp>
 #include <srs/data/DataStructs.hpp>
+#include <srs/data/DataStructsFormat.hpp>
 
 namespace srs
 {
@@ -86,6 +87,7 @@ namespace srs
     void DataProcessor::start()
     {
         is_stopped.store(false);
+        spdlog::debug("Data processor starts.");
         if (print_mode_ == print_speed)
         {
             monitor_.start();
@@ -133,7 +135,7 @@ namespace srs
                 data_processes_.reset();
             }
         }
-        catch (oneapi::tbb::user_abort& ex)
+        catch (tbb::user_abort& ex)
         {
             spdlog::debug("Data processing: {}", ex.what());
         }
@@ -146,7 +148,7 @@ namespace srs
 
     void DataProcessor::update_monitor()
     {
-        const auto& struct_data = data_processes_.get_data<DataProcessManager::structure>();
+        const auto& struct_data = data_processes_.get_struct_data();
 
         total_processed_hit_numer_ += struct_data.hit_data.size();
         monitor_.update(struct_data);
@@ -154,7 +156,7 @@ namespace srs
 
     void DataProcessor::print_data()
     {
-        const auto& export_data = data_processes_.get_data<DataProcessManager::structure>();
+        const auto& export_data = data_processes_.get_struct_data();
         const auto& raw_data = data_processes_.get_data<DataProcessManager::raw>();
         if (print_mode_ == print_raw)
         {
@@ -162,18 +164,18 @@ namespace srs
         }
         if (print_mode_ == print_header or print_mode_ == print_raw or print_mode_ == print_all)
         {
-            spdlog::info("frame header: [ {} ]. Data size: {}", export_data.header, received_data_size_);
+            spdlog::info("{}. Data size: {}", export_data.header, received_data_size_);
         }
 
         if (print_mode_ == print_all)
         {
             for (const auto& hit_data : export_data.hit_data)
             {
-                spdlog::info("Hit data: [ {} ]", hit_data);
+                spdlog::info("{}", hit_data);
             }
             for (const auto& marker_data : export_data.marker_data)
             {
-                spdlog::info("Marker data: [ {} ]", marker_data);
+                spdlog::info("{}", marker_data);
             }
         }
     }

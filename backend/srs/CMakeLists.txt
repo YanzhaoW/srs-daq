@@ -1,26 +1,49 @@
-# target_sources(srs PRIVATE Application.cpp utils/Connections.cpp)
+if(BUILD_STATIC)
+    add_library(srscpp STATIC)
+    target_compile_options(srscpp PRIVATE "-static")
+else()
+    add_library(srscpp SHARED)
+endif()
 target_sources(srscpp PRIVATE Application.cpp)
 
-add_subdirectory(utils)
-add_subdirectory(analysis)
-add_subdirectory(serializers)
-add_subdirectory(writers)
-add_subdirectory(data)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    target_compile_options(srscpp PRIVATE "-fclang-abi-compat=17")
+endif()
+
+target_sources(
+    srscpp
+    PUBLIC FILE_SET
+           publicHeaders
+           TYPE
+           HEADERS
+           BASE_DIRS
+           ${CMAKE_SOURCE_DIR}/backend)
 
 target_sources(
     srscpp
     PRIVATE FILE_SET
+            privateHeaders
+            TYPE
             HEADERS
             BASE_DIRS
-            ${CMAKE_CURRENT_SOURCE_DIR}
-            FILES
-            serializers/SerializableBuffer.hpp
-            utils/CommonDefitions.hpp
-            devices/Fec.hpp
-            devices/VmmDevice.hpp
-            Application.hpp)
+            ${CMAKE_SOURCE_DIR}/backend)
 
-target_include_directories(srscpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/devices)
-target_link_libraries(srscpp PRIVATE srs_data)
+add_subdirectory(utils)
+add_subdirectory(data)
+add_subdirectory(converters)
+add_subdirectory(writers)
+add_subdirectory(readers)
+add_subdirectory(analysis)
+
+target_sources(
+    srscpp
+    PUBLIC FILE_SET
+           publicHeaders
+           FILES
+           Application.hpp
+           format.hpp
+           srs.hpp)
+
+target_link_libraries(srscpp PRIVATE $<BUILD_LOCAL_INTERFACE:srs_data>)
 target_compile_definitions(srscpp PUBLIC BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION
                                          BOOST_THREAD_PROVIDES_FUTURE_WHEN_ALL_WHEN_ANY)

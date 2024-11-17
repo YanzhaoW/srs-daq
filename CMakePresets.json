@@ -17,12 +17,29 @@
                 "CMAKE_PROJECT_TOP_LEVEL_INCLUDES": "utils/conan/conan_provider.cmake",
                 "CONAN_INSTALL_ARGS": "--build=missing;-scompiler.cppstd=gnu23"
             }
+        },
+        {
+            "name": "static",
+            "displayName": "static config",
+            "description": "static build",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "CMAKE_PROJECT_TOP_LEVEL_INCLUDES": "utils/conan/conan_provider.cmake",
+                "CONAN_INSTALL_ARGS": "--build=missing;-scompiler.cppstd=gnu20",
+                "BUILD_STATIC": "ON"
+            }
         }
     ],
     "buildPresets": [
         {
             "name": "default",
             "configurePreset": "default"
+        },
+        {
+            "name": "static",
+            "configurePreset": "static"
         }
     ],
     "workflowPresets": [
@@ -36,6 +53,19 @@
                 {
                     "type": "build",
                     "name": "default"
+                }
+            ]
+        },
+        {
+            "name": "static",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "static"
+                },
+                {
+                    "type": "build",
+                    "name": "static"
                 }
             ]
         }

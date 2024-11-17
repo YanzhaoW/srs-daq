@@ -1,10 +1,10 @@
 #pragma once
 
 #ifdef HAS_ROOT
-#include <srs/data/DataStructs.hpp>
 #include <TFile.h>
 #include <TTree.h>
 #include <srs/analysis/DataProcessManager.hpp>
+#include <srs/data/DataStructs.hpp>
 
 namespace srs
 {

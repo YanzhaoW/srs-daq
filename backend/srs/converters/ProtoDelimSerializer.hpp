@@ -2,7 +2,7 @@
 
 #include <google/protobuf/io/gzip_stream.h>
 #include <google/protobuf/util/delimited_message_util.h>
-#include <srs/serializers/ProtoDeserializerBase.hpp>
+#include <srs/converters/ProtoSerializerBase.hpp>
 
 namespace srs
 {
@@ -28,12 +28,13 @@ namespace srs
         return 0;
     };
 
-    class ProtoDelimDeserializer : public ProtoDeserializerBase<decltype(protobuf_delim_deserializer_converter)>
+    class ProtoDelimSerializer : public ProtoSerializerBase<decltype(protobuf_delim_deserializer_converter)>
     {
       public:
-        explicit ProtoDelimDeserializer(asio::thread_pool& thread_pool)
-            : ProtoDeserializerBase{ thread_pool, protobuf_delim_deserializer_converter }
+        explicit ProtoDelimSerializer(asio::thread_pool& thread_pool)
+            : ProtoSerializerBase{ thread_pool, "ProtoDelimSerializer", protobuf_delim_deserializer_converter }
         {
         }
+        static constexpr auto ConverterOption = std::array{ proto_frame };
     };
 } // namespace srs
