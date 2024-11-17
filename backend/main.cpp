@@ -2,6 +2,7 @@
 #include <CLI/CLI.hpp>
 #include <spdlog/spdlog.h>
 #include <srs/Application.hpp>
+#include <print>
 
 auto main(int argc, char** argv) -> int
 {
@@ -13,8 +14,10 @@ auto main(int argc, char** argv) -> int
         auto spdlog_level = spdlog::level::info;
         auto print_mode = srs::DataPrintMode::print_speed;
         auto output_filenames = std::vector<std::string>{ "output.bin" };
+        auto is_version_print = false;
 
-        cli_args.add_option("-v, --verbose-level", spdlog_level, "set log level")
+        cli_args.add_flag("-v, --version", is_version_print, "show the current version");
+        cli_args.add_option("-l, --log-level", spdlog_level, "set log level")
             ->transform(CLI::CheckedTransformer(spd_log_map, CLI::ignore_case))
             ->capture_default_str();
         cli_args.add_option("-p, --print-mode", print_mode, "set data print mode")
@@ -25,13 +28,18 @@ auto main(int argc, char** argv) -> int
             ->expected(0, -1);
         cli_args.parse(argc, argv);
 
+        if(is_version_print)
+        {
+            std::println("{}", SRS_PROJECT_VERSION);
+            return 0;
+        }
+
         spdlog::set_level(spdlog_level);
 
         auto app = srs::App{};
         app.set_remote_endpoint(srs::DEFAULT_SRS_IP, srs::DEFAULT_SRS_CONTROL_PORT);
         app.set_print_mode(print_mode);
         app.set_output_filenames(output_filenames);
-
 
         app.read_data();
         app.switch_on();

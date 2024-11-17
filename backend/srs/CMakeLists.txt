@@ -41,6 +41,7 @@ target_sources(
            publicHeaders
            FILES
            Application.hpp
+           format.hpp
            srs.hpp)
 
 target_link_libraries(srscpp PRIVATE $<BUILD_LOCAL_INTERFACE:srs_data>)

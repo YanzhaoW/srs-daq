@@ -13,6 +13,12 @@ namespace srs
       public:
         ProtoMsgReader();
 
+        ProtoMsgReader(const ProtoMsgReader&) = delete;
+        ProtoMsgReader(ProtoMsgReader&&) = default;
+        ProtoMsgReader& operator=(const ProtoMsgReader&) = delete;
+        ProtoMsgReader& operator=(ProtoMsgReader&&) = default;
+        ~ProtoMsgReader();
+
         auto convert(std::string_view msg, StructData& struct_data);
         auto convert(std::string_view msg) -> const StructData&;
 

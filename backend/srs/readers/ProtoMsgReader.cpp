@@ -10,6 +10,8 @@ namespace srs
     {
     }
 
+    ProtoMsgReader::~ProtoMsgReader() = default;
+
     auto ProtoMsgReader::convert(std::string_view msg, StructData& struct_data)
     {
         const auto& prot_struct = proto_deserializer_->convert(msg);
