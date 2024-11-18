@@ -41,11 +41,6 @@ jobs:
       matrix:
         os: [ debian-bullseye, fedora-41 ]
         root: [ "with-root", "no-root" ]
-        include:
-          - os: debian-bullseye
-            static-libstdcxx: ON
-          - os: fedora-41
-            static-libstdcxx: OFF
     name: ${{ matrix.os }}-${{ matrix.root }}
     env:
       CMAKE_GENERATOR: Ninja
@@ -77,7 +72,7 @@ jobs:
           source $PARENT_DIR/miniconda3/bin/activate
           conda activate srs
           mkdir ${PARENT_DIR}/srs-install
-          cmake --preset static -DCMAKE_INSTALL_PREFIX=${PARENT_DIR}/srs-install -DBUILD_STATIC_STDCXX=${{ matrix.static-libstdcxx }} -DNO_ROOT=$DISABLE_ROOT
+          cmake --preset static -DCMAKE_INSTALL_PREFIX=${PARENT_DIR}/srs-install -DNO_ROOT=$DISABLE_ROOT -DENABLE_TEST=OFF
           cmake --build ./build --target install -- -j2
           cd ${{ env.PARENT_DIR }}
           tar czf "srs-${{ matrix.os}}-x86-64-${{ env.TAG_NAME }}-${{ matrix.root }}.tar.gz" srs-install

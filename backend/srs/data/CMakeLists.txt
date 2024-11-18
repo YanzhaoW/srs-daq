@@ -1,13 +1,9 @@
-if(BUILD_STATIC)
-    add_library(srs_data STATIC)
-else()
-    add_library(srs_data SHARED)
-endif()
+add_library(srs_data SHARED)
 
 target_link_libraries(
     srs_data
-    PUBLIC protobuf::libprotobuf fmt::fmt
-    PRIVATE Boost::thread)
+    PUBLIC $<BUILD_LOCAL_INTERFACE:protobuf::libprotobuf > $<BUILD_LOCAL_INTERFACE:fmt::fmt>
+    PRIVATE $<BUILD_LOCAL_INTERFACE:Boost::thread>)
 
 target_sources(
     srs_data

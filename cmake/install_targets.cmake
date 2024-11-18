@@ -21,12 +21,10 @@ set_target_properties(
                SOVERSION ${PROJECT_VERSION_MAJOR}
                VERSION ${PROJECT_VERSION})
 
-if(NOT BUILD_STATIC)
-    install(
-        TARGETS srs_data
-        EXPORT srsTargets
-        FILE_SET HEADERS)
-endif()
+install(
+    TARGETS srs_data
+    EXPORT srsTargets
+    FILE_SET HEADERS)
 
 install(
     TARGETS srscpp
@@ -38,6 +36,8 @@ install(
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/srs
     NAMESPACE srs::
     FILE srsConfig-targets.cmake)
+
+install(IMPORTED_RUNTIME_ARTIFACTS TBB::tbb LIBRARY)
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/srsConfig.cmake
               ${CMAKE_CURRENT_BINARY_DIR}/srsConfig-version.cmake

@@ -58,6 +58,10 @@ namespace srs
 
     auto create_coro_future(auto& coro, auto&& pre_fut)
     {
+        if (not pre_fut.valid())
+        {
+            throw std::runtime_error("Previous future is not valid!");
+        }
         return pre_fut.then(
             [&coro](std::remove_cvref_t<decltype(pre_fut)> fut)
             {

@@ -1,6 +1,7 @@
 # some operating systems don't have static libstdc++.a library
-if(BUILD_STATIC AND BUILD_STATIC_STDCXX)
+if(BUILD_STATIC)
     set(CMAKE_EXE_LINKER_FLAGS "-static-libstdc++")
+    set(CMAKE_SHARED_LINKER_FLAGS "-static-libstdc++")
 endif()
 
 find_package(Boost REQUIRED CONFIG COMPONENTS thread)
@@ -39,3 +40,5 @@ add_subdirectory(srs)
 add_executable(srs_control main.cpp)
 target_link_libraries(srs_control PRIVATE srscpp spdlog::spdlog CLI11::CLI11 Boost::thread)
 target_compile_definitions(srs_control PUBLIC SRS_PROJECT_VERSION="v${CMAKE_PROJECT_VERSION}")
+
+include(${CMAKE_SOURCE_DIR}/cmake/install_targets.cmake)

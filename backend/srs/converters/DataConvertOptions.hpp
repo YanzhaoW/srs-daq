@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <string_view>
 
 namespace srs
 {
@@ -15,6 +16,26 @@ namespace srs
         proto,
         proto_frame
     };
+
+    constexpr auto convert_option_to_string(DataConvertOptions option) -> std::string_view
+    {
+        using enum DataConvertOptions;
+        switch (option)
+        {
+            case none:
+                return std::string_view{ "none" };
+            case raw:
+                return std::string_view{ "raw" };
+            case raw_frame:
+                return std::string_view{ "raw_frame" };
+            case structure:
+                return std::string_view{ "structure" };
+            case proto:
+                return std::string_view{ "proto" };
+            case proto_frame:
+                return std::string_view{ "proto_frame" };
+        }
+    }
 
     struct ConvertOptionRelation
     {
@@ -48,6 +69,11 @@ namespace srs
 
     constexpr auto convert_option_has_dependency(DataConvertOptions dependee, DataConvertOptions depender) -> bool
     {
+        if (dependee == depender)
+        {
+            return true;
+        }
+
         return std::ranges::any_of(CONVERT_OPTION_RELATIONS,
                                    [dependee, depender](ConvertOptionRelation relation) -> bool
                                    {

@@ -1,9 +1,4 @@
-if(BUILD_STATIC)
-    add_library(srscpp STATIC)
-    target_compile_options(srscpp PRIVATE "-static")
-else()
-    add_library(srscpp SHARED)
-endif()
+add_library(srscpp SHARED)
 target_sources(srscpp PRIVATE Application.cpp)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
