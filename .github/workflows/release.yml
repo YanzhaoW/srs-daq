@@ -111,7 +111,7 @@ jobs:
           cd ${GITHUB_WORKSPACE}/..
           mkdir download-cache && cd download-cache
           echo "DOWNLOAD_DIR=$PWD" >> $GITHUB_ENV
-          if [ $TAG_NAME == "master" ]; then
+          if [ $TAG_NAME == "unstable" ]; then
             echo "TITLE=\"Release of unstable master branch\"" >> $GITHUB_ENV
             echo "PRERELEASE=--prerelease" >> $GITHUB_ENV
           else

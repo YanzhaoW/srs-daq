@@ -18,7 +18,7 @@
 #### Step 1: Clone the latest version
 
 ```bash
-git clone -b latest https://github.com/YanzhaoW/srs-daq.git
+git clone -b [latest version] https://github.com/YanzhaoW/srs-daq.git
 cd srs-daq
 git submodule update --init
 ```
