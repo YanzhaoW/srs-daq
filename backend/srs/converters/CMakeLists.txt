@@ -7,7 +7,7 @@ target_sources(
     PRIVATE FILE_SET
             privateHeaders
             FILES
-            DataDeserializeOptions.hpp
+            DataConvertOptions.hpp
             ProtoDelimSerializer.hpp
             ProtoSerializer.hpp
             ProtoSerializerBase.hpp

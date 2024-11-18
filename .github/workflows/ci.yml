@@ -2,11 +2,10 @@ name: ci
 on:
   pull_request:
     branches:
-      - dev
       - master
   push:
     branches:
-      - dev
+      - master
   workflow_dispatch:
 
 permissions: write-all

@@ -28,10 +28,7 @@ namespace srs
         }
 
         auto write(auto pre_future) -> OutputFuture { return create_coro_future(coro_, pre_future); }
-        [[nodiscard]] static auto get_deserialize_mode() -> DataDeserializeOptions
-        {
-            return DataDeserializeOptions::structure;
-        }
+        [[nodiscard]] static auto get_convert_mode() -> DataConvertOptions { return DataConvertOptions::structure; }
 
       private:
         TFile root_file;

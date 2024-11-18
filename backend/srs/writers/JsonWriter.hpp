@@ -92,9 +92,9 @@ namespace srs
             coro_sync_start(coro_, std::optional<InputType>{}, asio::use_awaitable);
         }
 
-        [[nodiscard]] static auto get_deserialize_mode() -> DataDeserializeOptions
+        [[nodiscard]] static auto get_convert_mode() -> DataConvertOptions
         {
-            return DataDeserializeOptions::structure;
+            return DataConvertOptions::structure;
         }
 
         auto write(auto fut) -> boost::unique_future<std::optional<int>> { return {}; }

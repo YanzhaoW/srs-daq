@@ -7,7 +7,8 @@
 namespace srs
 {
     DataProcessManager::DataProcessManager(DataProcessor* data_processor, asio::thread_pool& thread_pool)
-        : struct_deserializer_{ thread_pool }
+        : raw_to_delim_raw_converter_{ thread_pool }
+        , struct_deserializer_{ thread_pool }
         , struct_proto_converter_{ thread_pool }
         , proto_serializer_{ thread_pool }
         , proto_delim_serializer_{ thread_pool }
@@ -30,6 +31,7 @@ namespace srs
     void DataProcessManager::run_processes(bool is_stopped)
     {
         auto starting_fut = create_coro_future(coro_, is_stopped).share();
+        auto raw_to_delim_raw_fut = raw_to_delim_raw_converter_.create_future(starting_fut, writers_);
         auto struct_deser_fut = struct_deserializer_.create_future(starting_fut, writers_);
         auto proto_converter_fut = struct_proto_converter_.create_future(struct_deser_fut, writers_);
         auto proto_deser_fut = proto_serializer_.create_future(proto_converter_fut, writers_);
@@ -40,22 +42,22 @@ namespace srs
             spdlog::info("Shutting down all data writers...");
         }
 
-        auto make_writer_future =
-            [&starting_fut, &struct_deser_fut, &proto_converter_fut, &proto_deser_fut, &proto_delim_deser_fut](
-                auto& writer)
+        auto make_writer_future = [&](auto& writer)
         {
-            const auto deser_mode = writer.get_deserialize_mode();
+            const auto convert_mode = writer.get_convert_mode();
             if constexpr (std::remove_cvref_t<decltype(writer)>::IsStructType)
             {
                 return writer.write(struct_deser_fut);
             }
             else
             {
-                switch (deser_mode)
+                switch (convert_mode)
                 {
                     case raw:
                         return writer.write(starting_fut);
                         break;
+                    case raw_frame:
+                        return writer.write(raw_to_delim_raw_fut);
                     case proto:
                         return writer.write(proto_deser_fut);
                         break;
