@@ -18,11 +18,14 @@ jobs:
 
     steps:
       - name: Define envs
-        run:
-          echo "CMAKE_BUILD_TYPE=Release" >> $GITHUB_ENV
+        run: echo "CMAKE_BUILD_TYPE=Release" >> $GITHUB_ENV
       - if: github.event_name == 'push'
         run: |
-          echo "TAG_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
+          if [ "${{ github.ref_name }}" == "master" ]; then
+            echo "TAG_NAME=unstable" >> $GITHUB_ENV
+          else
+            echo "TAG_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
+          fi
       - name: Setup build type
         id: build
         run: |
@@ -39,8 +42,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ debian-bullseye, fedora-41 ]
-        root: [ "with-root", "no-root" ]
+        os: [debian-bullseye, fedora-41]
+        root: ['with-root', 'no-root']
+        include:
+          - os: debian-bullseye
+            preset: static
+          - os: fedora-41
+            preset: default
     name: ${{ matrix.os }}-${{ matrix.root }}
     env:
       CMAKE_GENERATOR: Ninja
@@ -72,7 +80,7 @@ jobs:
           source $PARENT_DIR/miniconda3/bin/activate
           conda activate srs
           mkdir ${PARENT_DIR}/srs-install
-          cmake --preset static -DCMAKE_INSTALL_PREFIX=${PARENT_DIR}/srs-install -DNO_ROOT=$DISABLE_ROOT -DENABLE_TEST=OFF
+          cmake --preset ${{ matrix.preset}} -DCMAKE_INSTALL_PREFIX=${PARENT_DIR}/srs-install -DNO_ROOT=$DISABLE_ROOT
           cmake --build ./build --target install -- -j2
           cd ${{ env.PARENT_DIR }}
           tar czf "srs-${{ matrix.os}}-x86-64-${{ env.TAG_NAME }}-${{ matrix.root }}.tar.gz" srs-install
@@ -92,7 +100,7 @@ jobs:
       run:
         shell: bash
     permissions: write-all
-    needs: [ setup, build-artifacts ]
+    needs: [setup, build-artifacts]
     steps:
       - uses: actions/checkout@v4
 
@@ -123,4 +131,3 @@ jobs:
       - name: create release
         run: |
           gh release create ${{ env.TAG_NAME }} ${{ env.PRERELEASE }} --generate-notes --title ${{ env.TITLE }} --target $GITHUB_SHA ${{ steps.artifacts-download.outputs.download-path}}/*/*.tar.gz
-
