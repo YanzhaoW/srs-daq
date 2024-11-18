@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <boost/asio/ip/address.hpp>
 #include <spdlog/spdlog.h>
 #include <srs/analysis/DataProcessor.hpp>
@@ -55,27 +56,17 @@ namespace srs
 
     DataWriter::~DataWriter() = default;
 
-    auto DataWriter::has_deserialize_type(DataDeserializeOptions option) const -> bool
+    auto DataWriter::is_convert_required(DataConvertOptions dependee) const -> bool
     {
-        switch (option)
-        {
-            case raw:
-                return check_if_exist(proto_frame) or check_if_exist(proto) or check_if_exist(structure) or
-                       check_if_exist(raw);
-            case structure:
-                return check_if_exist(structure) or check_if_exist(proto) or check_if_exist(proto_frame);
-            case proto:
-                return check_if_exist(proto);
-            case proto_frame:
-                return check_if_exist(proto_frame);
-            default:
-                return false;
-        }
+        return std::ranges::any_of(
+            convert_count_map_,
+            [dependee](const auto& option_count) -> bool
+            { return option_count.second > 0 && convert_option_has_dependency(dependee, option_count.first); });
     }
 
     void DataWriter::wait_for_finished() { boost::wait_for_all(write_futures_.begin(), write_futures_.end()); }
 
-    auto DataWriter::add_binary_file(const std::string& filename, DataDeserializeOptions deser_mode) -> bool
+    auto DataWriter::add_binary_file(const std::string& filename, DataConvertOptions deser_mode) -> bool
     {
         auto& app = data_processor_->get_app();
         return binary_files_
@@ -83,7 +74,7 @@ namespace srs
             .second;
     }
 
-    auto DataWriter::add_udp_file(const std::string& filename, DataDeserializeOptions deser_mode) -> bool
+    auto DataWriter::add_udp_file(const std::string& filename, DataConvertOptions deser_mode) -> bool
     {
         auto& app = data_processor_->get_app();
         auto endpoint = convert_str_to_endpoint(app.get_io_context(), filename);
@@ -96,6 +87,7 @@ namespace srs
         return false;
     }
 
+    // NOLINTNEXTLINE
     auto DataWriter::add_root_file(const std::string& filename) -> bool
     {
 #ifdef HAS_ROOT
@@ -120,7 +112,7 @@ namespace srs
 
         for (const auto& filename : filenames)
         {
-            const auto [filetype, deser_mode] = get_filetype_from_filename(filename);
+            const auto [filetype, convert_mode] = get_filetype_from_filename(filename);
 
             auto is_ok = false;
 
@@ -131,10 +123,10 @@ namespace srs
                     continue;
                     break;
                 case bin:
-                    is_ok = add_binary_file(filename, deser_mode);
+                    is_ok = add_binary_file(filename, convert_mode);
                     break;
                 case udp:
-                    is_ok = add_udp_file(filename, deser_mode);
+                    is_ok = add_udp_file(filename, convert_mode);
                     break;
                 case root:
                     if (not check_root_dependency())
@@ -151,7 +143,7 @@ namespace srs
             if (is_ok)
             {
                 spdlog::info("Add the output source {:?}", filename);
-                ++(output_num_trackers_.at(deser_mode));
+                ++(convert_count_map_.at(convert_mode));
             }
             else
             {

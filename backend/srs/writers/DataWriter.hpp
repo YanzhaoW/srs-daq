@@ -2,8 +2,8 @@
 
 #include <boost/thread/future.hpp>
 #include <map>
+#include <srs/converters/DataConvertOptions.hpp>
 #include <srs/data/DataStructs.hpp>
-#include <srs/converters/DataDeserializeOptions.hpp>
 #include <srs/writers/DataWriterOptions.hpp>
 
 namespace srs
@@ -19,7 +19,7 @@ namespace srs
     {
       public:
         using enum DataWriterOption;
-        using enum DataDeserializeOptions;
+        using enum DataConvertOptions;
 
         explicit DataWriter(DataProcessor* processor);
 
@@ -35,13 +35,11 @@ namespace srs
         void set_output_filenames(const std::vector<std::string>& filenames);
 
         // Getter:
-        [[nodiscard]] auto has_deserialize_type(DataDeserializeOptions option) const -> bool;
+        [[nodiscard]] auto is_convert_required(DataConvertOptions dependee) const -> bool;
 
       private:
-        std::map<DataDeserializeOptions, int> output_num_trackers_{ { raw, 0 },
-                                                                    { structure, 0 },
-                                                                    { proto, 0 },
-                                                                    { proto_frame, 0 } };
+        std::map<DataConvertOptions, int> convert_count_map_{ EMPTY_CONVERT_OPTION_COUNT_MAP.begin(),
+                                                              EMPTY_CONVERT_OPTION_COUNT_MAP.end() };
         std::map<std::string, std::unique_ptr<BinaryFileWriter>> binary_files_;
         std::map<std::string, std::unique_ptr<UDPWriter>> udp_files_;
         std::map<std::string, std::unique_ptr<JsonWriter>> json_files_;
@@ -51,15 +49,10 @@ namespace srs
         DataProcessor* data_processor_ = nullptr;
         std::vector<boost::unique_future<std::optional<int>>> write_futures_;
 
-        auto add_binary_file(const std::string& filename, DataDeserializeOptions deser_mode) -> bool;
-        auto add_udp_file(const std::string& filename, DataDeserializeOptions deser_mode) -> bool;
+        auto add_binary_file(const std::string& filename, DataConvertOptions deser_mode) -> bool;
+        auto add_udp_file(const std::string& filename, DataConvertOptions deser_mode) -> bool;
         auto add_root_file(const std::string& filename) -> bool;
         auto add_json_file(const std::string& filename) -> bool;
-
-        [[nodiscard]] auto check_if_exist(DataDeserializeOptions option) const -> bool
-        {
-            return output_num_trackers_.at(option) > 0;
-        }
 
         template <typename WriterType>
         void write_to_files(std::map<std::string, std::unique_ptr<WriterType>>& writers, auto make_future)

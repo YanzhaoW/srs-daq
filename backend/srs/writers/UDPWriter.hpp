@@ -2,7 +2,7 @@
 
 #include <boost/asio.hpp>
 #include <srs/analysis/DataProcessManager.hpp>
-#include <srs/converters/DataDeserializeOptions.hpp>
+#include <srs/converters/DataConvertOptions.hpp>
 #include <srs/utils/ConnectionBase.hpp>
 #include <srs/writers/DataWriterOptions.hpp>
 
@@ -20,8 +20,8 @@ namespace srs
     class UDPWriter
     {
       public:
-        UDPWriter(App& app, asio::ip::udp::endpoint endpoint, DataDeserializeOptions derser_mode)
-            : deser_mode_{ derser_mode }
+        UDPWriter(App& app, asio::ip::udp::endpoint endpoint, DataConvertOptions derser_mode)
+            : convert_mode_{ derser_mode }
             , connection_{ ConnectionInfo{ &app } }
             , app_{ app }
         {
@@ -33,9 +33,9 @@ namespace srs
         }
 
         static constexpr auto IsStructType = false;
-        auto is_deserialize_valid() { return deser_mode_ == raw or deser_mode_ == proto; }
+        auto is_deserialize_valid() { return convert_mode_ == raw or convert_mode_ == proto; }
 
-        auto get_deserialize_mode() const -> DataDeserializeOptions { return deser_mode_; }
+        auto get_convert_mode() const -> DataConvertOptions { return convert_mode_; }
         auto write(auto last_fut) -> boost::unique_future<std::optional<int>>
         {
             return create_coro_future(coro_, last_fut);
@@ -45,8 +45,8 @@ namespace srs
         void close() { connection_.close_socket(); }
 
       private:
-        using enum DataDeserializeOptions;
-        DataDeserializeOptions deser_mode_ = DataDeserializeOptions::none;
+        using enum DataConvertOptions;
+        DataConvertOptions convert_mode_ = DataConvertOptions::none;
         UDPWriterConnection connection_;
         std::reference_wrapper<App> app_;
         asio::experimental::coro<int(std::optional<std::string_view>)> coro_;

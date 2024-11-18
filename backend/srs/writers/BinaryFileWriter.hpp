@@ -23,8 +23,8 @@ namespace srs
 
         explicit BinaryFileWriter(asio::thread_pool& thread_pool,
                                   const std::string& filename,
-                                  DataDeserializeOptions deser_mode)
-            : deser_mode_{ deser_mode }
+                                  DataConvertOptions deser_mode)
+            : convert_mode_{ deser_mode }
             , file_name_{ filename }
             , ofstream_{ filename, std::ios::trunc }
         {
@@ -36,11 +36,11 @@ namespace srs
             coro_sync_start(coro_, std::optional<InputType>{}, asio::use_awaitable);
         }
         auto write(auto pre_future) -> OutputFuture { return create_coro_future(coro_, pre_future); }
-        auto get_deserialize_mode() const -> DataDeserializeOptions { return deser_mode_; }
+        auto get_convert_mode() const -> DataConvertOptions { return convert_mode_; }
         void close() { ofstream_.close(); }
 
       private:
-        DataDeserializeOptions deser_mode_ = DataDeserializeOptions::none;
+        DataConvertOptions convert_mode_ = DataConvertOptions::none;
         std::string file_name_;
         std::ofstream ofstream_;
         CoroType coro_;

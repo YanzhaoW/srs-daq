@@ -4,7 +4,7 @@ on:
     tags:
       - v[0-9]+.[0-9]+.[0-9]+
     branches:
-      - dev
+      - master
   workflow_dispatch:
 
 permissions: write-all
@@ -108,8 +108,8 @@ jobs:
           cd ${GITHUB_WORKSPACE}/..
           mkdir download-cache && cd download-cache
           echo "DOWNLOAD_DIR=$PWD" >> $GITHUB_ENV
-          if [ $TAG_NAME == "dev" ]; then
-            echo "TITLE=\"Release of unstable dev branch\"" >> $GITHUB_ENV
+          if [ $TAG_NAME == "master" ]; then
+            echo "TITLE=\"Release of unstable master branch\"" >> $GITHUB_ENV
             echo "PRERELEASE=--prerelease" >> $GITHUB_ENV
           else
             echo "TITLE=\"Release of version $TAG_NAME\"" >> $GITHUB_ENV

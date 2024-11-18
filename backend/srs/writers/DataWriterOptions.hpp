@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <filesystem>
-#include <srs/converters/DataDeserializeOptions.hpp>
+#include <srs/converters/DataConvertOptions.hpp>
 #include <string_view>
 
 namespace srs
@@ -18,10 +18,10 @@ namespace srs
     };
 
     inline auto get_filetype_from_filename(std::string_view filename)
-        -> std::tuple<DataWriterOption, DataDeserializeOptions>
+        -> std::tuple<DataWriterOption, DataConvertOptions>
     {
         using enum DataWriterOption;
-        using enum DataDeserializeOptions;
+        using enum DataConvertOptions;
         namespace fs = std::filesystem;
 
         if (auto pos = filename.find(':'); pos != std::string::npos)
@@ -32,7 +32,7 @@ namespace srs
         const auto file_ext = fs::path{ filename }.extension().string();
         if (file_ext == ".bin" or file_ext == ".lmd")
         {
-            return { bin, raw };
+            return { bin, raw_frame };
         }
         if (file_ext == ".binpb")
         {

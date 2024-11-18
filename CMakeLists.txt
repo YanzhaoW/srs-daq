@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.28)
 
 project(
     srs
-    VERSION 0.1.0
+    VERSION 0.1.1
     LANGUAGES CXX C)
 
 include(${CMAKE_SOURCE_DIR}/cmake/install_config.cmake)
