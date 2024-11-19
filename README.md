@@ -1,6 +1,9 @@
 # srs-daq - A data acquisition program for SRS FEC & VMM3
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/7e8c956af1bc46c7836524f1ace32c11)](https://app.codacy.com/gh/YanzhaoW/srs-daq/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Downloads](https://img.shields.io/github/downloads/YanzhaoW/srs-daq/total.svg)](https://github.com/YanzhaoW/srs-daq/releases)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/7e8c956af1bc46c7836524f1ace32c11)](https://app.codacy.com/gh/YanzhaoW/srs-daq/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![CI pipeline](https://github.com/YanzhaoW/srs-daq/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/YanzhaoW/srs-daq/actions?query=branch%3Amaster)
+[![Github Releases](https://img.shields.io/github/release/YanzhaoW/srs-daq.svg)](https://github.com/YanzhaoW/srs-daq/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Introduction
 
