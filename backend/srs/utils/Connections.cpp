@@ -3,7 +3,7 @@
 
 namespace srs
 {
-    void Starter::end_of_connection()
+    void Starter::close()
     {
         close_socket();
         auto& control = get_app();
@@ -15,12 +15,18 @@ namespace srs
     void Stopper::acq_off()
     {
         const auto waiting_time = std::chrono::seconds{ 4 };
-        get_app().wait_for_status([](const Status& status) { return status.is_acq_on.load(); }, waiting_time);
+        get_app().wait_for_status(
+            [](const Status& status)
+            {
+                spdlog::debug("Waiting for acq_on status true ...");
+                return status.is_acq_on.load();
+            },
+            waiting_time);
         const auto data = std::vector<CommunicateEntryType>{ 0, 15, 0 };
         communicate(data, NULL_ADDRESS);
     }
 
-    void DataReader::end_of_connection()
+    void DataReader::close()
     {
         spdlog::debug("Stopping data reading ...");
         close_socket();

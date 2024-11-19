@@ -9,7 +9,6 @@ project(
     LANGUAGES CXX C)
 
 include(${CMAKE_SOURCE_DIR}/cmake/install_config.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake/install_packages.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/project_config.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/check_compilers.cmake)
 
@@ -22,7 +21,11 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     list(APPEND CMAKE_CXX_FLAGS "-fexperimental-library")
 endif()
 
+include(${CMAKE_SOURCE_DIR}/cmake/import_packages.cmake)
+
 add_subdirectory(frontend)
 add_subdirectory(backend)
-add_subdirectory(test)
 add_subdirectory(examples)
+if(ENABLE_TEST)
+    add_subdirectory(test)
+endif()

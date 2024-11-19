@@ -28,6 +28,7 @@ add_subdirectory(data)
 add_subdirectory(converters)
 add_subdirectory(writers)
 add_subdirectory(readers)
+add_subdirectory(devices)
 add_subdirectory(analysis)
 
 target_sources(

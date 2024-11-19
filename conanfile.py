@@ -62,7 +62,7 @@ class CompressorRecipe(ConanFile):
         self.requires("protobuf/5.27.0", options={"with_zlib": True, "fPIC": True, "shared": False, "lite": False})
         self.requires("boost/1.86.0", options=BOOST_OPTIONS)
         if os.environ["CMAKE_ENABLE_TEST"] == "ON":
-            self.requires("catch2/3.7.1")
+            self.requires("gtest/1.15.0")
 
     def generate(self):
         tc = CMakeToolchain(self)

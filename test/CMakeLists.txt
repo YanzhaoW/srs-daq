@@ -1,3 +1,3 @@
 if(ENABLE_TEST)
-    add_subdirectory(integration)
+    add_subdirectory(backend)
 endif()

@@ -8,8 +8,8 @@
 #include <spdlog/spdlog.h>
 #include <srs/Application.hpp>
 #include <srs/analysis/DataProcessor.hpp>
-#include <srs/data/SRSDataStructs.hpp>
 #include <srs/data/DataStructsFormat.hpp>
+#include <srs/data/SRSDataStructs.hpp>
 
 namespace srs
 {
@@ -99,8 +99,10 @@ namespace srs
     {
         // CAS operation to guarantee the thread safty
         auto expected = false;
+        spdlog::trace("Try to stop the data processor. Current is_stopped status: {}", is_stopped.load());
         if (is_stopped.compare_exchange_strong(expected, true))
         {
+            spdlog::trace("Try to stop data monitor");
             monitor_.stop();
             data_queue_.abort();
             spdlog::info("Stopping analysis loop ...");

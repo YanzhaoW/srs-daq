@@ -6,6 +6,7 @@
 #include <srs/utils/CommonDefitions.hpp>
 #include <string>
 #include <vector>
+#include <print>
 
 namespace srs
 {
@@ -20,6 +21,7 @@ namespace srs
             {
                 throw std::runtime_error{ fmt::format("Cannot open the file {:?}", input_filename_) };
             }
+            spdlog::debug("Open the binary file {:?}", input_filename_);
         }
 
         void read_one_frame(std::vector<char>& data_str)
@@ -40,6 +42,7 @@ namespace srs
                 return {};
             }
 
+            std::println("==================passing here 3");
             input_file_ >> size;
             auto read_size = static_cast<std::size_t>(input_file_.read(input_buffer_.data(), size).gcount());
 
