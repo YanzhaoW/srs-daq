@@ -4,7 +4,7 @@
 #include <spdlog/spdlog.h>
 #include <srs/Application.hpp>
 #include <srs/converters/DataConverterBase.hpp>
-#include <srs/data/DataStructs.hpp>
+#include <srs/data/SRSDataStructs.hpp>
 #include <srs/utils/CommonFunctions.hpp>
 #include <srs/utils/CommonAlias.hpp>
 

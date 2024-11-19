@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include <srs/data/DataStructs.hpp>
+#include <srs/data/SRSDataStructs.hpp>
 #include <string_view>
 
 namespace srs

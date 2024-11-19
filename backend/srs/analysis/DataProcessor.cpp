@@ -8,7 +8,7 @@
 #include <spdlog/spdlog.h>
 #include <srs/Application.hpp>
 #include <srs/analysis/DataProcessor.hpp>
-#include <srs/data/DataStructs.hpp>
+#include <srs/data/SRSDataStructs.hpp>
 #include <srs/data/DataStructsFormat.hpp>
 
 namespace srs

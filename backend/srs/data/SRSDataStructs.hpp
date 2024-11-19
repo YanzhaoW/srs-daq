@@ -62,4 +62,5 @@ namespace srs
         struct_data.marker_data.clear();
         struct_data.hit_data.clear();
     }
+
 } // namespace srs

@@ -2,9 +2,10 @@
 
 #ifdef HAS_ROOT
 #include <TFile.h>
+#include <TSystem.h>
 #include <TTree.h>
 #include <srs/analysis/DataProcessManager.hpp>
-#include <srs/data/DataStructs.hpp>
+#include <srs/data/SRSDataStructs.hpp>
 
 namespace srs
 {
@@ -25,6 +26,8 @@ namespace srs
             tree.Branch("srs_frame_data", &output_buffer_);
             coro_ = generate_coro(thread_pool.get_executor());
             coro_sync_start(coro_, std::optional<InputType>{}, asio::use_awaitable);
+            spdlog::trace("ROOT INCLUDE DIRS: {}", gSystem->GetIncludePath());
+            spdlog::trace("ROOT LIBRARIES: {}", gSystem->GetLibraries());
         }
 
         auto write(auto pre_future) -> OutputFuture { return create_coro_future(coro_, pre_future); }

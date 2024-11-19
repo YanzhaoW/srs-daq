@@ -13,11 +13,11 @@ target_sources(
            ${CMAKE_SOURCE_DIR}/backend
            ${CMAKE_BINARY_DIR}/backend
            FILES
-           DataStructs.hpp
+           SRSDataStructs.hpp
            DataStructsFormat.hpp
            ${CMAKE_CURRENT_BINARY_DIR}/message.pb.h)
 
-target_sources(srscpp PUBLIC FILE_SET publicHeaders FILES DataStructs.hpp)
+target_sources(srscpp PUBLIC FILE_SET publicHeaders FILES SRSDataStructs.hpp)
 
 protobuf_generate(
     TARGET
@@ -41,9 +41,11 @@ if(ROOT_FOUND)
     target_link_libraries(srs_data PUBLIC ROOT::RIO ROOT::Tree)
     target_compile_definitions(srs_data PUBLIC HAS_ROOT=1)
     target_compile_options(srs_data PUBLIC "-Wno-cpp")
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/SRSDataStructs.hpp
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
     root_generate_dictionary(
         srs_dict
-        DataStructs.hpp
+        SRSDataStructs.hpp
         MODULE
         srs_data
         LINKDEF

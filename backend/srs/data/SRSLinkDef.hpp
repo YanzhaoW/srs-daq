@@ -1,8 +1,4 @@
-#ifdef __CINT__
-
-#pragma link off all globals;
-#pragma link off all classes;
-#pragma link off all functions;
+#ifdef __CLING__
 
 #pragma link C++ class srs::ReceiveDataHeader+;
 #pragma link C++ class srs::MarkerData+;

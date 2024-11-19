@@ -65,7 +65,15 @@ jobs:
           echo "TAG_NAME=${{ needs.setup.outputs.tag_name }}" >> $GITHUB_ENV
           cd $GITHUB_WORKSPACE/..
           echo "PARENT_DIR=$PWD" >> $GITHUB_ENV
-          if [[ ${{ matrix.root }} == "with-root" ]]; then export DISABLE_ROOT="OFF"; else export DISABLE_ROOT="ON"; fi
+          export ROOT_VERSION=$(root-config --version | sed "s/\./\-/g")
+          if [[ ${{ matrix.root }} == "with-root" ]]; then
+            export DISABLE_ROOT="OFF"
+            export ROOT_TAG="root-${ROOT_VERSION}"
+          else 
+            export DISABLE_ROOT="ON"
+            export ROOT_TAG="no-root"
+          fi
+          echo "ROOT_TAG=${ROOT_TAG}" >> $GITHUB_ENV
           echo "DISABLE_ROOT=${DISABLE_ROOT}" >> $GITHUB_ENV
       - name: install miniconda
         run: |
@@ -83,12 +91,12 @@ jobs:
           cmake --preset ${{ matrix.preset}} -DCMAKE_INSTALL_PREFIX=${PARENT_DIR}/srs-install -DNO_ROOT=$DISABLE_ROOT
           cmake --build ./build --target install -- -j2
           cd ${{ env.PARENT_DIR }}
-          tar czf "srs-${{ matrix.os}}-x86-64-${{ env.TAG_NAME }}-${{ matrix.root }}.tar.gz" srs-install
+          tar czf "srs-${{ matrix.os}}-x86-64-${{ env.TAG_NAME }}-${{ env.ROOT_TAG }}.tar.gz" srs-install
 
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os}}-${{ env.TAG_NAME }}-${{ matrix.root }}
-          path: ${{ env.PARENT_DIR }}/srs-${{ matrix.os}}-x86-64-${{ env.TAG_NAME }}-${{ matrix.root }}.tar.gz
+          path: ${{ env.PARENT_DIR }}/srs-${{ matrix.os}}-x86-64-${{ env.TAG_NAME }}-${{ env.ROOT_TAG }}.tar.gz
           retention-days: 1
 
   publish-release:
