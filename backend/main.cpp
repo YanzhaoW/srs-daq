@@ -1,8 +1,12 @@
 #include "CLIOptionsMap.hpp"
 #include <CLI/CLI.hpp>
+#include <print>
 #include <spdlog/spdlog.h>
 #include <srs/Application.hpp>
-#include <print>
+
+#ifdef HAS_ROOT
+#include <TROOT.h>
+#endif
 
 auto main(int argc, char** argv) -> int
 {
@@ -15,8 +19,10 @@ auto main(int argc, char** argv) -> int
         auto print_mode = srs::DataPrintMode::print_speed;
         auto output_filenames = std::vector<std::string>{ "output.bin" };
         auto is_version_print = false;
+        auto is_root_version_print = false;
 
         cli_args.add_flag("-v, --version", is_version_print, "show the current version");
+        cli_args.add_flag("--root-version", is_root_version_print, "show the ROOT version if used");
         cli_args.add_option("-l, --log-level", spdlog_level, "set log level")
             ->transform(CLI::CheckedTransformer(spd_log_map, CLI::ignore_case))
             ->capture_default_str();
@@ -28,9 +34,19 @@ auto main(int argc, char** argv) -> int
             ->expected(0, -1);
         cli_args.parse(argc, argv);
 
-        if(is_version_print)
+        if (is_version_print)
         {
             std::println("{}", SRS_PROJECT_VERSION);
+            return 0;
+        }
+
+        if (is_root_version_print)
+        {
+#ifdef HAS_ROOT
+            std::println("{}", gROOT->GetVersion());
+#else
+            std::println("ROOT is not built");
+#endif
             return 0;
         }
 

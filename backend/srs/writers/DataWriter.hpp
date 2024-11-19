@@ -3,7 +3,7 @@
 #include <boost/thread/future.hpp>
 #include <map>
 #include <srs/converters/DataConvertOptions.hpp>
-#include <srs/data/DataStructs.hpp>
+#include <srs/data/SRSDataStructs.hpp>
 #include <srs/writers/DataWriterOptions.hpp>
 
 namespace srs

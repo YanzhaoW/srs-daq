@@ -1,11 +1,11 @@
 #pragma once
 
-#include <srs/data/DataStructs.hpp>
 #include <fstream>
 #include <glaze/glaze.hpp>
 #include <map>
 #include <spdlog/spdlog.h>
 #include <srs/analysis/DataProcessManager.hpp>
+#include <srs/data/SRSDataStructs.hpp>
 
 namespace srs
 {
@@ -92,10 +92,7 @@ namespace srs
             coro_sync_start(coro_, std::optional<InputType>{}, asio::use_awaitable);
         }
 
-        [[nodiscard]] static auto get_convert_mode() -> DataConvertOptions
-        {
-            return DataConvertOptions::structure;
-        }
+        [[nodiscard]] static auto get_convert_mode() -> DataConvertOptions { return DataConvertOptions::structure; }
 
         auto write(auto fut) -> boost::unique_future<std::optional<int>> { return {}; }
 

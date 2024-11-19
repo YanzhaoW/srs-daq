@@ -1,4 +1,4 @@
 #pragma once
 
-#include <srs/data/DataStructs.hpp>
+#include <srs/data/SRSDataStructs.hpp>
 #include <srs/readers/ProtoMsgReader.hpp>
