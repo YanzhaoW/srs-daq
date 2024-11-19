@@ -4,7 +4,7 @@ on:
     tags:
       - v[0-9]+.[0-9]+.[0-9]+
     branches:
-      - master
+      - dev
   workflow_dispatch:
 
 permissions: write-all
@@ -21,7 +21,7 @@ jobs:
         run: echo "CMAKE_BUILD_TYPE=Release" >> $GITHUB_ENV
       - if: github.event_name == 'push'
         run: |
-          if [ "${{ github.ref_name }}" == "master" ]; then
+          if [ "${{ github.ref_name }}" == "dev" ]; then
             echo "TAG_NAME=unstable" >> $GITHUB_ENV
           else
             echo "TAG_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
@@ -120,7 +120,7 @@ jobs:
           mkdir download-cache && cd download-cache
           echo "DOWNLOAD_DIR=$PWD" >> $GITHUB_ENV
           if [ $TAG_NAME == "unstable" ]; then
-            echo "TITLE=\"Release of unstable master branch\"" >> $GITHUB_ENV
+            echo "TITLE=\"Release of unstable dev branch\"" >> $GITHUB_ENV
             echo "PRERELEASE=--prerelease" >> $GITHUB_ENV
           else
             echo "TITLE=\"Release of version $TAG_NAME\"" >> $GITHUB_ENV
@@ -134,7 +134,7 @@ jobs:
 
       - name: clean old releases
         continue-on-error: true
-        run: gh release delete ${{ env.TAG_NAME }} || true
+        run: gh release delete ${{ env.TAG_NAME }} --cleanup-tag || true
 
       - name: create release
         run: |
