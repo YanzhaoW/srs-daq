@@ -23,10 +23,12 @@ After unzipping the downloaded file, a new folder `srs-install` will be put in t
 
 If your operating system is not in the download link list. Please either [build the project from source](doc/build_source.md) or create an issue to make the request.
 
+> [!IMPORTANT]  
+> If the ROOT support is needed, please install the same ROOT version used in the download link.
 
 ## srs_control - The main program
 
-<!-- To run the program, first make sure you have activated the conda environment `srs`, which can be checked by `conda info`. If not, run `conda activate srs` to activate `srs` environment. --> Go to `srs-install/bin` directory and run
+Go to `srs-install/bin` directory and run
 
 ```bash
 ./srs_control [-p DATA_PRINT_OPTION] [-v LOG_LEVEL] [-h]
@@ -36,6 +38,7 @@ If your operating system is not in the download link list. Please either [build 
 
 - `-h` or `--help`: print the help message.
 - `-v` or `--version`: show the current version.
+- `--root-version`: show the ROOT version if used.
 - `-l` or `--log-level`: set the verbose level. Available options: "critical", "error", "warn", "info" (default), "debug", "trace", "off".
 - `-p` or `--print-mode`: set the data printing mode. Available options:
   - speed (default): print the reading rate of received data.
