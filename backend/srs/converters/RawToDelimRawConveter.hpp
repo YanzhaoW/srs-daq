@@ -55,7 +55,7 @@ namespace srs
             auto size = static_cast<SizeType>(input.size());
             output.reserve(size + sizeof(size));
             auto deserialize_to = zpp::bits::out{ output, zpp::bits::append{}, zpp::bits::endian::big{} };
-            deserialize_to(size, input).or_throw();
+            deserialize_to(size, zpp::bits::unsized(input)).or_throw();
         }
     };
 } // namespace srs

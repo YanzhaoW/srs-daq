@@ -42,7 +42,7 @@ namespace srs
         }
 
         // INFO: this will be called in coroutine
-        void close() { connection_.close_socket(); }
+        void close() { connection_.close(); }
 
         // Getters:
         auto get_local_socket() -> const auto& { return connection_.get_socket(); }

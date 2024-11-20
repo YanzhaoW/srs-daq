@@ -105,10 +105,12 @@ namespace srs
             spdlog::trace("Try to stop data monitor");
             monitor_.stop();
             data_queue_.abort();
-            spdlog::info("Stopping analysis loop ...");
-            data_processes_.stop();
-            spdlog::info("Analysis loop is stopped");
+            // spdlog::info("Stopping analysis loop ...");
+            // data_processes_.stop();
+            // spdlog::info("Analysis loop is stopped");
         }
+
+        spdlog::trace("Data processor is stopped");
     }
 
     void DataProcessor::read_data_once(std::span<BufferElementType> read_data)
@@ -128,9 +130,14 @@ namespace srs
             spdlog::trace("entering analysis loop");
             // TODO: Use direct binary data
 
-            while (not is_stopped.load())
+            while (true)
             {
-                data_processes_.analysis_one(data_queue_);
+                if (is_stopped.load())
+                {
+                    data_processes_.analysis_one(data_queue_, true);
+                    break;
+                }
+                data_processes_.analysis_one(data_queue_, false);
                 update_monitor();
                 print_data();
 
@@ -146,6 +153,7 @@ namespace srs
             spdlog::critical("Exception occured: {}", ex.what());
             app_->exit();
         }
+        spdlog::debug("Analysis loop is stopped");
     }
 
     void DataProcessor::update_monitor()

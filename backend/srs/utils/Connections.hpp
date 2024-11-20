@@ -33,9 +33,9 @@ namespace srs
     {
       public:
         Stopper(const Stopper&) = delete;
-        Stopper(Stopper&&) = default;
+        Stopper(Stopper&&) = delete;
         Stopper& operator=(const Stopper&) = delete;
-        Stopper& operator=(Stopper&&) = default;
+        Stopper& operator=(Stopper&&) = delete;
 
         explicit Stopper(const ConnectionInfo& info)
             : ConnectionBase(info, "Stopper")
@@ -50,7 +50,7 @@ namespace srs
 
         static void on_fail() { spdlog::debug("on_fail of stopper is called"); }
         void acq_off();
-        void close() {}
+        // void close() {}
     };
 
     class DataReader : public ConnectionBase<LARGE_READ_MSG_BUFFER_SIZE>

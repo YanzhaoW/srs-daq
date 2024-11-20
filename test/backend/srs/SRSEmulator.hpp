@@ -3,21 +3,21 @@
 #include <boost/asio.hpp>
 #include <boost/thread/future.hpp>
 #include <optional>
+#include <print>
 #include <srs/readers/RawFrameReader.hpp>
 #include <srs/utils/CommonAlias.hpp>
 #include <srs/writers/UDPWriter.hpp>
 #include <string>
-#include <print>
 
 namespace srs::test
 {
     class SRSEmulator
     {
       public:
-        explicit SRSEmulator(std::string_view filename, App& app)
+        explicit SRSEmulator(std::string_view filename, int port, App& app)
             : source_filename_{ filename }
             , frame_reader_{ source_filename_ }
-            , udp_writer_{ app, asio::ip::udp::endpoint{ udp::v4(), 0 } }
+            , udp_writer_{ app, asio::ip::udp::endpoint{ udp::v4(), static_cast<asio::ip::port_type>(port) } }
         {
         }
 
@@ -30,7 +30,6 @@ namespace srs::test
                 {
                     return;
                 }
-                std::println("data: {}", read_str);
                 auto send_fut = boost::async([read_str]() { return std::optional<std::string_view>{ read_str }; });
                 udp_writer_.write(std::move(send_fut)).get();
             }

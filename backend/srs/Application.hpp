@@ -25,6 +25,7 @@ namespace srs
         App& operator=(App&&) = delete;
         ~App() noexcept;
 
+        // public APIs
         void configure_fec() {}
         void switch_on();
         void switch_off();
@@ -33,6 +34,7 @@ namespace srs
         void notify_status_change() { status_.status_change.notify_all(); }
         void start_analysis();
         void exit();
+        void wait_for_finish();
         void wait_for_status(auto&& condition, std::chrono::seconds time_duration = DEFAULT_STATUS_WAITING_TIME_SECONDS)
         {
             status_.wait_for_status(std::forward<decltype(condition)>(condition), time_duration);
@@ -52,6 +54,7 @@ namespace srs
         // [[nodiscard]] auto get_fec_config() const -> const auto& { return fec_config_; }
         [[nodiscard]] auto get_status() const -> const auto& { return status_; }
         [[nodiscard]] auto get_io_context() -> auto& { return io_context_; }
+        auto get_data_reader() -> DataReader* { return data_reader_.get(); }
 
       private:
         using udp = asio::ip::udp;

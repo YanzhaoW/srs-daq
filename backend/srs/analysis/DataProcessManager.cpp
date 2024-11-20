@@ -39,7 +39,7 @@ namespace srs
 
         if (is_stopped)
         {
-            spdlog::info("Shutting down all data writers...");
+            spdlog::debug("Shutting down all data writers...");
         }
 
         auto make_writer_future = [&](auto& writer)
@@ -75,7 +75,7 @@ namespace srs
         writers_.wait_for_finished();
         if (is_stopped)
         {
-            spdlog::debug("All data writers are shutdown.");
+            spdlog::info("All data writers are shutdown.");
         }
     }
 

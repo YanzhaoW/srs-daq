@@ -18,7 +18,6 @@ namespace srs
 
     App::~App() noexcept
     {
-        io_work_guard_.reset();
         if (working_thread_.joinable())
         {
             spdlog::debug("Application: Working thread is still running. Trying to stop the io context ...");
@@ -44,6 +43,7 @@ namespace srs
                 });
             io_context_.join();
             end_of_work();
+            spdlog::debug("Application: working thread is finished");
         };
         working_thread_ = std::jthread{ monitoring_action };
     }
@@ -80,7 +80,9 @@ namespace srs
         {
             set_status_acq_off(true);
         }
+        io_work_guard_.reset();
         set_status_acq_on(false);
+        spdlog::debug("Application is exited");
     }
 
     void App::set_print_mode(DataPrintMode mode) { data_processor_->set_print_mode(mode); }
@@ -123,9 +125,6 @@ namespace srs
         data_reader_->start();
     }
 
-    void App::start_analysis()
-    {
-        data_processor_->start();
-        // working_thread_.join();
-    }
+    void App::start_analysis() { data_processor_->start(); }
+    void App::wait_for_finish() { working_thread_.join(); }
 } // namespace srs

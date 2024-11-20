@@ -30,13 +30,12 @@ namespace srs
 
         // possible overload from derived class
         void read_data_handle(std::span<BufferElementType> read_data) {}
-        void close() {}
+        void close() { close_socket(); }
         void on_fail() { spdlog::debug("default on_fail is called!"); }
         auto get_executor() { return app_->get_io_context().get_executor(); }
 
         void listen(this auto&& self, bool is_continuous = false);
         void communicate(this auto&& self, const std::vector<CommunicateEntryType>& data, uint16_t address);
-        void close_socket();
 
         auto send_continuous_message() -> asio::experimental::coro<int(std::optional<std::string_view>)>;
 
@@ -60,9 +59,11 @@ namespace srs
 
       protected:
         auto new_shared_socket(int port_number) -> std::unique_ptr<udp::socket>;
+        void close_socket();
 
       private:
         int local_port_number_ = 0;
+        std::atomic<bool> is_socket_closed_{ false };
         uint32_t counter_ = INIT_COUNT_VALUE;
         std::string name_ = "ConnectionBase";
         gsl::not_null<App*> app_;
@@ -108,7 +109,7 @@ namespace srs
 
             if (not msg.has_value())
             {
-                close_socket();
+                close();
                 co_return;
             }
             else
@@ -124,13 +125,15 @@ namespace srs
         spdlog::debug("Connection {}: starting to listen ...", connection->get_name());
         while (true)
         {
-            if (not connection->socket_->is_open())
+            if (not connection->socket_->is_open() or connection->is_socket_closed_.load())
             {
-                break;
+                co_return;
             }
 
+            spdlog::trace("reading messages ...");
             auto receive_data_size = co_await connection->socket_->async_receive(
                 asio::buffer(connection->read_msg_buffer_), asio::use_awaitable);
+            spdlog::trace("Messages received");
             auto read_msg = std::span{ connection->read_msg_buffer_.data(), receive_data_size };
             connection->read_data_handle(read_msg);
             // spdlog::info("Connection {}: received {} bytes data", connection->get_name(), read_msg.size());
@@ -169,14 +172,15 @@ namespace srs
         auto interrupt_signal = asio::signal_set(co_await asio::this_coro::executor, SIGINT);
         spdlog::trace("Connection {}: waiting for signals", connection->get_name());
         auto [error, sig_num] = co_await interrupt_signal.async_wait(asio::as_tuple(asio::use_awaitable));
-        if (error)
+        if (error == asio::error::operation_aborted)
         {
             spdlog::trace("Connection {}: Signal ended with {}", connection->get_name(), error.message());
         }
         else
         {
             fmt::print("\n");
-            spdlog::trace("Connection {}: Signal ID {} is called!", connection->get_name(), sig_num);
+            spdlog::trace(
+                "Connection {}: Signal ID {} is called with {:?}!", connection->get_name(), sig_num, error.message());
             connection->close();
         }
     }
@@ -186,9 +190,11 @@ namespace srs
     {
         auto socket = std::make_unique<udp::socket>(
             app_->get_io_context(), udp::endpoint{ udp::v4(), static_cast<asio::ip::port_type>(port_number) });
-        spdlog::trace("Openning the socket from ip: {} with port: {}",
+        spdlog::debug("Connection {}: Openning the socket from ip: {} with port: {}",
+                      name_,
                       socket->local_endpoint().address().to_string(),
                       socket->local_endpoint().port());
+        local_port_number_ = socket->local_endpoint().port();
         return socket;
     }
 
@@ -204,7 +210,6 @@ namespace srs
     void ConnectionBase<size>::listen(this auto&& self, bool is_continuous)
     {
         using asio::experimental::awaitable_operators::operator||;
-        spdlog::debug("Connection {}: creating socket with local port number: {}", self.name_, self.local_port_number_);
         if (self.socket_ == nullptr)
         {
             self.socket_ = self.new_shared_socket(self.local_port_number_);
@@ -233,12 +238,13 @@ namespace srs
     template <int size>
     void ConnectionBase<size>::close_socket()
     {
-        if (socket_->is_open())
+        if (not is_socket_closed_.load())
         {
+            is_socket_closed_.store(true);
             spdlog::trace("Connection {}: Closing the socket ...", name_);
             socket_->cancel();
             socket_->close();
-            spdlog::trace("Connection {}: Socket is closed.", name_);
+            spdlog::trace("Connection {}: Socket is closed and cancelled.", name_);
         }
     }
 } // namespace srs
