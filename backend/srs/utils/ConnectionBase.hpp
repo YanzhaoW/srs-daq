@@ -71,6 +71,7 @@ namespace srs
         udp::endpoint remote_endpoint_;
         SerializableMsgBuffer write_msg_buffer_;
         std::span<const char> continuous_send_msg_;
+        std::unique_ptr<asio::signal_set> signal_set_;
         ReadBufferType<buffer_size> read_msg_buffer_{};
         int timeout_seconds_ = DEFAULT_TIMEOUT_SECONDS;
 
@@ -130,10 +131,8 @@ namespace srs
                 co_return;
             }
 
-            spdlog::trace("reading messages ...");
             auto receive_data_size = co_await connection->socket_->async_receive(
                 asio::buffer(connection->read_msg_buffer_), asio::use_awaitable);
-            spdlog::trace("Messages received");
             auto read_msg = std::span{ connection->read_msg_buffer_.data(), receive_data_size };
             connection->read_data_handle(read_msg);
             // spdlog::info("Connection {}: received {} bytes data", connection->get_name(), read_msg.size());
@@ -169,9 +168,9 @@ namespace srs
     template <int size>
     auto ConnectionBase<size>::signal_handling(auto* connection) -> asio::awaitable<void>
     {
-        auto interrupt_signal = asio::signal_set(co_await asio::this_coro::executor, SIGINT);
+        connection->signal_set_ = std::make_unique<asio::signal_set>(co_await asio::this_coro::executor, SIGINT);
         spdlog::trace("Connection {}: waiting for signals", connection->get_name());
-        auto [error, sig_num] = co_await interrupt_signal.async_wait(asio::as_tuple(asio::use_awaitable));
+        auto [error, sig_num] = co_await connection->signal_set_->async_wait(asio::as_tuple(asio::use_awaitable));
         if (error == asio::error::operation_aborted)
         {
             spdlog::trace("Connection {}: Signal ended with {}", connection->get_name(), error.message());
@@ -244,6 +243,10 @@ namespace srs
             spdlog::trace("Connection {}: Closing the socket ...", name_);
             socket_->cancel();
             socket_->close();
+            if (signal_set_ != nullptr)
+            {
+                signal_set_->cancel();
+            }
             spdlog::trace("Connection {}: Socket is closed and cancelled.", name_);
         }
     }

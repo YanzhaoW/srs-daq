@@ -147,11 +147,13 @@ namespace srs
         catch (tbb::user_abort& ex)
         {
             spdlog::debug("Data processing: {}", ex.what());
+            app_->set_error_string(ex.what());
         }
         catch (std::exception& ex)
         {
             spdlog::critical("Exception occured: {}", ex.what());
-            app_->exit();
+            app_->set_error_string(ex.what());
+            // app_->exit();
         }
         spdlog::debug("Analysis loop is stopped");
     }

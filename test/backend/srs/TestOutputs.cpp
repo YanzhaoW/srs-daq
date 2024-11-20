@@ -7,7 +7,7 @@ namespace srs::test
 {
     namespace
     {
-        void run_application(const std::string& output_filename)
+        void run_application(const std::string& output_filename, std::string& error_msg)
         {
             try
             {
@@ -28,10 +28,11 @@ namespace srs::test
                 emulator.start_send_data();
                 app.exit();
                 app.wait_for_finish();
+                error_msg = app.get_error_string();
             }
-            catch (const std::runtime_error& err)
+            catch (std::exception& ex)
             {
-                spdlog::critical("Exception occurred: {}", err.what());
+                spdlog::critical("Exception occured: {}", ex.what());
             }
         }
 
@@ -55,7 +56,9 @@ namespace
 TEST(check_outputs, binary_output)
 {
     const auto filename = std::string{ "test_output.bin" };
-    srs::test::run_application(filename);
+    auto error_msg = std::string{};
+    ASSERT_NO_THROW(srs::test::run_application(filename, error_msg));
+    EXPECT_EQ(error_msg, "");
     auto res = check_if_file_exist(filename);
     ASSERT_TRUE(res);
 }
@@ -63,7 +66,9 @@ TEST(check_outputs, binary_output)
 TEST(check_outputs, root_output)
 {
     const auto filename = std::string{ "test_output.root" };
-    srs::test::run_application(filename);
+    auto error_msg = std::string{};
+    ASSERT_NO_THROW(srs::test::run_application(filename, error_msg));
+    EXPECT_EQ(error_msg, "");
     auto res = check_if_file_exist(filename);
 #ifdef HAS_ROOT
     ASSERT_TRUE(res);
@@ -75,7 +80,9 @@ TEST(check_outputs, root_output)
 TEST(check_outputs, proto_binary)
 {
     const auto filename = std::string{ "test_output.binpb" };
-    srs::test::run_application(filename);
+    auto error_msg = std::string{};
+    ASSERT_NO_THROW(srs::test::run_application(filename, error_msg));
+    EXPECT_EQ(error_msg, "");
     auto res = check_if_file_exist(filename);
     ASSERT_TRUE(res);
 }
@@ -83,7 +90,9 @@ TEST(check_outputs, proto_binary)
 TEST(check_outputs, json_output)
 {
     const auto filename = std::string{ "test_output.json" };
-    srs::test::run_application(filename);
+    auto error_msg = std::string{};
+    ASSERT_NO_THROW(srs::test::run_application(filename, error_msg));
+    EXPECT_EQ(error_msg, "");
     auto res = check_if_file_exist(filename);
 #ifdef HAS_ROOT
     ASSERT_TRUE(res);

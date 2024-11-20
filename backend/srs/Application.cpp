@@ -30,18 +30,25 @@ namespace srs
     {
         auto monitoring_action = [this]()
         {
-            signal_set_.async_wait(
-                [this](const boost::system::error_code& error, auto)
-                {
-                    if (error == asio::error::operation_aborted)
+            try
+            {
+                signal_set_.async_wait(
+                    [this](const boost::system::error_code& error, auto)
                     {
-                        return;
-                    }
+                        if (error == asio::error::operation_aborted)
+                        {
+                            return;
+                        }
 
-                    spdlog::trace("calling SIGINT from monitoring thread");
-                    exit();
-                });
-            io_context_.join();
+                        spdlog::trace("calling SIGINT from monitoring thread");
+                        exit();
+                    });
+                io_context_.join();
+            }
+            catch (const std::exception& ex)
+            {
+                spdlog::critical("Exception on working thread occured: {}", ex.what());
+            }
             end_of_work();
             spdlog::debug("Application: working thread is finished");
         };

@@ -43,6 +43,23 @@ jobs:
           git config --global --add safe.directory $GITHUB_WORKSPACE
           cmake --preset default
           cmake --build ./build -- -j2
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: test
+        run: |
+          cd build/bin
+          ./srs_backend_test --gtest_output=xml
+
+      - name: publish test report
+        uses: mikepenz/action-junit-report@v5
+        if: success() || failure()
+        with:
+          report_paths: 'build/bin/test_detail.xml'
+
+      - name: cache-delete
+        run: |
+          git config --global --add safe.directory $GITHUB_WORKSPACE
           gh cache delete ${{ steps.cache-restore.outputs.cache-primary-key }} || true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

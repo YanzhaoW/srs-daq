@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <print>
 #include <string_view>
 
 namespace srs
@@ -69,6 +70,9 @@ namespace srs
 
     constexpr auto convert_option_has_dependency(DataConvertOptions dependee, DataConvertOptions depender) -> bool
     {
+        std::println("-----------dependee: {}, depender: {}",
+                     convert_option_to_string(dependee),
+                     convert_option_to_string(dependee));
         if (dependee == depender)
         {
             return true;

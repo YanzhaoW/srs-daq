@@ -48,6 +48,7 @@ namespace srs
         void set_status_is_reading(bool val = true) { status_.is_reading.store(val); }
         void set_print_mode(DataPrintMode mode);
         void set_output_filenames(const std::vector<std::string>& filenames);
+        void set_error_string(std::string_view err_msg) { error_string_ = err_msg; }
 
         // getters:
         [[nodiscard]] auto get_channel_address() const -> uint16_t { return channel_address_; }
@@ -55,6 +56,7 @@ namespace srs
         [[nodiscard]] auto get_status() const -> const auto& { return status_; }
         [[nodiscard]] auto get_io_context() -> auto& { return io_context_; }
         auto get_data_reader() -> DataReader* { return data_reader_.get(); }
+        [[nodiscard]] auto get_error_string() const -> const std::string& { return error_string_; }
 
       private:
         using udp = asio::ip::udp;
@@ -62,6 +64,7 @@ namespace srs
         Status status_;
         uint16_t channel_address_ = DEFAULT_CHANNEL_ADDRE;
         Config configurations_;
+        std::string error_string_;
         io_context_type io_context_{ 4 };
         asio::executor_work_guard<io_context_type::executor_type> io_work_guard_;
         asio::signal_set signal_set_{ io_context_, SIGINT, SIGTERM };
