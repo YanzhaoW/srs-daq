@@ -58,7 +58,7 @@ jobs:
         with:
           name: Google test
           path: 'build/bin/test_detail.xml'
-          fail-on-error: false
+          fail-on-error: true
           reporter: java-junit
 
       - name: cache-delete
