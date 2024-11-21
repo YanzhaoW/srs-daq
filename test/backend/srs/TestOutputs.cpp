@@ -7,13 +7,11 @@ namespace srs::test
 {
     namespace
     {
-        void run_application(const std::string& output_filename, std::string& error_msg)
+        void run_application(const std::vector<std::string>& output_filenames, std::string& error_msg)
         {
             try
             {
                 auto app = srs::App{};
-                auto output_filenames = std::vector<std::string>{};
-                output_filenames.push_back(output_filename);
 
                 app.set_fec_data_receiv_port(0);
                 app.set_output_filenames(output_filenames);
@@ -53,21 +51,21 @@ namespace
 
 } // namespace
 
-TEST(check_outputs, binary_output)
+TEST(integration_test_outputfiles, binary_output)
 {
     const auto filename = std::string{ "test_output.bin" };
     auto error_msg = std::string{};
-    ASSERT_NO_THROW(srs::test::run_application(filename, error_msg));
+    ASSERT_NO_THROW(srs::test::run_application(std::vector{ filename }, error_msg));
     EXPECT_EQ(error_msg, "");
     auto res = check_if_file_exist(filename);
     ASSERT_TRUE(res);
 }
 
-TEST(check_outputs, root_output)
+TEST(integration_test_outputfiles, root_output)
 {
     const auto filename = std::string{ "test_output.root" };
     auto error_msg = std::string{};
-    ASSERT_NO_THROW(srs::test::run_application(filename, error_msg));
+    ASSERT_NO_THROW(srs::test::run_application(std::vector{ filename }, error_msg));
     EXPECT_EQ(error_msg, "");
     auto res = check_if_file_exist(filename);
 #ifdef HAS_ROOT
@@ -77,21 +75,21 @@ TEST(check_outputs, root_output)
 #endif
 }
 
-TEST(check_outputs, proto_binary)
+TEST(integration_test_outputfiles, proto_binary_output)
 {
     const auto filename = std::string{ "test_output.binpb" };
     auto error_msg = std::string{};
-    ASSERT_NO_THROW(srs::test::run_application(filename, error_msg));
+    ASSERT_NO_THROW(srs::test::run_application(std::vector{ filename }, error_msg));
     EXPECT_EQ(error_msg, "");
     auto res = check_if_file_exist(filename);
     ASSERT_TRUE(res);
 }
 
-TEST(check_outputs, json_output)
+TEST(integration_test_outputfiles, json_output)
 {
     const auto filename = std::string{ "test_output.json" };
     auto error_msg = std::string{};
-    ASSERT_NO_THROW(srs::test::run_application(filename, error_msg));
+    ASSERT_NO_THROW(srs::test::run_application(std::vector{ filename }, error_msg));
     EXPECT_EQ(error_msg, "");
     auto res = check_if_file_exist(filename);
 #ifdef HAS_ROOT
@@ -99,4 +97,30 @@ TEST(check_outputs, json_output)
 #else
     ASSERT_FALSE(res);
 #endif
+}
+
+TEST(integration_test_outputfiles, all_outputs)
+{
+    const auto filenames = std::vector<std::string>{
+        "test_output1.bin", "test_output2.bin", "test_output1.json", "test_output1.root", "test_output1.binpb"
+    };
+    auto error_msg = std::string{};
+    ASSERT_NO_THROW(srs::test::run_application(filenames, error_msg));
+    EXPECT_EQ(error_msg, "");
+    for (const auto& filename : filenames)
+    {
+        auto res = check_if_file_exist(filename);
+        if (filename == "test_output1.root")
+        {
+#ifdef HAS_ROOT
+            ASSERT_TRUE(res);
+#else
+            ASSERT_FALSE(res);
+#endif
+        }
+        else
+        {
+            ASSERT_TRUE(res);
+        }
+    }
 }
