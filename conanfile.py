@@ -1,4 +1,5 @@
 import os
+from sys import platform
 
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain
@@ -59,10 +60,11 @@ class CompressorRecipe(ConanFile):
         self.requires("spdlog/1.14.1")
         self.requires("zpp_bits/4.4.24")
         self.requires("fmt/11.0.1", override=True)
-        self.requires("protobuf/5.27.0", options={"with_zlib": True, "fPIC": True, "shared": False, "lite": False})
         self.requires("boost/1.86.0", options=BOOST_OPTIONS)
-        if os.environ["CMAKE_ENABLE_TEST"] == "ON":
-            self.requires("gtest/1.15.0")
+        if platform != "darwin":
+            self.requires("protobuf/5.27.0", options={"with_zlib": True, "fPIC": True, "shared": False, "lite": False})
+            if os.environ["CMAKE_ENABLE_TEST"] == "ON":
+                self.requires("gtest/1.15.0")
 
     def generate(self):
         tc = CMakeToolchain(self)
