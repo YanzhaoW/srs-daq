@@ -40,5 +40,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-      - name: result
-        run: echo "Please visit ${{ env.url }} for the doxygen documnetaion."

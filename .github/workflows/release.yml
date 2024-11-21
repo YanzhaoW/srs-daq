@@ -87,11 +87,10 @@ jobs:
         run: |
           source $PARENT_DIR/miniconda3/bin/activate
           conda activate srs
-          mkdir ${PARENT_DIR}/srs-install
-          cmake --preset ${{ matrix.preset}} -DCMAKE_INSTALL_PREFIX=${PARENT_DIR}/srs-install -DNO_ROOT=$DISABLE_ROOT
+          mkdir srs-daq
+          cmake --preset ${{ matrix.preset}} -DCMAKE_INSTALL_PREFIX="./srs-daq" -DNO_ROOT=$DISABLE_ROOT
           cmake --build ./build --target install -- -j2
-          cd ${{ env.PARENT_DIR }}
-          tar czf "srs-${{ matrix.os}}-x86-64-${{ env.TAG_NAME }}-${{ env.ROOT_TAG }}.tar.gz" srs-install
+          tar czf "srs-${{ matrix.os}}-x86-64-${{ env.TAG_NAME }}-${{ env.ROOT_TAG }}.tar.gz" "./srs-daq"
 
       - uses: actions/upload-artifact@v4
         with:

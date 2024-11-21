@@ -7,7 +7,9 @@
 
 ## Introduction
 
-srs-daq is an asynchronous data IO program for SRS system.
+srs-daq is an asynchronous data IO program for SRS system. It communicates with the SRS system through the UDP socket with different commands to, for example, start or stop the data transferring from the system. Data sent from the SRS system is then analyzed in the program in different stages, such as the deserialization, monitoring, data conversion and writing to different files or sockets. There are 4 types of output formats supported: binary file, root file (require ROOT), JSON file and UDP socket. Binary file can store either **as-is** data sent from the SRS system or the Google's Protobuf binary. UDP socket can only send the Google's Protobuf binary due to its easy deserialization.
+
+Technical information about class definitions can be found in this [Doxygen documentation](https://yanzhaow.github.io/srs-daq/).
 
 ### Included
 
@@ -22,7 +24,7 @@ Please visit the [release page](https://github.com/YanzhaoW/srs-daq/releases) an
 wget [download-link]
 tar -xvzf [download-file]
 ```
-After unzipping the downloaded file, a new folder `srs-install` will be put in the current folder.
+After unzipping the downloaded file, a new folder `srs-daq` will be put in the current folder.
 
 If your operating system is not in the download link list. Please either [build the project from source](doc/build_source.md) or create an issue to make the request.
 
@@ -31,7 +33,7 @@ If your operating system is not in the download link list. Please either [build 
 
 ## srs_control - The main program
 
-Go to `srs-install/bin` directory and run
+Go to `srs-daq/bin` directory and run
 
 ```bash
 ./srs_control [-p DATA_PRINT_OPTION] [-v LOG_LEVEL] [-h]
