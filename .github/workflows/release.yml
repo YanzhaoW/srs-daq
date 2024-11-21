@@ -134,7 +134,7 @@ jobs:
 
       - name: clean old releases
         continue-on-error: true
-        run: gh release delete ${{ env.TAG_NAME }} || true
+        run: gh release delete ${{ env.TAG_NAME }} --cleanup-tag || true
 
       - name: create release
         run: |

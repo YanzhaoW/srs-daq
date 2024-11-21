@@ -59,7 +59,8 @@ auto main(int argc, char** argv) -> int
 
         app.read_data();
         app.switch_on();
-        app.run();
+        app.start_analysis();
+        app.wait_for_finish();
     }
     catch (const CLI::ParseError& e)
     {

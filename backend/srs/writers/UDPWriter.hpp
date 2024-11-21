@@ -20,7 +20,7 @@ namespace srs
     class UDPWriter
     {
       public:
-        UDPWriter(App& app, asio::ip::udp::endpoint endpoint, DataConvertOptions derser_mode)
+        UDPWriter(App& app, asio::ip::udp::endpoint endpoint, DataConvertOptions derser_mode = DataConvertOptions::none)
             : convert_mode_{ derser_mode }
             , connection_{ ConnectionInfo{ &app } }
             , app_{ app }
@@ -42,11 +42,15 @@ namespace srs
         }
 
         // INFO: this will be called in coroutine
-        void close() { connection_.close_socket(); }
+        void close() { connection_.close(); }
+
+        // Getters:
+        auto get_local_socket() -> const auto& { return connection_.get_socket(); }
+        auto get_remote_endpoint() -> const auto& { return connection_.get_remote_endpoint(); }
 
       private:
         using enum DataConvertOptions;
-        DataConvertOptions convert_mode_ = DataConvertOptions::none;
+        DataConvertOptions convert_mode_;
         UDPWriterConnection connection_;
         std::reference_wrapper<App> app_;
         asio::experimental::coro<int(std::optional<std::string_view>)> coro_;

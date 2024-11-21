@@ -16,27 +16,43 @@ namespace srs
         start_work();
     }
 
-    App::~App() = default;
+    App::~App() noexcept
+    {
+        if (working_thread_.joinable())
+        {
+            spdlog::debug("Application: Working thread is still running. Trying to stop the io context ...");
+            io_context_.stop();
+            spdlog::debug("io context is stoped");
+        }
+    }
 
     void App::start_work()
     {
         auto monitoring_action = [this]()
         {
-            signal_set_.async_wait(
-                [this](const boost::system::error_code& error, auto)
-                {
-                    if (error == asio::error::operation_aborted)
+            try
+            {
+                signal_set_.async_wait(
+                    [this](const boost::system::error_code& error, auto)
                     {
-                        return;
-                    }
+                        if (error == asio::error::operation_aborted)
+                        {
+                            return;
+                        }
 
-                    spdlog::trace("calling SIGINT from monitoring thread");
-                    exit();
-                });
-            io_context_.join();
+                        spdlog::trace("calling SIGINT from monitoring thread");
+                        exit();
+                    });
+                io_context_.join();
+            }
+            catch (const std::exception& ex)
+            {
+                spdlog::critical("Exception on working thread occured: {}", ex.what());
+            }
             end_of_work();
+            spdlog::debug("Application: working thread is finished");
         };
-        working_thread_ = std::thread{ monitoring_action };
+        working_thread_ = std::jthread{ monitoring_action };
     }
 
     void App::end_of_work() const
@@ -51,10 +67,16 @@ namespace srs
     void App::exit()
     {
         signal_set_.cancel();
-        data_processor_->stop();
-        spdlog::debug("Shutting down application ...");
         status_.is_on_exit.store(true);
-        status_.wait_for_status([](const auto& status) { return not status.is_reading.load(); });
+        data_processor_->stop();
+        data_reader_->close();
+        spdlog::debug("Shutting down application ...");
+        status_.wait_for_status(
+            [](const auto& status)
+            {
+                spdlog::debug("Waiting for reading status false");
+                return not status.is_reading.load();
+            });
 
         if (status_.is_acq_on.load())
         {
@@ -65,8 +87,9 @@ namespace srs
         {
             set_status_acq_off(true);
         }
-        set_status_acq_on(false);
         io_work_guard_.reset();
+        set_status_acq_on(false);
+        spdlog::debug("Application is exited");
     }
 
     void App::set_print_mode(DataPrintMode mode) { data_processor_->set_print_mode(mode); }
@@ -86,7 +109,7 @@ namespace srs
     void App::switch_on()
     {
         auto connection_info = ConnectionInfo{ this };
-        connection_info.local_port_number = FEC_CONTROL_LOCAL_PORT;
+        connection_info.local_port_number = configurations_.fec_control_local_port;
         auto connection = std::make_shared<Starter>(connection_info);
         connection->set_remote_endpoint(remote_endpoint_);
         connection->acq_on();
@@ -95,7 +118,7 @@ namespace srs
     void App::switch_off()
     {
         auto connection_info = ConnectionInfo{ this };
-        connection_info.local_port_number = FEC_CONTROL_LOCAL_PORT;
+        connection_info.local_port_number = configurations_.fec_control_local_port;
         auto connection = std::make_shared<Stopper>(connection_info);
         connection->set_remote_endpoint(remote_endpoint_);
         connection->acq_off();
@@ -104,14 +127,11 @@ namespace srs
     void App::read_data()
     {
         auto connection_info = ConnectionInfo{ this };
-        connection_info.local_port_number = FEC_DAQ_RECEIVE_PORT;
-        auto data_reader = std::make_shared<DataReader>(connection_info, data_processor_.get());
-        data_reader->start();
+        connection_info.local_port_number = configurations_.fec_data_receive_port;
+        data_reader_ = std::make_shared<DataReader>(connection_info, data_processor_.get());
+        data_reader_->start();
     }
 
-    void App::run()
-    {
-        data_processor_->start();
-        working_thread_.join();
-    }
+    void App::start_analysis() { data_processor_->start(); }
+    void App::wait_for_finish() { working_thread_.join(); }
 } // namespace srs

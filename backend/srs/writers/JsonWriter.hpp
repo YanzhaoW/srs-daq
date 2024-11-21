@@ -93,8 +93,10 @@ namespace srs
         }
 
         [[nodiscard]] static auto get_convert_mode() -> DataConvertOptions { return DataConvertOptions::structure; }
-
-        auto write(auto fut) -> boost::unique_future<std::optional<int>> { return {}; }
+        auto write(auto pre_future) -> boost::unique_future<std::optional<int>>
+        {
+            return create_coro_future(coro_, pre_future);
+        }
 
       private:
         bool is_first_item = true;

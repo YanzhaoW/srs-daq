@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <fmt/format.h>
 #include <string_view>
 
 namespace srs
@@ -69,6 +70,9 @@ namespace srs
 
     constexpr auto convert_option_has_dependency(DataConvertOptions dependee, DataConvertOptions depender) -> bool
     {
+        // fmt::println("-----------dependee: {}, depender: {}",
+        //              convert_option_to_string(dependee),
+        //              convert_option_to_string(dependee));
         if (dependee == depender)
         {
             return true;
@@ -92,3 +96,30 @@ namespace srs
     }
 
 } // namespace srs
+
+template <>
+class fmt::formatter<srs::DataConvertOptions>
+{
+  public:
+    static constexpr auto parse(format_parse_context& ctx) { return ctx.end(); }
+    template <typename FmtContent>
+    constexpr auto format(srs::DataConvertOptions option, FmtContent& ctn) const
+    {
+        using enum srs::DataConvertOptions;
+        switch (option)
+        {
+            case none:
+                return fmt::format_to(ctn.out(), "none");
+            case raw:
+                return fmt::format_to(ctn.out(), "raw");
+            case raw_frame:
+                return fmt::format_to(ctn.out(), "raw_frame");
+            case structure:
+                return fmt::format_to(ctn.out(), "structure");
+            case proto:
+                return fmt::format_to(ctn.out(), "proto");
+            case proto_frame:
+                return fmt::format_to(ctn.out(), "proto_frame");
+        }
+    }
+};

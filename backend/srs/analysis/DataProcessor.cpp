@@ -8,8 +8,8 @@
 #include <spdlog/spdlog.h>
 #include <srs/Application.hpp>
 #include <srs/analysis/DataProcessor.hpp>
-#include <srs/data/SRSDataStructs.hpp>
 #include <srs/data/DataStructsFormat.hpp>
+#include <srs/data/SRSDataStructs.hpp>
 
 namespace srs
 {
@@ -99,14 +99,18 @@ namespace srs
     {
         // CAS operation to guarantee the thread safty
         auto expected = false;
+        spdlog::trace("Try to stop the data processor. Current is_stopped status: {}", is_stopped.load());
         if (is_stopped.compare_exchange_strong(expected, true))
         {
+            spdlog::trace("Try to stop data monitor");
             monitor_.stop();
             data_queue_.abort();
-            spdlog::info("Stopping analysis loop ...");
-            data_processes_.stop();
-            spdlog::info("Analysis loop is stopped");
+            // spdlog::info("Stopping analysis loop ...");
+            // data_processes_.stop();
+            // spdlog::info("Analysis loop is stopped");
         }
+
+        spdlog::trace("Data processor is stopped");
     }
 
     void DataProcessor::read_data_once(std::span<BufferElementType> read_data)
@@ -126,9 +130,14 @@ namespace srs
             spdlog::trace("entering analysis loop");
             // TODO: Use direct binary data
 
-            while (not is_stopped.load())
+            while (true)
             {
-                data_processes_.analysis_one(data_queue_);
+                if (is_stopped.load())
+                {
+                    data_processes_.analysis_one(data_queue_, true);
+                    break;
+                }
+                data_processes_.analysis_one(data_queue_, false);
                 update_monitor();
                 print_data();
 
@@ -138,12 +147,15 @@ namespace srs
         catch (tbb::user_abort& ex)
         {
             spdlog::debug("Data processing: {}", ex.what());
+            app_->set_error_string(ex.what());
         }
         catch (std::exception& ex)
         {
             spdlog::critical("Exception occured: {}", ex.what());
-            app_->exit();
+            app_->set_error_string(ex.what());
+            // app_->exit();
         }
+        spdlog::debug("Analysis loop is stopped");
     }
 
     void DataProcessor::update_monitor()

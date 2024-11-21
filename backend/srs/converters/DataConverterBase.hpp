@@ -6,6 +6,8 @@
 #include <srs/utils/CommonFunctions.hpp>
 #include <srs/writers/DataWriter.hpp>
 
+#include <fmt/ranges.h>
+
 namespace srs
 {
     template <typename Input, typename Output>
@@ -23,7 +25,6 @@ namespace srs
         explicit DataConverterBase(auto coro)
             : coro_(std::move(coro))
         {
-
             coro_sync_start(coro_, std::optional<InputType>{}, asio::use_awaitable);
         }
 
