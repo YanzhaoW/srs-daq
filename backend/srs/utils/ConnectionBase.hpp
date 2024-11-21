@@ -76,9 +76,10 @@ namespace srs
         int timeout_seconds_ = DEFAULT_TIMEOUT_SECONDS;
 
         void encode_write_msg(const std::vector<CommunicateEntryType>& data, uint16_t address);
-        static auto signal_handling(auto* connection) -> asio::awaitable<void>;
+        static auto signal_handling(SharedConnectionPtr auto connection) -> asio::awaitable<void>;
         static auto timer_countdown(auto* connection) -> asio::awaitable<void>;
-        static auto listen_message(SharedPtr auto connection, bool is_continuous = false) -> asio::awaitable<void>;
+        static auto listen_message(SharedConnectionPtr auto connection, bool is_continuous = false)
+            -> asio::awaitable<void>;
         static auto send_message(std::shared_ptr<ConnectionBase> connection) -> asio::awaitable<void>;
         void reset_read_msg_buffer() { std::fill(read_msg_buffer_.begin(), read_msg_buffer_.end(), 0); }
     };
@@ -121,7 +122,8 @@ namespace srs
     }
 
     template <int size>
-    auto ConnectionBase<size>::listen_message(SharedPtr auto connection, bool is_continuous) -> asio::awaitable<void>
+    auto ConnectionBase<size>::listen_message(SharedConnectionPtr auto connection, bool is_continuous)
+        -> asio::awaitable<void>
     {
         spdlog::debug("Connection {}: starting to listen ...", connection->get_name());
         while (true)
@@ -166,7 +168,7 @@ namespace srs
     }
 
     template <int size>
-    auto ConnectionBase<size>::signal_handling(auto* connection) -> asio::awaitable<void>
+    auto ConnectionBase<size>::signal_handling(SharedConnectionPtr auto connection) -> asio::awaitable<void>
     {
         connection->signal_set_ = std::make_unique<asio::signal_set>(co_await asio::this_coro::executor, SIGINT);
         spdlog::trace("Connection {}: waiting for signals", connection->get_name());
@@ -214,12 +216,10 @@ namespace srs
             self.socket_ = self.new_shared_socket(self.local_port_number_);
         }
 
-        co_spawn(
-            self.app_->get_io_context(),
-            signal_handling(&self) || timer_countdown(&self) ||
-                listen_message(std::static_pointer_cast<std::remove_cvref_t<decltype(self)>>(self.shared_from_this()),
-                               is_continuous),
-            asio::detached);
+        co_spawn(self.app_->get_io_context(),
+                 signal_handling(get_shared_from_this(self)) || timer_countdown(&self) ||
+                     listen_message(get_shared_from_this(self), is_continuous),
+                 asio::detached);
         spdlog::debug("Connection {}: spawned listen coroutine", self.name_);
     }
 
@@ -241,11 +241,13 @@ namespace srs
         {
             is_socket_closed_.store(true);
             spdlog::trace("Connection {}: Closing the socket ...", name_);
-            socket_->cancel();
+            // socket_->cancel();
             socket_->close();
             if (signal_set_ != nullptr)
             {
+                spdlog::trace("Connection {}: cannelling signal ...", name_);
                 signal_set_->cancel();
+                spdlog::debug("Connection {}: signal is cancelled.", name_);
             }
             spdlog::trace("Connection {}: Socket is closed and cancelled.", name_);
         }

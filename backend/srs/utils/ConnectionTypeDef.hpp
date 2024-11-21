@@ -18,7 +18,7 @@ namespace srs
     };
 
     template <typename T>
-    concept SharedPtr = is_shared_ptr<T>::value and requires(T obj) { obj->get_name(); };
+    concept SharedConnectionPtr = is_shared_ptr<T>::value and requires(T obj) { obj->get_name(); };
 
     struct ConnectionInfo
     {

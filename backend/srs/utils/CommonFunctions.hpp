@@ -56,6 +56,11 @@ namespace srs
         return bin_val;
     }
 
+    constexpr auto get_shared_from_this(auto&& obj)
+    {
+        return std::static_pointer_cast<std::remove_cvref_t<decltype(obj)>>(obj.shared_from_this());
+    }
+
     auto create_coro_future(auto& coro, auto&& pre_fut)
     {
         if (not pre_fut.valid())
