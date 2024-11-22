@@ -18,7 +18,7 @@ Please make sure add the directory path of the program folder `srs-install` to `
 Convert the proto binary data to data structure
 ####################################################
 
-The full example can be found in this :ref:`script<../examples/readUDP/main.cpp>` .
+The full example can be found in this `script <https://github.com/YanzhaoW/srs-daq/blob/master/examples/readUDP/main.cpp>`_ .
 
 The class `srs::ProtoMsgReader` converts the proto binary data to the data structure. The memory allocation is done in the constructor and no allocation happens during the conversion. If multiple conversions needs to be done, the object should be kept alive to reduce the memory allocation.
 

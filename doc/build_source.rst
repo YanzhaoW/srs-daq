@@ -11,7 +11,7 @@ Prerequisites
 - oneTBB
 - **(Optional)** ROOT <span>&#8805;</span> 6.32
 
-- (mini) Conda. See [this instruction](install_conda.md) to install miniconda quickly.
+- (mini) Conda. See :doc:`this instruction </install_conda>` to install miniconda quickly.
 
 .. warning::
   DO NOT USE Conda to install ROOT. Use latest compiler to install ROOT from the source.
@@ -39,7 +39,7 @@ Step 2: Activate the Conda environment
 Step 3: Build the project
 ------------------------------------
 
-**Make sure conda environment `srs` is activated.**
+**Make sure conda environment ``srs`` is activated.**
 
 .. code-block:: bash
 
@@ -55,14 +55,14 @@ or
 
 Following CMake preset optional settings are available:
 
-- `-DUSE_ROOT=`
-  - `OFF` or `FALSE` (default). The program would only compile with ROOT if ROOT exists. 
-  - `ON` or `TRUE`. CMake configuration will fail if `ROOT` is not found. 
-- `-DNO_ROOT=`
-  - `OFF` or `FALSE` (default). Same as `-DUSE_ROOT=OFF`.
-  - `ON` or `TRUE`. The program does NOT compiler with ROOT even if ROOT exists.
+- ``-DUSE_ROOT=``
+  - ``OFF`` or ``FALSE`` (default). The program would only compile with ROOT if ROOT exists. 
+  - ``ON`` or ``TRUE``. CMake configuration will fail if ``ROOT`` is not found. 
+- ``-DNO_ROOT=``
+  - ``OFF`` or ``FALSE`` (default). Same as ``-DUSE_ROOT=OFF``.
+  - ``ON`` or ``TRUE``. The program does NOT compiler with ROOT even if ROOT exists.
 
-For example, to disable the ROOT dependency, run the `cmake --preset` with:
+For example, to disable the ROOT dependency, run the ``cmake --preset`` with:
 
 .. code-block:: bash
 
