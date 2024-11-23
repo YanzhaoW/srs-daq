@@ -14,15 +14,22 @@ release = '@CMAKE_PROJECT_VERSION@'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["myst_parser"]
+extensions = ['sphinx.ext.imgmath', 'sphinx.ext.todo',  'breathe']
 
 templates_path = ['_templates']
 exclude_patterns = []
 
-source_suffix = ['.rst', '.md', '.cpp']
+source_suffix = ['.rst' ]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
 html_static_path = []
+
+# -- Options for breathe ----------------------------
+
+breathe_projects = {"@CMAKE_PROJECT_NAME@": "@CMAKE_BINARY_DIR@/xml"}
+breathe_default_project = "@CMAKE_PROJECT_NAME@"
+breathe_default_members = ('members', 'undoc-members')
+breathe_show_include = True

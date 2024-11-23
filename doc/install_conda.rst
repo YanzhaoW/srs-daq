@@ -1,5 +1,5 @@
 #################################################
-Installation of required software using Conda
+Install prerequisites
 #################################################
 
 Conda is a package manager for easily installing required libraries and software.

@@ -1,5 +1,5 @@
 ###################################
-Build the project from source
+Build from source
 ###################################
 
 Prerequisites
