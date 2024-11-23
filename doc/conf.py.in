@@ -7,8 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = '@CMAKE_PROJECT_NAME@'
-copyright = '2024, Yanzhao Wang'
-author = 'Yanzhao Wang'
+copyright = '2024, Yanzhao Wang (王彥昭)'
+author = 'Yanzhao Wang (王彥昭)'
 release = '@CMAKE_PROJECT_VERSION@'
 
 # -- General configuration ---------------------------------------------------
@@ -23,7 +23,7 @@ html_context = {
   'display_github': True,
   'github_user': 'YanzhaoW',
   'github_repo': 'srs-daq',
-  'github_version': 'dev',
+  'github_version': 'dev/doc/',
 }
 
 source_suffix = ['.rst' ]

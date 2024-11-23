@@ -18,13 +18,17 @@ jobs:
           submodules: 'true'
       - name: run doxygen
         run: |
-          brew install doxygen graphviz
-          mkdir -p build
-          doxygen
+          brew upgrade
+          brew install doxygen graphviz cmake ninja
+          python3 -m venv venv
+          source venv/bin/activate
+          python3 -m pip install --upgrade pip
+          python3 -m pip install sphinx breathe sphinx-rtd-theme
+          cmake --workflow --preset build-doc
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: build/html
+          path: build/doc/sphinx
           retention-days: 1
 
   deploy-doc:

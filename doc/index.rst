@@ -7,7 +7,6 @@
 
    install_conda
    build_source
-   Source Code @ GitHub <https://github.com/YanzhaoW/srs-daq>
 
 .. toctree::
    :maxdepth: 2
