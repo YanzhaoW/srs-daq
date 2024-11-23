@@ -18,6 +18,13 @@ extensions = ['sphinx.ext.imgmath', 'sphinx.ext.todo',  'breathe']
 
 templates_path = ['_templates']
 exclude_patterns = []
+html_show_sourcelink = False
+html_context = {
+  'display_github': True,
+  'github_user': 'YanzhaoW',
+  'github_repo': 'srs-daq',
+  'github_version': 'dev',
+}
 
 source_suffix = ['.rst' ]
 
@@ -29,7 +36,7 @@ html_static_path = []
 
 # -- Options for breathe ----------------------------
 
-breathe_projects = {"@CMAKE_PROJECT_NAME@": "@CMAKE_BINARY_DIR@/xml"}
+breathe_projects = {"@CMAKE_PROJECT_NAME@": "@CMAKE_CURRENT_BINARY_DIR@/xml"}
 breathe_default_project = "@CMAKE_PROJECT_NAME@"
 breathe_default_members = ('members', 'undoc-members')
 breathe_show_include = True

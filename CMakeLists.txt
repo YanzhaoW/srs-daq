@@ -10,7 +10,6 @@ project(
     VERSION 0.1.1
     LANGUAGES CXX C)
 
-include(sphinx_setup)
 include(install_config)
 include(project_config)
 include(check_compilers)
@@ -29,6 +28,7 @@ include(import_packages)
 add_subdirectory(frontend)
 add_subdirectory(backend)
 add_subdirectory(examples)
+add_subdirectory(doc)
 if(ENABLE_TEST)
     add_subdirectory(test)
 endif()
