@@ -1,0 +1,1 @@
+.. include:: ../../cmake/README.rst

@@ -1,11 +1,8 @@
 #################################################
-Install prerequisites
+How to install Mini-conda
 #################################################
 
 Conda is a package manager for easily installing required libraries and software.
-
-Install mini-conda
-############################################
 
 Go to `mini-conda quick command line install <https://docs.anaconda.com/free/miniconda/#quick-command-line-install>`_ and choose the method for your operating system. For example, Linux users can do
 

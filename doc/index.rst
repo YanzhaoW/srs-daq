@@ -1,23 +1,24 @@
-.. include:: ../README.rst
+#####################################
+Welcome to SRS-DAQ documentation
+#####################################
 
 .. toctree::
    :maxdepth: 2
-   :caption: Installation
-   :hidden:
+   :caption: Basics
 
-   install_conda
-   build_source
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Program design
-   :hidden:
-
+   introduction
+   download_step
+   installation
+   executable
    library_usage
 
 .. toctree::
    :maxdepth: 2
-   :caption: Reference
-   :hidden:
+   :caption: Program design
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Advanced topics
 
    classes

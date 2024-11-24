@@ -1,3 +1,7 @@
+# import sys
+# from pathlib import Path
+
+# sys.path.append(str(Path('exts').resolve()))
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -14,7 +18,7 @@ release = '@CMAKE_PROJECT_VERSION@'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.imgmath', 'sphinx.ext.todo',  'breathe']
+extensions = ['sphinx.ext.autosectionlabel', 'sphinx.ext.imgmath', 'sphinx.ext.todo',  'breathe']
 
 templates_path = ['_templates']
 exclude_patterns = []
@@ -27,6 +31,8 @@ html_context = {
 }
 
 source_suffix = ['.rst' ]
+
+autosectionlabel_prefix_document = True
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
