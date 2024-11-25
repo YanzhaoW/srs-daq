@@ -12,11 +12,11 @@ Link the SRS library with CMake `find_package`:
   find_package(srs REQUIRED)
   add_executable(main PRIVATE srs::srs)
 
-Please make sure add the directory path of the installation folder ``srs-daq`` to ``CMAKE_PREFIX_PATH``:
+Please make sure add the directory path of the installation folder ``srs-install`` to ``CMAKE_PREFIX_PATH``:
 
 .. code-block:: bash
 
-  cmake -DCMAKE_PREFIX_PATH=[...]/srs-daq ..
+  cmake -DCMAKE_PREFIX_PATH=[...]/srs-install ..
 
 Available APIs
 ##################################
