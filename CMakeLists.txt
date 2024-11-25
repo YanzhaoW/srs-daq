@@ -8,7 +8,7 @@ set(ENV{CMAKE_ENABLE_TEST} ${ENABLE_TEST})
 
 project(
     SRS-DAQ
-    VERSION 0.1.1
+    VERSION 0.1.2
     LANGUAGES CXX C)
 
 if(BUILD_ONLY_DOC)
