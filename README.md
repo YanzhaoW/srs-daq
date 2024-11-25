@@ -9,8 +9,11 @@ SRS-DAQ is a project containing a command line tool `srs_control` and additional
 
 Please check the full documentation of this project: [SRS-DAQ documentation](<https://yanzhaow.github.io/srs-daq/>).
 
+## `srs_control` preview
+
+![Imgur](doc/media/srs_control_preview_v1.gif)
 
 ## Acknowledgments
 
 - A lot of information was used from the existing codebase of the VMM slow control software [vmmsc](https://gitlab.cern.ch/rd51-slow-control/vmmsc.git).
-- The understanding of the communication protocol was helped from the [srslib](https://github.com/bl0x/srslib).
+- The understanding of the communication protocol was helped from [srslib](https://github.com/bl0x/srslib).

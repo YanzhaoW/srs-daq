@@ -2,7 +2,7 @@ name: publish-doc
 on:
   push:
     branches:
-      - dev
+      - master
   workflow_dispatch:
 
 jobs:
