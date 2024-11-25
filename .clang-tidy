@@ -26,7 +26,6 @@ Checks: >
   modernize-*,
   performance-*,
   readability-*,
-  -hicpp-new-delete-operators,
   -modernize-use-trailing-return-type
 
 CheckOptions:

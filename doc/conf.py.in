@@ -42,7 +42,10 @@ html_static_path = []
 
 # -- Options for breathe ----------------------------
 
-breathe_projects = {"@CMAKE_PROJECT_NAME@": "@CMAKE_CURRENT_BINARY_DIR@/xml"}
-breathe_default_project = "@CMAKE_PROJECT_NAME@"
-breathe_default_members = ('members', 'undoc-members')
+breathe_projects = {"srs": "@CMAKE_CURRENT_BINARY_DIR@/xml"}
+breathe_default_project = "srs"
+# breathe_default_members = ('members', 'undoc-members')
 breathe_show_include = True
+breathe_projects_source = {
+            "srs" : ( "../backend/srs/readers", ["ProtoMsgReader.hpp"] )
+}
