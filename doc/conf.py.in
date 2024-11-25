@@ -1,0 +1,51 @@
+# import sys
+# from pathlib import Path
+
+# sys.path.append(str(Path('exts').resolve()))
+# Configuration file for the Sphinx documentation builder.
+#
+# For the full list of built-in configuration values, see the documentation:
+# https://www.sphinx-doc.org/en/master/usage/configuration.html
+
+# -- Project information -----------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+
+project = '@CMAKE_PROJECT_NAME@'
+copyright = '2024, Yanzhao Wang (王彥昭)'
+author = 'Yanzhao Wang (王彥昭)'
+release = '@CMAKE_PROJECT_VERSION@'
+
+# -- General configuration ---------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
+
+extensions = ['sphinx.ext.autosectionlabel', 'sphinx.ext.imgmath', 'sphinx.ext.todo',  'breathe']
+
+templates_path = ['_templates']
+exclude_patterns = []
+html_show_sourcelink = False
+html_context = {
+  'display_github': True,
+  'github_user': 'YanzhaoW',
+  'github_repo': 'srs-daq',
+  'github_version': 'dev/doc/',
+}
+
+source_suffix = ['.rst' ]
+
+autosectionlabel_prefix_document = True
+
+# -- Options for HTML output -------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+
+html_theme = 'sphinx_rtd_theme'
+html_static_path = []
+
+# -- Options for breathe ----------------------------
+
+breathe_projects = {"srs": "@CMAKE_CURRENT_BINARY_DIR@/xml"}
+breathe_default_project = "srs"
+# breathe_default_members = ('members', 'undoc-members')
+breathe_show_include = True
+breathe_projects_source = {
+            "srs" : ( "../backend/srs/readers", ["ProtoMsgReader.hpp"] )
+}

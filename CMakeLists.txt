@@ -1,31 +1,41 @@
 cmake_minimum_required(VERSION 3.28)
 
-include(${CMAKE_SOURCE_DIR}/cmake/option_settings.cmake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+
+include(option_settings)
+
 set(ENV{CMAKE_ENABLE_TEST} ${ENABLE_TEST})
 
 project(
-    srs
+    SRS-DAQ
     VERSION 0.1.1
     LANGUAGES CXX C)
 
-include(${CMAKE_SOURCE_DIR}/cmake/install_config.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake/project_config.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake/check_compilers.cmake)
+if(BUILD_ONLY_DOC)
+    add_subdirectory(doc)
+else()
+    if(BUILD_DOC)
+        add_subdirectory(doc)
+    endif()
+    include(install_config)
+    include(project_config)
+    include(check_compilers)
 
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_EXTENSIONS ON)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+    set(CMAKE_CXX_STANDARD 23)
+    set(CMAKE_CXX_EXTENSIONS ON)
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+    set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    list(APPEND CMAKE_CXX_FLAGS "-fexperimental-library")
-endif()
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        list(APPEND CMAKE_CXX_FLAGS "-fexperimental-library")
+    endif()
 
-include(${CMAKE_SOURCE_DIR}/cmake/import_packages.cmake)
+    include(import_packages)
 
-add_subdirectory(frontend)
-add_subdirectory(backend)
-add_subdirectory(examples)
-if(ENABLE_TEST)
-    add_subdirectory(test)
+    add_subdirectory(frontend)
+    add_subdirectory(backend)
+    add_subdirectory(examples)
+    if(ENABLE_TEST)
+        add_subdirectory(test)
+    endif()
 endif()
