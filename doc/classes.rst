@@ -1,11 +1,22 @@
 =======================
-Classes
+Reference
 =======================
 
-.. .. doxygenclass:: srs::ProtoMsgReader
-..    :project: srs
-..    :private-members:
+Common definitions
+==========================
 
-.. .. doxygenclass:: srs::ProtoSerializer
-..    :project: srs
-..    :private-members:
+.. doxygengroup:: CommonDefinitions
+   :project: srs
+
+Common functions
+========================
+
+.. doxygengroup:: CommonFunctions
+   :project: srs
+
+
+Common aliases
+========================
+
+.. doxygengroup:: CommonAliases
+   :project: srs

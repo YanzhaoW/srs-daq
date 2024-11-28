@@ -1,72 +1,60 @@
 #pragma once
 
-#include <algorithm>
 #include <fstream>
 #include <print>
-#include <srs/converters/RawToDelimRawConveter.hpp>
 #include <srs/utils/CommonDefitions.hpp>
 #include <string>
 #include <vector>
-#include <zpp_bits.h>
 
 namespace srs
 {
     class RawFrameReader
     {
       public:
-        explicit RawFrameReader(const std::string& filename)
-            : input_filename_{ filename }
-            , input_file_{ filename, std::ios::binary }
-        {
-            if (input_file_.fail())
-            {
-                throw std::runtime_error{ fmt::format("Cannot open the file {:?}", input_filename_) };
-            }
-            spdlog::debug("Open the binary file {:?}", input_filename_);
-        }
+        //! Default Constructor. No memory allocation.
+        explicit RawFrameReader() = default;
 
-        void read_one_frame(std::vector<char>& data_str)
-        {
-            auto data_view = read_one_frame();
-            data_str.clear();
-            data_str.reserve(data_view.size());
-            std::ranges::copy(data_view, std::back_inserter(data_str));
-        }
+        /**
+         * \brief Constructor that opens a file with the given filename.
+         *
+         * @param filename The file name of the input binary
+         *
+         */
+        explicit RawFrameReader(const std::string& filename);
 
-        auto read_one_frame() -> std::string_view
-        {
-            std::ranges::fill(input_buffer_, 0);
-            std::ranges::fill(size_buffer_, 0);
-            auto size = Raw2DelimRawConverter::SizeType{};
+        /**
+         *
+         * \brief Read one frame of the bianry data to a vector.
+         *
+         * The input vector is first reserved with #srs::LARGE_READ_MSG_BUFFER_SIZE elements and then resized with the
+         * \a size value, which is read from the binary file in the beginning. The vector is then set with \a size bytes
+         * of data from the file.
+         *
+         * @param binary_data The vector of chars to be filled.
+         * @param input_file Input file handler.
+         * @return The amount of bytes read from the binary file. If the binary input file is not open, return 0.
+         */
+        static auto read_one_frame(std::vector<char>& binary_data, std::ifstream& input_file) -> std::size_t;
 
-            if (input_file_.eof())
-            {
-                spdlog::info("End of the binary file.");
-                return {};
-            }
+        /**
+         *
+         * \brief Read one frame of the binary data from a file specified by the constructor \ref RawFrameReader(const
+         * std::string&).
+         *
+         * The binary data frame is written to the internal member variable #input_buffer_;
+         * #srs::LARGE_READ_MSG_BUFFER_SIZE bytes of memory will be reserved for the vector.
+         *
+         * @return Non-owning binary data.
+         *
+         */
+        auto read_one_frame() -> std::string_view;
 
-            input_file_.read(size_buffer_.data(), static_cast<int64_t>(size_buffer_.size()));
-            auto serialize_to = zpp::bits::in{ size_buffer_, zpp::bits::endian::big{} };
-            serialize_to(size).or_throw();
-            if (size > input_buffer_.size())
-            {
-                spdlog::critical("Read buffer size too small for the frame.");
-                return {};
-            }
-            auto read_size = static_cast<std::size_t>(input_file_.read(input_buffer_.data(), size).gcount());
-
-            if (read_size != size)
-            {
-                spdlog::warn("Binary Data is not extracted correctly from the file {:?}", input_filename_);
-            }
-
-            return std::string_view{ input_buffer_.data(), read_size };
-        }
+        //! Getter to the internal binary data used by the member function \ref read_one_frame().
+        auto get_binary_data() const -> const auto& { return input_buffer_; }
 
       private:
-        std::string input_filename_;
-        std::ifstream input_file_;
-        std::array<char, sizeof(Raw2DelimRawConverter::SizeType)> size_buffer_{};
-        std::array<char, LARGE_READ_MSG_BUFFER_SIZE> input_buffer_{};
+        std::string input_filename_;     //!< Input binary file name.
+        std::ifstream input_file_;       //!< Input binary file handler
+        std::vector<char> input_buffer_; //!< internal binary data buffer
     };
 } // namespace srs
