@@ -9,9 +9,11 @@ const PLOT_HEIGHT_PERCENT = 0.4
 
 const setAjustableSize = (lineChart: React.RefObject<IChart>, plot_ref: React.RefObject<HTMLHeadingElement>) => {
     if (plot_ref.current) {
-        const chart = lineChart.current?.instance;
-        if (chart) {
-            chart.resize({ width: PLOT_WIDTH_PERCENT * plot_ref.current.offsetWidth, height: PLOT_HEIGHT_PERCENT * plot_ref.current.offsetHeight });
+        if (lineChart.current) {
+            const chart = lineChart.current.instance;
+            if (chart) {
+                chart.resize({ width: PLOT_WIDTH_PERCENT * plot_ref.current.offsetWidth, height: PLOT_HEIGHT_PERCENT * plot_ref.current.offsetHeight });
+            }
         }
     }
 }
@@ -90,7 +92,7 @@ const Plots = () => {
                     className={"bb"}
                 />
             </div>
-        </div >
+        </div>
     );
 
 };
