@@ -18,17 +18,42 @@ namespace srs
         coro_sync_start(coro_, false, asio::use_awaitable);
     }
 
-    void DataProcessManager::analysis_one(tbb::concurrent_bounded_queue<SerializableMsgBuffer>& data_queue,
-                                          bool is_stopped)
+    auto DataProcessManager::analysis_one(tbb::concurrent_bounded_queue<SerializableMsgBuffer>& data_queue,
+                                          bool is_blocking) -> bool
     {
-        if (not is_stopped)
+        auto pop_res = true;
+        reset();
+        if (is_blocking)
         {
             data_queue.pop(binary_data_);
         }
-        run_processes(is_stopped);
+        else
+        {
+            pop_res = data_queue.try_pop(binary_data_);
+        }
+        if (pop_res)
+        {
+            auto res = run_processes(false);
+            if (not res.has_value())
+            {
+                throw std::runtime_error(fmt::format("{}", res.error()));
+            }
+        }
+        return pop_res;
     }
 
-    void DataProcessManager::run_processes(bool is_stopped)
+    DataProcessManager::~DataProcessManager()
+    {
+        spdlog::debug("Closing analysis task workflows ...");
+        reset();
+        auto res = run_processes(true);
+        if (not res.has_value())
+        {
+            spdlog::error("{}", res.error());
+        }
+    }
+
+    auto DataProcessManager::run_processes(bool is_stopped) -> std::expected<void, std::string_view>
     {
         auto starting_fut = create_coro_future(coro_, is_stopped).share();
         auto raw_to_delim_raw_fut = raw_to_delim_raw_converter_.create_future(starting_fut, writers_);
@@ -55,18 +80,14 @@ namespace srs
                 {
                     case raw:
                         return writer.write(starting_fut);
-                        break;
                     case raw_frame:
                         return writer.write(raw_to_delim_raw_fut);
                     case proto:
                         return writer.write(proto_deser_fut);
-                        break;
                     case proto_frame:
                         return writer.write(proto_delim_deser_fut);
-                        break;
                     default:
-                        throw std::runtime_error("Unrecognized derserialization option");
-                        break;
+                        return boost::unique_future<std::optional<int>>{};
                 }
             }
         };
@@ -75,8 +96,9 @@ namespace srs
         writers_.wait_for_finished();
         if (is_stopped)
         {
-            spdlog::info("All data writers are shutdown.");
+            spdlog::info("All data consumers are finished.");
         }
+        return {};
     }
 
     // NOLINTNEXTLINE(readability-static-accessed-through-instance)

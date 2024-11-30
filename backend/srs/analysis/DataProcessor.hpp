@@ -57,11 +57,18 @@ namespace srs
       public:
         explicit DataProcessor(App* control);
 
+        DataProcessor(const DataProcessor&) = delete;
+        DataProcessor(DataProcessor&&) = delete;
+        DataProcessor& operator=(const DataProcessor&) = delete;
+        DataProcessor& operator=(DataProcessor&&) = delete;
+        ~DataProcessor();
+
         // From socket interface. Need to be fast return
         void read_data_once(std::span<BufferElementType> read_data);
 
-        void start();
-        void stop();
+        void abort() { data_queue_.abort(); }
+
+        void start(bool is_blocking);
 
         // getters:
         [[nodiscard]] auto get_read_data_bytes() const -> uint64_t { return total_read_data_bytes_.load(); }
@@ -79,10 +86,12 @@ namespace srs
             data_processes_.set_output_filenames(filenames);
         }
 
+        void stop();
+
       private:
         using enum DataPrintMode;
 
-        std::atomic<bool> is_stopped{ false };
+        std::atomic<bool> is_stopped_{ false };
         std::size_t received_data_size_{};
         DataPrintMode print_mode_ = DataPrintMode::print_speed;
         std::atomic<uint64_t> total_read_data_bytes_ = 0;
@@ -95,7 +104,7 @@ namespace srs
         DataProcessManager data_processes_;
 
         // should run on a different task
-        void analysis_loop();
+        void analysis_loop(bool is_blocking);
         void update_monitor();
         void write_data();
         void print_data();

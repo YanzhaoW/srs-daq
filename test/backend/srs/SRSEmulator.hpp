@@ -23,6 +23,7 @@ namespace srs::test
 
         void start_send_data()
         {
+            spdlog::info("Starting to send data from emulator ...");
             while (true)
             {
                 auto read_str = frame_reader_.read_one_frame();
@@ -31,7 +32,8 @@ namespace srs::test
                     return;
                 }
                 auto send_fut = boost::async([read_str]() { return std::optional<std::string_view>{ read_str }; });
-                udp_writer_.write(std::move(send_fut)).get();
+                auto send_size = udp_writer_.write(std::move(send_fut)).get();
+                // spdlog::info("sent data size: {}", send_size.value());
             }
         }
 

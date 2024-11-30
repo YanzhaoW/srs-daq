@@ -1,5 +1,6 @@
 #pragma once
 
+#include <expected>
 #include <spdlog/spdlog.h>
 #include <srs/Application.hpp>
 #include <srs/converters/DataConvertOptions.hpp>
@@ -21,13 +22,20 @@ namespace srs
       public:
         explicit DataProcessManager(DataProcessor* data_processor, asio::thread_pool& thread_pool);
 
+        // rule of 5
+        ~DataProcessManager();
+        DataProcessManager(const DataProcessManager&) = delete;
+        DataProcessManager(DataProcessManager&&) = delete;
+        DataProcessManager& operator=(const DataProcessManager&) = delete;
+        DataProcessManager& operator=(DataProcessManager&&) = delete;
+
         using enum DataConvertOptions;
         using StartingCoroType = asio::experimental::coro<std::string_view(bool)>;
 
-        void analysis_one(tbb::concurrent_bounded_queue<SerializableMsgBuffer>& data_queue, bool is_stopped = false);
+        auto analysis_one(tbb::concurrent_bounded_queue<SerializableMsgBuffer>& data_queue, bool is_blocking) -> bool;
         void set_output_filenames(const std::vector<std::string>& filenames);
         void reset();
-        void stop() { run_processes(true); }
+        // void stop() { run_processes(true); }
 
         // Getters:
         template <DataConvertOptions option>
@@ -48,7 +56,7 @@ namespace srs
         DataWriter writers_;
 
         auto generate_starting_coro(asio::any_io_executor /*unused*/) -> StartingCoroType;
-        void run_processes(bool is_stopped);
+        [[maybe_unused]] auto run_processes(bool is_stopped) -> std::expected<void, std::string_view>;
     };
 
     template <DataConvertOptions option>

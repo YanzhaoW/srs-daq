@@ -84,33 +84,33 @@ namespace srs
     {
     }
 
-    void DataProcessor::start()
+    void DataProcessor::start(bool is_blocking)
     {
-        is_stopped.store(false);
+        is_stopped_.store(false);
         spdlog::debug("Data processor starts.");
         if (print_mode_ == print_speed)
         {
             monitor_.start();
         }
-        asio::post(app_->get_io_context(), [this]() { analysis_loop(); });
+        analysis_loop(is_blocking);
+        spdlog::trace("Data processor exit start().");
     }
+
+    DataProcessor::~DataProcessor() { stop(); }
+    // DataProcessor::~DataProcessor() = default;
 
     void DataProcessor::stop()
     {
         // CAS operation to guarantee the thread safty
         auto expected = false;
-        spdlog::trace("Try to stop the data processor. Current is_stopped status: {}", is_stopped.load());
-        if (is_stopped.compare_exchange_strong(expected, true))
+        spdlog::trace("Try to stop the data processor. Current is_stopped status: {}", is_stopped_.load());
+        if (is_stopped_.compare_exchange_strong(expected, true))
         {
             spdlog::trace("Try to stop data monitor");
             monitor_.stop();
             data_queue_.abort();
-            // spdlog::info("Stopping analysis loop ...");
-            // data_processes_.stop();
-            // spdlog::info("Analysis loop is stopped");
+            spdlog::trace("Data processor is stopped");
         }
-
-        spdlog::trace("Data processor is stopped");
     }
 
     void DataProcessor::read_data_once(std::span<BufferElementType> read_data)
@@ -123,7 +123,7 @@ namespace srs
         }
     }
 
-    void DataProcessor::analysis_loop()
+    void DataProcessor::analysis_loop(bool is_blocking)
     {
         try
         {
@@ -132,22 +132,24 @@ namespace srs
 
             while (true)
             {
-                if (is_stopped.load())
+                if (is_stopped_.load())
                 {
-                    data_processes_.analysis_one(data_queue_, true);
                     break;
                 }
-                data_processes_.analysis_one(data_queue_, false);
+                auto analysis_result = data_processes_.analysis_one(data_queue_, is_blocking);
                 update_monitor();
                 print_data();
 
-                data_processes_.reset();
+                auto is_reading = app_->get_status().is_reading.load();
+                if (not(is_reading or analysis_result))
+                {
+                    break;
+                }
             }
         }
         catch (tbb::user_abort& ex)
         {
-            spdlog::debug("Data processing: {}", ex.what());
-            app_->set_error_string(ex.what());
+            spdlog::trace("Data processing: {}", ex.what());
         }
         catch (std::exception& ex)
         {
@@ -155,7 +157,7 @@ namespace srs
             app_->set_error_string(ex.what());
             // app_->exit();
         }
-        spdlog::debug("Analysis loop is stopped");
+        spdlog::debug("Analysis loop is done.\n");
     }
 
     void DataProcessor::update_monitor()

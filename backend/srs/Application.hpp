@@ -13,6 +13,25 @@ namespace srs
 {
     class DataProcessor;
     class DataReader;
+    class App;
+
+    class AppExitHelper
+    {
+      public:
+        explicit AppExitHelper(App* app)
+            : app_{ app }
+        {
+        }
+
+        AppExitHelper(const AppExitHelper&) = default;
+        AppExitHelper(AppExitHelper&&) = delete;
+        AppExitHelper& operator=(const AppExitHelper&) = default;
+        AppExitHelper& operator=(AppExitHelper&&) = delete;
+        ~AppExitHelper() noexcept;
+
+      private:
+        App* app_;
+    };
 
     class App
     {
@@ -26,18 +45,18 @@ namespace srs
         ~App() noexcept;
 
         // public APIs
+        void init();
         void configure_fec() {}
         void switch_on();
         void switch_off();
-        void read_data();
+        void read_data(bool is_non_stop = true);
 
         void notify_status_change() { status_.status_change.notify_all(); }
-        void start_analysis();
-        void exit();
+        void start_analysis(bool is_blocking = true);
         void wait_for_finish();
-        void wait_for_status(auto&& condition, std::chrono::seconds time_duration = DEFAULT_STATUS_WAITING_TIME_SECONDS)
+        auto wait_for_status(auto&& condition, std::chrono::seconds time_duration = DEFAULT_STATUS_WAITING_TIME_SECONDS) -> bool
         {
-            status_.wait_for_status(std::forward<decltype(condition)>(condition), time_duration);
+            return status_.wait_for_status(std::forward<decltype(condition)>(condition), time_duration);
         }
 
         // setters:
@@ -57,6 +76,10 @@ namespace srs
         [[nodiscard]] auto get_io_context() -> auto& { return io_context_; }
         auto get_data_reader() -> DataReader* { return data_reader_.get(); }
         [[nodiscard]] auto get_error_string() const -> const std::string& { return error_string_; }
+        [[nodiscard]] auto get_data_processor() const -> const auto& { return *data_processor_; };
+
+        // called by ExitHelper
+        void end_of_work();
 
       private:
         using udp = asio::ip::udp;
@@ -65,15 +88,19 @@ namespace srs
         uint16_t channel_address_ = DEFAULT_CHANNEL_ADDRE;
         Config configurations_;
         std::string error_string_;
+
+        // Destructors are called in the inversed order
         io_context_type io_context_{ 4 };
         asio::executor_work_guard<io_context_type::executor_type> io_work_guard_;
+        udp::endpoint remote_endpoint_;
         asio::signal_set signal_set_{ io_context_, SIGINT, SIGTERM };
         std::jthread working_thread_;
-        udp::endpoint remote_endpoint_;
+        AppExitHelper exit_helper_{ this };
         std::unique_ptr<DataProcessor> data_processor_;
         std::shared_ptr<DataReader> data_reader_;
 
-        void start_work();
-        void end_of_work() const;
+        void exit();
+        void wait_for_reading_finish();
     };
+
 } // namespace srs

@@ -1,8 +1,5 @@
 #pragma once
 
-#include "CommonDefitions.hpp"
-#include "ConnectionTypeDef.hpp"
-
 #include <boost/asio/experimental/awaitable_operators.hpp>
 #include <boost/asio/experimental/coro.hpp>
 #include <fmt/ranges.h>
@@ -11,6 +8,7 @@
 #include <srs/Application.hpp>
 #include <srs/converters/SerializableBuffer.hpp>
 #include <srs/utils/CommonConcepts.hpp>
+#include <srs/utils/ConnectionTypeDef.hpp>
 
 namespace srs
 {
@@ -34,7 +32,7 @@ namespace srs
         void on_fail() { spdlog::debug("default on_fail is called!"); }
         auto get_executor() { return app_->get_io_context().get_executor(); }
 
-        void listen(this auto&& self, bool is_continuous = false);
+        void listen(this auto&& self, bool is_non_stop = false);
         void communicate(this auto&& self, const std::vector<CommunicateEntryType>& data, uint16_t address);
 
         auto send_continuous_message() -> asio::experimental::coro<int(std::optional<std::string_view>)>;
@@ -56,12 +54,15 @@ namespace srs
         auto get_socket() -> const udp::socket& { return *socket_; }
         auto get_remote_endpoint() -> const udp::endpoint& { return remote_endpoint_; }
         [[nodiscard]] auto get_local_port_number() const -> int { return local_port_number_; }
+        [[nodiscard]] auto is_continuous() const -> bool { return is_continuous_; }
 
       protected:
         auto new_shared_socket(int port_number) -> std::unique_ptr<udp::socket>;
         void close_socket();
+        void set_continuous(bool is_continuous = true) { is_continuous_ = is_continuous; }
 
       private:
+        bool is_continuous_ = false;
         int local_port_number_ = 0;
         std::atomic<bool> is_socket_closed_{ false };
         uint32_t counter_ = INIT_COUNT_VALUE;
@@ -78,7 +79,7 @@ namespace srs
         void encode_write_msg(const std::vector<CommunicateEntryType>& data, uint16_t address);
         static auto signal_handling(SharedConnectionPtr auto connection) -> asio::awaitable<void>;
         static auto timer_countdown(auto* connection) -> asio::awaitable<void>;
-        static auto listen_message(SharedConnectionPtr auto connection, bool is_continuous = false)
+        static auto listen_message(SharedConnectionPtr auto connection, bool is_non_stop = false)
             -> asio::awaitable<void>;
         static auto send_message(std::shared_ptr<ConnectionBase> connection) -> asio::awaitable<void>;
         void reset_read_msg_buffer() { std::fill(read_msg_buffer_.begin(), read_msg_buffer_.end(), 0); }
@@ -89,10 +90,11 @@ namespace srs
     template <int size>
     auto ConnectionBase<size>::send_message(std::shared_ptr<ConnectionBase<size>> connection) -> asio::awaitable<void>
     {
-        spdlog::debug("Connection {}: Sending data ...", connection->get_name());
+        spdlog::trace("Connection {}: Sending data ...", connection->get_name());
         auto data_size = co_await connection->socket_->async_send_to(
             asio::buffer(connection->write_msg_buffer_.data()), connection->remote_endpoint_, asio::use_awaitable);
-        spdlog::debug("Connection {}: {} bytes data sent with {:02x}",
+        spdlog::debug("Connection {}: Message is sent.", connection->get_name());
+        spdlog::trace("Connection {}: {} bytes data sent with {:02x}",
                       connection->get_name(),
                       data_size,
                       fmt::join(connection->write_msg_buffer_.data(), " "));
@@ -122,10 +124,24 @@ namespace srs
     }
 
     template <int size>
-    auto ConnectionBase<size>::listen_message(SharedConnectionPtr auto connection, bool is_continuous)
+    auto ConnectionBase<size>::listen_message(SharedConnectionPtr auto connection, bool is_non_stop)
         -> asio::awaitable<void>
     {
+        using asio::experimental::awaitable_operators::operator||;
+
         spdlog::debug("Connection {}: starting to listen ...", connection->get_name());
+
+        auto io_context = co_await asio::this_coro::executor;
+        auto timer = asio::steady_timer{ io_context };
+        if (is_non_stop)
+        {
+            timer.expires_at(decltype(timer)::time_point::max());
+        }
+        else
+        {
+            timer.expires_after(std::chrono::seconds{ connection->timeout_seconds_ });
+        }
+
         while (true)
         {
             if (not connection->socket_->is_open() or connection->is_socket_closed_.load())
@@ -133,38 +149,37 @@ namespace srs
                 co_return;
             }
 
-            auto receive_data_size = co_await connection->socket_->async_receive(
-                asio::buffer(connection->read_msg_buffer_), asio::use_awaitable);
-            auto read_msg = std::span{ connection->read_msg_buffer_.data(), receive_data_size };
+            auto receive_data_size = co_await (
+                connection->socket_->async_receive(asio::buffer(connection->read_msg_buffer_), asio::use_awaitable) ||
+                timer.async_wait(asio::use_awaitable));
+            if (not is_non_stop and std::holds_alternative<std::monostate>(receive_data_size))
+            {
+                if (not connection->is_continuous())
+                {
+                    spdlog::error("Connection {}: Message listening TIMEOUT after {} seconds.",
+                                  connection->get_name(),
+                                  connection->timeout_seconds_);
+                    connection->on_fail();
+                }
+                else
+                {
+                    spdlog::info("Connection {}: Message listening TIMEOUT after {} seconds.",
+                                 connection->get_name(),
+                                 connection->timeout_seconds_);
+                }
+                break;
+            }
+            auto read_msg = std::span{ connection->read_msg_buffer_.data(), std::get<std::size_t>(receive_data_size) };
             connection->read_data_handle(read_msg);
             // spdlog::info("Connection {}: received {} bytes data", connection->get_name(), read_msg.size());
 
             connection->reset_read_msg_buffer();
-            if (not is_continuous or connection->get_app().get_status().is_on_exit.load())
+            if (not connection->is_continuous() or connection->get_app().get_status().is_on_exit.load())
             {
                 break;
             }
         }
         connection->close();
-    }
-
-    template <int size>
-    auto ConnectionBase<size>::timer_countdown(auto* connection) -> asio::awaitable<void>
-    {
-        auto io_context = co_await asio::this_coro::executor;
-        auto timer = asio::steady_timer{ io_context };
-        if (connection->timeout_seconds_ > 0)
-        {
-
-            timer.expires_after(std::chrono::seconds{ connection->timeout_seconds_ });
-        }
-        else
-        {
-            timer.expires_at(decltype(timer)::time_point::max());
-        }
-        co_await timer.async_wait(asio::use_awaitable);
-        spdlog::error("Connection {}: TIMEOUT after {} seconds.", connection->get_name(), connection->timeout_seconds_);
-        connection->on_fail();
     }
 
     template <int size>
@@ -208,7 +223,7 @@ namespace srs
     }
 
     template <int size>
-    void ConnectionBase<size>::listen(this auto&& self, bool is_continuous)
+    void ConnectionBase<size>::listen(this auto&& self, bool is_non_stop)
     {
         using asio::experimental::awaitable_operators::operator||;
         if (self.socket_ == nullptr)
@@ -217,10 +232,9 @@ namespace srs
         }
 
         co_spawn(self.app_->get_io_context(),
-                 signal_handling(get_shared_from_this(self)) || timer_countdown(&self) ||
-                     listen_message(get_shared_from_this(self), is_continuous),
+                 signal_handling(get_shared_from_this(self)) || listen_message(get_shared_from_this(self), is_non_stop),
                  asio::detached);
-        spdlog::debug("Connection {}: spawned listen coroutine", self.name_);
+        spdlog::trace("Connection {}: spawned listen coroutine", self.name_);
     }
 
     template <int size>
@@ -231,7 +245,7 @@ namespace srs
         self.listen();
         self.encode_write_msg(data, address);
         co_spawn(self.app_->get_io_context(), send_message(self.shared_from_this()), asio::detached);
-        spdlog::debug("Connection {}: spawned write coroutine", self.name_);
+        spdlog::trace("Connection {}: spawned write coroutine", self.name_);
     }
 
     template <int size>
@@ -247,7 +261,7 @@ namespace srs
             {
                 spdlog::trace("Connection {}: cannelling signal ...", name_);
                 signal_set_->cancel();
-                spdlog::debug("Connection {}: signal is cancelled.", name_);
+                spdlog::trace("Connection {}: signal is cancelled.", name_);
             }
             spdlog::trace("Connection {}: Socket is closed and cancelled.", name_);
         }
