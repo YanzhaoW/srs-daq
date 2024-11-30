@@ -18,6 +18,60 @@ Please make sure add the directory path of the installation folder ``srs-install
 
   cmake -DCMAKE_PREFIX_PATH=[...]/srs-install ..
 
+Output data structure
+################################
+
+The output data structure of this program is a C++ struct:
+
+.. doxygenclass:: srs::StructData
+   :project: srs
+   :members:
+   :undoc-members:
+
+with its sub structure:
+
+.. doxygenclass:: srs::HitData
+   :project: srs
+   :members:
+
+
+.. doxygenclass:: srs::MarkerData
+   :project: srs
+   :members:
+
+
+.. doxygenclass:: srs::ReceiveDataHeader
+   :project: srs
+   :members:
+
+An example of ROOT macro to extract data structure from the tree
+===================================================================
+
+To extract the data structure value, it's highly recommended to use ROOT `TTreeReader <https://root.cern/doc/master/classTTreeReader.html>`_ instead of direct ROOT ``TTree``. The tree name from the :program: `srs_control` save a tree named "srs_data_tree" with a single branch named "srs_frame_data".
+
+The following example extract the whole data structure :cpp:type: `srs::StructData` and print out every offset value:
+
+.. code:: cpp
+
+   int check_srs()
+   {
+       auto file = std::make_unique<TFile>("output.root", "read");
+       auto tree_reader = TTreeReader{ "srs_data_tree", file.get() };
+
+       auto srs_struct_data = TTreeReaderValue<srs::StructData>{ tree_reader, "srs_frame_data" };
+
+       while (tree_reader.Next())
+       {
+           const auto& hit_data = srs_struct_data->hit_data;
+           for (const auto& hit : hit_data)
+           {
+               std::cout << "offset: " << static_cast<int>(hit.offset) << "\n";
+           }
+       }
+       return 0;
+   }
+
+
 Available APIs
 ##################################
 
