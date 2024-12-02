@@ -81,10 +81,12 @@ namespace srs
                 reset();
                 convert(temp_data);
             }
+            // spdlog::info("size: {}", output_data_.hit_data.size());
             auto data = co_yield (&output_data_);
             if (data.has_value())
             {
                 temp_data = data.value();
+                // spdlog::info("get data size: {}", temp_data.size());
             }
             else
             {

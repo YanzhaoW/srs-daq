@@ -37,22 +37,11 @@
     text-align: center;
 }
 
-.start_div {
-    align-items: start;
-    margin: 0px;
-    padding: 0px;
-    display: inline-block;
-    margin-left: 2em;
-}
 
-.button,
-.start_button {
+.button {
     font-family: Helvetica, Arial, sans-serif;
     border-width: 0px;
     cursor: pointer;
-}
-
-.button {
     font-size: 20px;
     background-color: white;
     margin: 1px;
@@ -64,32 +53,9 @@
     border-radius: 9999px;
 }
 
-.start_button {
-    background-color: #1ff218;
-    font-size: 20px;
-    padding: 0.5em;
-    height: 50px;
-    width: 160px;
-    border-radius: 10px;
-}
-
-.start_button:hover {
-    box-shadow: '10px 5px 5px #BEBEBE';
-    background-color: #18ba13;
-}
-
 .button:hover {
     /* text-shadow: 2px, 2px, 4px, grey; */
     background-color: #edebe4;
-}
-
-.start_button_caption {
-    font-family: Helvetica, Arial, sans-serif;
-    font-style: italic;
-    margin: 0px;
-    padding: 0px;
-    font-size: 10px;
-    color: grey;
 }
 
 .icon_text {

@@ -45,19 +45,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/srsConfig.cmake
 
 # install executable
 
-install(TARGETS srs_control RUNTIME_DEPENDENCY_SET appDeps)
-install(
-    RUNTIME_DEPENDENCY_SET
-    appDeps
-    PRE_EXCLUDE_REGEXES
-    [[libc\.so\..*]]
-    [[libgcc_s\.so\..*]]
-    [[libm\.so\..*]]
-    [[libstdc\+\+\.so\..*]]
-    [[ld-linux-x86-64\.so\..*]]
-    [[librt\.so\..*]]
-    [[libpthread\.so\..*]]
-    [[libdl\.so\..*]])
+install(TARGETS srs_control)
 
 install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/srs_check_udp
                  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/srs_check_binpb

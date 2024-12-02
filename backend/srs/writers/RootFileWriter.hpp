@@ -22,18 +22,29 @@ namespace srs
         explicit RootFileWriter(asio::thread_pool& thread_pool, auto&&... args)
             : root_file{ std::forward<decltype(args)>(args)... }
         {
+            spdlog::debug("Root file {:?} has been opened.", root_file.GetName());
             tree.SetDirectory(&root_file);
             tree.Branch("srs_frame_data", &output_buffer_);
             coro_ = generate_coro(thread_pool.get_executor());
             coro_sync_start(coro_, std::optional<InputType>{}, asio::use_awaitable);
-            spdlog::trace("ROOT INCLUDE DIRS: {}", gSystem->GetIncludePath());
-            spdlog::trace("ROOT LIBRARIES: {}", gSystem->GetLibraries());
+            // spdlog::trace("ROOT INCLUDE DIRS: {}", gSystem->GetIncludePath());
+            // spdlog::trace("ROOT LIBRARIES: {}", gSystem->GetLibraries());
+        }
+
+        ~RootFileWriter()
+        {
+            if (not is_closed_)
+            {
+                spdlog::error("Root file {:?} is not closed successfully. Data might not be written completely.",
+                              root_file.GetName());
+            }
         }
 
         auto write(auto pre_future) -> OutputFuture { return create_coro_future(coro_, pre_future); }
         [[nodiscard]] static auto get_convert_mode() -> DataConvertOptions { return DataConvertOptions::structure; }
 
       private:
+        bool is_closed_ = false;
         TFile root_file;
         CoroType coro_;
         TTree tree{ "srs_data_tree", "Data structures from SRS system" };
@@ -62,10 +73,17 @@ namespace srs
                 {
                     root_file.Write();
                     spdlog::info("ROOT file {} is closed successfully", root_file.GetName());
+                    is_closed_ = true;
                     co_return;
                 }
             }
         }
+
+      public:
+        RootFileWriter(const RootFileWriter&) = delete;
+        RootFileWriter(RootFileWriter&&) = delete;
+        RootFileWriter& operator=(const RootFileWriter&) = delete;
+        RootFileWriter& operator=(RootFileWriter&&) = delete;
     };
 
 } // namespace srs

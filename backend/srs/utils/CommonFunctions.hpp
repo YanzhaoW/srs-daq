@@ -8,6 +8,10 @@
 
 namespace srs
 {
+    /**  \addtogroup <CommonFunctions>
+     *  @{
+     */
+
     // subbits from a half open range [min, max)
     template <std::size_t bit_size, std::size_t max, std::size_t min = 0>
     constexpr auto subset(const std::bitset<bit_size>& bits) -> std::bitset<max - min>
@@ -94,4 +98,5 @@ namespace srs
             .get();
     }
 
+    /** @}*/
 } // namespace srs

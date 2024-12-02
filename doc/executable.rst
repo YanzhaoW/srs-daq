@@ -2,6 +2,8 @@
 Command line tools
 ##############################
 
+.. _srs_control:
+
 srs_control
 #####################
 

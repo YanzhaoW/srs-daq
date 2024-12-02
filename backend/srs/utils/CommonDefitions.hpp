@@ -5,6 +5,10 @@
 
 namespace srs
 {
+    /**  \addtogroup <CommonDefinitions>
+     *  @{
+     */
+
     // General
     constexpr auto BYTE_BIT_LENGTH = 8;
 
@@ -34,7 +38,6 @@ namespace srs
     constexpr auto FEC_DAQ_RECEIVE_PORT = 6006;
     static constexpr int FEC_CONTROL_LOCAL_PORT = 6007;
 
-
     // Data processor:
     constexpr auto DEFAULT_DISPLAY_PERIOD = std::chrono::milliseconds{ 200 };
     constexpr auto DEFAULT_ROOT_HTTP_SERVER_PERIOD = std::chrono::milliseconds{ 1000 };
@@ -53,4 +56,8 @@ namespace srs
         print_raw,
         print_all
     };
+
+    using RawDelimSizeType = uint32_t;
+
+    /** @}*/
 } // namespace srs

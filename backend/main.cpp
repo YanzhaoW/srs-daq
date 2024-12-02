@@ -57,10 +57,11 @@ auto main(int argc, char** argv) -> int
         app.set_print_mode(print_mode);
         app.set_output_filenames(output_filenames);
 
+        app.init();
         app.read_data();
         app.switch_on();
         app.start_analysis();
-        app.wait_for_finish();
+        // app.wait_for_finish();
     }
     catch (const CLI::ParseError& e)
     {

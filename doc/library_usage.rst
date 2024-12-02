@@ -12,42 +12,70 @@ Link the SRS library with CMake `find_package`:
   find_package(srs REQUIRED)
   add_executable(main PRIVATE srs::srs)
 
-Please make sure add the directory path of the installation folder ``srs-install`` to ``CMAKE_PREFIX_PATH``:
+Please make sure add the directory path of the installation folder ``srs-download`` to ``CMAKE_PREFIX_PATH``:
 
 .. code-block:: bash
 
-  cmake -DCMAKE_PREFIX_PATH=[...]/srs-install ..
+  cmake -DCMAKE_PREFIX_PATH=[...]/srs-download ..
+
+Output data structure
+################################
+
+The output data structure of this program is a C++ struct:
+
+.. doxygenstruct:: srs::StructData
+   :project: srs
+   :members:
+   :undoc-members:
+
+with its sub structure:
+
+.. doxygenstruct:: srs::HitData
+   :project: srs
+   :members:
+
+
+.. doxygenstruct:: srs::MarkerData
+   :project: srs
+   :members:
+
+
+.. doxygenstruct:: srs::ReceiveDataHeader
+   :project: srs
+   :members:
+
+An example of ROOT macro to extract data structure from the tree
+=================================================================
+
+To extract the data structure value, it's highly recommended to use ROOT `TTreeReader <https://root.cern/doc/master/classTTreeReader.html>`_ instead of direct ROOT ``TTree``. The tree name from the :ref:`srs_control` save a tree named "srs_data_tree" with a single branch named "srs_frame_data".
+
+The following example extract the whole data structure :cpp:type: `srs::StructData` and print out every offset value:
+
+.. code:: cpp
+
+   int check_srs()
+   {
+       auto file = std::make_unique<TFile>("output.root", "read");
+       auto tree_reader = TTreeReader{ "srs_data_tree", file.get() };
+
+       auto srs_struct_data = TTreeReaderValue<srs::StructData>{ tree_reader, "srs_frame_data" };
+
+       while (tree_reader.Next())
+       {
+           const auto& hit_data = srs_struct_data->hit_data;
+           for (const auto& hit : hit_data)
+           {
+               std::cout << "offset: " << static_cast<int>(hit.offset) << "\n";
+           }
+       }
+       return 0;
+   }
+
 
 Available APIs
 ##################################
 
-Deserialization of the UDP binary data
-=============================================
+.. toctree::
+   :maxdepth: 1
 
-The class :cpp:class:`srs::ProtoMsgReader` is responsible for the deserialization of the UDP binary data, which converts the Protobuf binary data sent by a UDP socket to a C++ data structure. All memory allocation of this class is done in its constructor. If the conversion are repeated many times, the object should be kept alive to reduce the memory allocation.
-
-The full example can be found in this `script <https://github.com/YanzhaoW/srs-daq/blob/master/examples/readUDP/main.cpp>`_ .
-
-**Minimum example:**
-
-.. code-block:: cpp
-  :linenos:
-
-  #include <srs/srs.hpp>
-
-  auto main() -> int
-  {
-    auto msg_reader = srs::ProtoMsgReader{};
-
-    std::string_view proto_binary = get_proto_msg();
-
-    const auto& data_struct = msg_reader.convert(proto_binary);
-
-    return 0;
-  }
-
-Details of :cpp:class:`srs::ProtoMsgReader`
------------------------------------------------
-
-.. doxygenfile:: ProtoMsgReader.hpp
-   :project: srs
+   stubs/library_apis

@@ -14,7 +14,7 @@ namespace srs
         {
         }
 
-        using SizeType = uint32_t;
+        using SizeType = RawDelimSizeType;
         static constexpr auto ConverterOption = std::array{ raw_frame };
 
         [[nodiscard]] auto data() const -> OutputType

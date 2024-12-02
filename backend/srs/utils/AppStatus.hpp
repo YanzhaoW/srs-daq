@@ -15,8 +15,10 @@ namespace srs
         // std::atomic<bool> is_already_exit = false;
         std::condition_variable status_change;
 
-        void wait_for_status(auto&& condition, std::chrono::seconds time_duration = DEFAULT_STATUS_WAITING_TIME_SECONDS)
+        auto wait_for_status(auto&& condition, std::chrono::seconds time_duration = DEFAULT_STATUS_WAITING_TIME_SECONDS)
+            -> bool
         {
+            using namespace std::string_literals;
             auto mutex = std::mutex{};
             while (not condition(*this))
             {
@@ -24,9 +26,10 @@ namespace srs
                 auto res = status_change.wait_for(lock, time_duration);
                 if (res == std::cv_status::timeout)
                 {
-                    throw std::runtime_error("TIMEOUT");
+                    return false;
                 }
             }
+            return true;
         }
     };
 

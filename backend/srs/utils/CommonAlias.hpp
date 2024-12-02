@@ -5,6 +5,10 @@
 
 namespace srs
 {
+    /**  \addtogroup <CommonAliases>
+     *  @{
+     */
+
     namespace asio = boost::asio;
 
     using io_context_type = asio::thread_pool;
@@ -16,4 +20,6 @@ namespace srs
     using ReadBufferType = std::array<BufferElementType, buffer_size>;
 
     using CommunicateEntryType = uint32_t;
+
+    /** @}*/
 } // namespace srs
