@@ -12,42 +12,42 @@ Link the SRS library with CMake `find_package`:
   find_package(srs REQUIRED)
   add_executable(main PRIVATE srs::srs)
 
-Please make sure add the directory path of the installation folder ``srs-install`` to ``CMAKE_PREFIX_PATH``:
+Please make sure add the directory path of the installation folder ``srs-download`` to ``CMAKE_PREFIX_PATH``:
 
 .. code-block:: bash
 
-  cmake -DCMAKE_PREFIX_PATH=[...]/srs-install ..
+  cmake -DCMAKE_PREFIX_PATH=[...]/srs-download ..
 
 Output data structure
 ################################
 
 The output data structure of this program is a C++ struct:
 
-.. doxygenclass:: srs::StructData
+.. doxygenstruct:: srs::StructData
    :project: srs
    :members:
    :undoc-members:
 
 with its sub structure:
 
-.. doxygenclass:: srs::HitData
+.. doxygenstruct:: srs::HitData
    :project: srs
    :members:
 
 
-.. doxygenclass:: srs::MarkerData
+.. doxygenstruct:: srs::MarkerData
    :project: srs
    :members:
 
 
-.. doxygenclass:: srs::ReceiveDataHeader
+.. doxygenstruct:: srs::ReceiveDataHeader
    :project: srs
    :members:
 
 An example of ROOT macro to extract data structure from the tree
-===================================================================
+=================================================================
 
-To extract the data structure value, it's highly recommended to use ROOT `TTreeReader <https://root.cern/doc/master/classTTreeReader.html>`_ instead of direct ROOT ``TTree``. The tree name from the :program: `srs_control` save a tree named "srs_data_tree" with a single branch named "srs_frame_data".
+To extract the data structure value, it's highly recommended to use ROOT `TTreeReader <https://root.cern/doc/master/classTTreeReader.html>`_ instead of direct ROOT ``TTree``. The tree name from the :ref:`srs_control` save a tree named "srs_data_tree" with a single branch named "srs_frame_data".
 
 The following example extract the whole data structure :cpp:type: `srs::StructData` and print out every offset value:
 
