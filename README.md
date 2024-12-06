@@ -9,6 +9,8 @@ SRS-DAQ is a program containing a command line tool `srs_control` and additional
 
 Please check the full documentation of this project: [SRS-DAQ documentation](<https://yanzhaow.github.io/srs-daq/>).
 
+Reference of the internal code implementation can be checked from this [Doxygen documentation](https://apps.ikp.uni-koeln.de/~ywang/srs/).
+
 ## `srs_control` preview
 
 ![Imgur](doc/media/srs_control_preview_v1.gif)
