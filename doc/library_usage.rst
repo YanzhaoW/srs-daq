@@ -49,7 +49,10 @@ An example of ROOT macro to extract data structure from the tree
 
 To extract the data structure value, it's highly recommended to use ROOT `TTreeReader <https://root.cern/doc/master/classTTreeReader.html>`_ instead of direct ROOT ``TTree``. The tree name from the :ref:`srs_control` save a tree named "srs_data_tree" with a single branch named "srs_frame_data".
 
-The following example extract the whole data structure :cpp:type: `srs::StructData` and print out every offset value:
+.. attention::
+   To let ROOT use the dictionary of ``srs::StructData``, the libaray path ``srs-download/lib`` has to be added to ``LD_LIBRARY_PATH`` before running the Macro file: ``export LD_LIBRARY_PATH="[.../srs-download]/lib:$LD_LIBRARY_PATH"``
+
+The following example extracts the whole data structure :cpp:type:`srs::StructData` and print out every offset value:
 
 .. code:: cpp
 
@@ -70,7 +73,6 @@ The following example extract the whole data structure :cpp:type: `srs::StructDa
        }
        return 0;
    }
-
 
 Available APIs
 ##################################
