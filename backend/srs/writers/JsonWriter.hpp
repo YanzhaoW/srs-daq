@@ -4,8 +4,8 @@
 #include <glaze/glaze.hpp>
 #include <map>
 #include <spdlog/spdlog.h>
-#include <srs/analysis/DataProcessManager.hpp>
 #include <srs/data/SRSDataStructs.hpp>
+#include <srs/workflow/DataProcessManager.hpp>
 
 namespace srs::writer
 {
@@ -92,7 +92,10 @@ namespace srs::writer
             common::coro_sync_start(coro_, std::optional<InputType>{}, asio::use_awaitable);
         }
 
-        [[nodiscard]] static auto get_convert_mode() -> process::DataConvertOptions { return process::DataConvertOptions::structure; }
+        [[nodiscard]] static auto get_convert_mode() -> process::DataConvertOptions
+        {
+            return process::DataConvertOptions::structure;
+        }
         auto write(auto pre_future) -> boost::unique_future<std::optional<int>>
         {
             return common::create_coro_future(coro_, pre_future);
@@ -159,4 +162,4 @@ namespace srs::writer
         }
     };
 
-} // namespace srs
+} // namespace srs::writer

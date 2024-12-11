@@ -1,4 +1,4 @@
-#include <srs/analysis/DataProcessManager.hpp>
+#include <srs/workflow/DataProcessManager.hpp>
 #include <srs/writers/BinaryFileWriter.hpp>
 #include <srs/writers/JsonWriter.hpp>
 #include <srs/writers/RootFileWriter.hpp>

@@ -1,9 +1,11 @@
-#include "Application.hpp"
+#include <string_view>
+
 #include <fmt/ranges.h>
 #include <spdlog/spdlog.h>
-#include <srs/analysis/DataProcessor.hpp>
+
+#include <srs/Application.hpp>
 #include <srs/utils/Connections.hpp>
-#include <string_view>
+#include <srs/workflow/DataProcessor.hpp>
 
 namespace srs
 {

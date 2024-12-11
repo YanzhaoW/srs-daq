@@ -7,9 +7,9 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 #include <srs/Application.hpp>
-#include <srs/analysis/DataProcessor.hpp>
 #include <srs/data/DataStructsFormat.hpp>
 #include <srs/data/SRSDataStructs.hpp>
+#include <srs/workflow/DataProcessor.hpp>
 
 namespace srs
 {

@@ -5,7 +5,7 @@
 #include <boost/asio/experimental/coro.hpp>
 #include <fmt/format.h>
 #include <fstream>
-#include <srs/analysis/DataProcessManager.hpp>
+#include <srs/workflow/DataProcessManager.hpp>
 #include <srs/utils/CommonConcepts.hpp>
 #include <string>
 

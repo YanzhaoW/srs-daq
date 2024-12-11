@@ -4,7 +4,7 @@
 #include <TFile.h>
 #include <TSystem.h>
 #include <TTree.h>
-#include <srs/analysis/DataProcessManager.hpp>
+#include <srs/workflow/DataProcessManager.hpp>
 #include <srs/data/SRSDataStructs.hpp>
 
 namespace srs::writer

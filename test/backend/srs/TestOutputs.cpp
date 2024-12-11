@@ -1,9 +1,11 @@
 #include <filesystem>
-#include <gtest/gtest.h>
-#include <srs/SRSEmulator.hpp>
-#include <srs/analysis/DataProcessor.hpp>
-#include <srs/utils/Connections.hpp>
 #include <thread>
+
+#include <gtest/gtest.h>
+
+#include <srs/SRSEmulator.hpp>
+#include <srs/utils/Connections.hpp>
+#include <srs/workflow/DataProcessor.hpp>
 
 namespace
 {
