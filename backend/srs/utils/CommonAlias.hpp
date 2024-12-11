@@ -5,8 +5,8 @@
 
 namespace srs
 {
-    /**  \addtogroup <CommonAliases>
-     *  @{
+    /**  \defgroup CommonAliases Common aliases
+     *   @{
      */
 
     namespace asio = boost::asio;

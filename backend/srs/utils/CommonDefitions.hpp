@@ -5,7 +5,7 @@
 
 namespace srs
 {
-    /**  \addtogroup <CommonDefinitions>
+    /**  \defgroup CommonDefinitions Common defintions
      *  @{
      */
 

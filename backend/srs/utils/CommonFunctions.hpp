@@ -8,8 +8,8 @@
 
 namespace srs
 {
-    /**  \addtogroup <CommonFunctions>
-     *  @{
+    /**  \defgroup CommonFunctions Common functions
+     *   @{
      */
 
     // subbits from a half open range [min, max)
