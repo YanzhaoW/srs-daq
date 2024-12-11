@@ -6,7 +6,7 @@
 #include <boost/asio/experimental/coro.hpp>
 
 #include <srs/utils/CommonConcepts.hpp>
-#include <srs/workflow/DataProcessManager.hpp>
+#include <srs/workflow/TaskDiagram.hpp>
 #include <srs/writers/DataWriterOptions.hpp>
 
 namespace srs::writer

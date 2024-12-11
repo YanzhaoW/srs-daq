@@ -4,8 +4,9 @@
 #include <TFile.h>
 #include <TSystem.h>
 #include <TTree.h>
-#include <srs/workflow/DataProcessManager.hpp>
+
 #include <srs/data/SRSDataStructs.hpp>
+#include <srs/workflow/TaskDiagram.hpp>
 
 namespace srs::writer
 {

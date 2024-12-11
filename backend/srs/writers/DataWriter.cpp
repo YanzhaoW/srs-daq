@@ -1,6 +1,6 @@
 #include <boost/asio/ip/address.hpp>
 
-#include <srs/workflow/DataProcessor.hpp>
+#include <srs/workflow/Handler.hpp>
 #include <srs/writers/BinaryFileWriter.hpp>
 #include <srs/writers/JsonWriter.hpp>
 #include <srs/writers/RootFileWriter.hpp>

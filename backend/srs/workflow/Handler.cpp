@@ -6,7 +6,7 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 
 #include <srs/data/DataStructsFormat.hpp>
-#include <srs/workflow/DataProcessor.hpp>
+#include <srs/workflow/Handler.hpp>
 
 namespace srs::workflow
 {
@@ -84,13 +84,13 @@ namespace srs::workflow
     void Handler::start(bool is_blocking)
     {
         is_stopped_.store(false);
-        spdlog::debug("Data processor starts.");
+        spdlog::debug("Workflow starts.");
         if (print_mode_ == print_speed)
         {
             monitor_.start();
         }
         analysis_loop(is_blocking);
-        spdlog::trace("Data processor exit start().");
+        spdlog::trace("Workflow exit start().");
     }
 
     Handler::~Handler() { stop(); }
@@ -100,13 +100,13 @@ namespace srs::workflow
     {
         // CAS operation to guarantee the thread safty
         auto expected = false;
-        spdlog::trace("Try to stop the data processor. Current is_stopped status: {}", is_stopped_.load());
+        spdlog::trace("Try to stop the workflow. Current is_stopped status: {}", is_stopped_.load());
         if (is_stopped_.compare_exchange_strong(expected, true))
         {
             spdlog::trace("Try to stop data monitor");
             monitor_.stop();
             data_queue_.abort();
-            spdlog::trace("Data processor is stopped");
+            spdlog::trace("Workflow is stopped");
         }
     }
 
@@ -124,7 +124,7 @@ namespace srs::workflow
     {
         try
         {
-            spdlog::trace("entering analysis loop");
+            spdlog::trace("entering workflow loop");
             // TODO: Use direct binary data
 
             while (true)
@@ -146,7 +146,7 @@ namespace srs::workflow
         }
         catch (tbb::user_abort& ex)
         {
-            spdlog::trace("Data processing: {}", ex.what());
+            spdlog::trace("Workflow: {}", ex.what());
         }
         catch (std::exception& ex)
         {
@@ -154,7 +154,7 @@ namespace srs::workflow
             app_->set_error_string(ex.what());
             // app_->exit();
         }
-        spdlog::debug("Analysis loop is done.\n");
+        spdlog::debug("Workflow loop is done.\n");
     }
 
     void Handler::update_monitor()
@@ -190,4 +190,4 @@ namespace srs::workflow
             }
         }
     }
-} // namespace srs
+} // namespace srs::workflow

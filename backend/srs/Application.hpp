@@ -58,7 +58,7 @@ namespace srs
         void read_data(bool is_non_stop = true);
 
         void notify_status_change() { status_.status_change.notify_all(); }
-        void start_analysis(bool is_blocking = true);
+        void start_workflow(bool is_blocking = true);
         void wait_for_finish();
         auto wait_for_status(auto&& condition,
                              std::chrono::seconds time_duration = common::DEFAULT_STATUS_WAITING_TIME_SECONDS) -> bool
@@ -83,7 +83,7 @@ namespace srs
         [[nodiscard]] auto get_io_context() -> auto& { return io_context_; }
         auto get_data_reader() -> DataReader* { return data_reader_.get(); }
         [[nodiscard]] auto get_error_string() const -> const std::string& { return error_string_; }
-        [[nodiscard]] auto get_data_processor() const -> const auto& { return *data_processor_; };
+        [[nodiscard]] auto get_workflow_handler() const -> const auto& { return *workflow_handler_; };
 
         // called by ExitHelper
         void end_of_work();
@@ -103,7 +103,7 @@ namespace srs
         asio::signal_set signal_set_{ io_context_, SIGINT, SIGTERM };
         std::jthread working_thread_;
         AppExitHelper exit_helper_{ this };
-        std::unique_ptr<workflow::Handler> data_processor_;
+        std::unique_ptr<workflow::Handler> workflow_handler_;
         std::shared_ptr<DataReader> data_reader_;
 
         void exit();

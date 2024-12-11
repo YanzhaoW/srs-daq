@@ -1,4 +1,4 @@
-#include <srs/workflow/DataProcessManager.hpp>
+#include <srs/workflow/TaskDiagram.hpp>
 #include <srs/writers/BinaryFileWriter.hpp>
 #include <srs/writers/JsonWriter.hpp>
 #include <srs/writers/RootFileWriter.hpp>
@@ -19,7 +19,7 @@ namespace srs::workflow
     }
 
     auto TaskDiagram::analysis_one(tbb::concurrent_bounded_queue<process::SerializableMsgBuffer>& data_queue,
-                                          bool is_blocking) -> bool
+                                   bool is_blocking) -> bool
     {
         auto pop_res = true;
         reset();

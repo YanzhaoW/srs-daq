@@ -5,7 +5,7 @@
 
 #include <glaze/glaze.hpp>
 
-#include <srs/workflow/DataProcessManager.hpp>
+#include <srs/workflow/TaskDiagram.hpp>
 
 namespace srs::writer
 {

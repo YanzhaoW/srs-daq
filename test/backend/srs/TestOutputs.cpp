@@ -5,7 +5,7 @@
 
 #include <srs/SRSEmulator.hpp>
 #include <srs/utils/Connections.hpp>
-#include <srs/workflow/DataProcessor.hpp>
+#include <srs/workflow/Handler.hpp>
 
 namespace
 {
@@ -36,8 +36,8 @@ namespace
                 auto analysis_thread = std::jthread(
                     [&app, this]()
                     {
-                        app.start_analysis(false);
-                        event_nums_ = app.get_data_processor().get_processed_hit_number();
+                        app.start_workflow(false);
+                        event_nums_ = app.get_workflow_handler().get_processed_hit_number();
                     });
 
                 // std::this_thread::sleep_for(std::chrono::seconds(1));

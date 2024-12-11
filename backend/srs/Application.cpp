@@ -5,7 +5,7 @@
 
 #include <srs/Application.hpp>
 #include <srs/utils/Connections.hpp>
-#include <srs/workflow/DataProcessor.hpp>
+#include <srs/workflow/Handler.hpp>
 
 namespace srs
 {
@@ -14,7 +14,7 @@ namespace srs
     {
         spdlog::set_pattern("[%H:%M:%S] [%^%=7l%$] [thread %t] %v");
         spdlog::info("Welcome to SRS Application");
-        data_processor_ = std::make_unique<workflow::Handler>(this);
+        workflow_handler_ = std::make_unique<workflow::Handler>(this);
     }
 
     AppExitHelper::~AppExitHelper() noexcept { app_->end_of_work(); }
@@ -109,13 +109,13 @@ namespace srs
         spdlog::debug("App::exit is called");
         status_.is_on_exit.store(true);
         wait_for_reading_finish();
-        data_processor_->stop();
+        workflow_handler_->stop();
     }
 
-    void App::set_print_mode(common::DataPrintMode mode) { data_processor_->set_print_mode(mode); }
+    void App::set_print_mode(common::DataPrintMode mode) { workflow_handler_->set_print_mode(mode); }
     void App::set_output_filenames(const std::vector<std::string>& filenames)
     {
-        data_processor_->set_output_filenames(filenames);
+        workflow_handler_->set_output_filenames(filenames);
     }
 
     void App::set_remote_endpoint(std::string_view remote_ip, int port_number)
@@ -148,10 +148,10 @@ namespace srs
     {
         auto connection_info = ConnectionInfo{ this };
         connection_info.local_port_number = configurations_.fec_data_receive_port;
-        data_reader_ = std::make_shared<DataReader>(connection_info, data_processor_.get());
+        data_reader_ = std::make_shared<DataReader>(connection_info, workflow_handler_.get());
         data_reader_->start(is_non_stop);
     }
 
-    void App::start_analysis(bool is_blocking) { data_processor_->start(is_blocking); }
+    void App::start_workflow(bool is_blocking) { workflow_handler_->start(is_blocking); }
     void App::wait_for_finish() { working_thread_.join(); }
 } // namespace srs

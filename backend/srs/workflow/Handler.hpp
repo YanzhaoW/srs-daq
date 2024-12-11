@@ -9,7 +9,7 @@
 #include <gsl/gsl-lite.hpp>
 #include <spdlog/logger.h>
 
-#include <srs/workflow/DataProcessManager.hpp>
+#include <srs/workflow/TaskDiagram.hpp>
 
 namespace srs
 {
