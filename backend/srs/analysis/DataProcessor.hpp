@@ -43,7 +43,7 @@ namespace srs
         std::atomic<uint64_t> last_read_data_bytes_ = 0;
         std::atomic<uint64_t> last_processed_hit_num_ = 0;
         std::chrono::time_point<std::chrono::steady_clock> last_print_time_ = std::chrono::steady_clock::now();
-        std::chrono::milliseconds period_ = DEFAULT_DISPLAY_PERIOD;
+        std::chrono::milliseconds period_ = common::DEFAULT_DISPLAY_PERIOD;
         std::atomic<double> current_received_bytes_MBps_;
         std::atomic<double> current_hits_ps_;
         std::string speed_string_;
@@ -78,7 +78,7 @@ namespace srs
         [[nodiscard]] auto get_app() -> auto& { return *app_; }
 
         // setters:
-        void set_print_mode(DataPrintMode mode) { print_mode_ = mode; }
+        void set_print_mode(common::DataPrintMode mode) { print_mode_ = mode; }
         void set_show_data_speed(bool val = true) { monitor_.show_data_speed(val); }
         void set_monitor_display_period(std::chrono::milliseconds duration) { monitor_.set_display_period(duration); }
         void set_output_filenames(const std::vector<std::string>& filenames)
@@ -89,11 +89,11 @@ namespace srs
         void stop();
 
       private:
-        using enum DataPrintMode;
+        using enum common::DataPrintMode;
 
         std::atomic<bool> is_stopped_{ false };
         std::size_t received_data_size_{};
-        DataPrintMode print_mode_ = DataPrintMode::print_speed;
+        common::DataPrintMode print_mode_ = common::DataPrintMode::print_speed;
         std::atomic<uint64_t> total_read_data_bytes_ = 0;
         std::atomic<uint64_t> total_processed_hit_numer_ = 0;
         gsl::not_null<App*> app_;

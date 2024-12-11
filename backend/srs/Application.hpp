@@ -54,7 +54,7 @@ namespace srs
         void notify_status_change() { status_.status_change.notify_all(); }
         void start_analysis(bool is_blocking = true);
         void wait_for_finish();
-        auto wait_for_status(auto&& condition, std::chrono::seconds time_duration = DEFAULT_STATUS_WAITING_TIME_SECONDS) -> bool
+        auto wait_for_status(auto&& condition, std::chrono::seconds time_duration = common::DEFAULT_STATUS_WAITING_TIME_SECONDS) -> bool
         {
             return status_.wait_for_status(std::forward<decltype(condition)>(condition), time_duration);
         }
@@ -65,7 +65,7 @@ namespace srs
         void set_status_acq_on(bool val = true) { status_.is_acq_on.store(val); }
         void set_status_acq_off(bool val = true) { status_.is_acq_off.store(val); }
         void set_status_is_reading(bool val = true) { status_.is_reading.store(val); }
-        void set_print_mode(DataPrintMode mode);
+        void set_print_mode(common::DataPrintMode mode);
         void set_output_filenames(const std::vector<std::string>& filenames);
         void set_error_string(std::string_view err_msg) { error_string_ = err_msg; }
 
@@ -85,7 +85,7 @@ namespace srs
         using udp = asio::ip::udp;
 
         Status status_;
-        uint16_t channel_address_ = DEFAULT_CHANNEL_ADDRE;
+        uint16_t channel_address_ = common::DEFAULT_CHANNEL_ADDRE;
         Config configurations_;
         std::string error_string_;
 

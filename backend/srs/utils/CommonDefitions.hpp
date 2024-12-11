@@ -3,7 +3,7 @@
 #include <chrono>
 #include <cstdint>
 
-namespace srs
+namespace srs::common
 {
     /**  \defgroup CommonDefinitions Common defintions
      *  @{
