@@ -53,7 +53,7 @@ namespace srs
 
         StartingCoroType coro_;
 
-        DataWriter writers_;
+        writer::Manager writers_;
 
         auto generate_starting_coro(asio::any_io_executor /*unused*/) -> StartingCoroType;
         [[maybe_unused]] auto run_processes(bool is_stopped) -> std::expected<void, std::string_view>;

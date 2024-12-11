@@ -9,26 +9,30 @@
 
 namespace srs
 {
-    class RootFileWriter;
-    class DataProcessor;
-    class BinaryFileWriter;
-    class UDPWriter;
-    class JsonWriter;
     class DataProcessManager;
+    class DataProcessor;
+}
 
-    class DataWriter
+namespace srs::writer
+{
+    class RootFile;
+    class BinaryFile;
+    class UDP;
+    class Json;
+
+    class Manager
     {
       public:
         using enum DataWriterOption;
         using enum DataConvertOptions;
 
-        explicit DataWriter(DataProcessor* processor);
+        explicit Manager(DataProcessor* processor);
 
-        ~DataWriter();
-        DataWriter(const DataWriter&) = delete;
-        DataWriter& operator=(const DataWriter&) = delete;
-        DataWriter(DataWriter&&) = default;
-        DataWriter& operator=(DataWriter&&) = default;
+        ~Manager();
+        Manager(const Manager&) = delete;
+        Manager& operator=(const Manager&) = delete;
+        Manager(Manager&&) = default;
+        Manager& operator=(Manager&&) = default;
 
         void write_with(auto make_future);
         void wait_for_finished();
@@ -41,11 +45,11 @@ namespace srs
       private:
         std::map<DataConvertOptions, int> convert_count_map_{ EMPTY_CONVERT_OPTION_COUNT_MAP.begin(),
                                                               EMPTY_CONVERT_OPTION_COUNT_MAP.end() };
-        std::map<std::string, std::unique_ptr<BinaryFileWriter>> binary_files_;
-        std::map<std::string, std::unique_ptr<UDPWriter>> udp_files_;
-        std::map<std::string, std::unique_ptr<JsonWriter>> json_files_;
+        std::map<std::string, std::unique_ptr<BinaryFile>> binary_files_;
+        std::map<std::string, std::unique_ptr<UDP>> udp_files_;
+        std::map<std::string, std::unique_ptr<Json>> json_files_;
 #ifdef HAS_ROOT
-        std::map<std::string, std::unique_ptr<RootFileWriter>> root_files_;
+        std::map<std::string, std::unique_ptr<RootFile>> root_files_;
 #endif
         DataProcessor* data_processor_ = nullptr;
         std::vector<boost::unique_future<std::optional<int>>> write_futures_;
@@ -66,7 +70,7 @@ namespace srs
         }
     };
 
-    void DataWriter::write_with(auto make_future)
+    void Manager::write_with(auto make_future)
     {
         write_to_files(binary_files_, make_future);
         write_to_files(udp_files_, make_future);

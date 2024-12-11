@@ -43,6 +43,6 @@ namespace srs::test
       private:
         std::string source_filename_;
         RawFrameReader frame_reader_;
-        UDPWriter udp_writer_;
+        writer::UDP udp_writer_;
     };
 } // namespace srs::test

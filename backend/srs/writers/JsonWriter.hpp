@@ -7,7 +7,7 @@
 #include <srs/analysis/DataProcessManager.hpp>
 #include <srs/data/SRSDataStructs.hpp>
 
-namespace srs
+namespace srs::writer
 {
     struct CompactExportData
     {
@@ -68,7 +68,7 @@ namespace srs
         }
     };
 
-    class JsonWriter
+    class Json
     {
       public:
         using InputType = const StructData*;
@@ -78,7 +78,7 @@ namespace srs
         using OutputFuture = boost::unique_future<std::optional<OutputType>>;
         static constexpr auto IsStructType = true;
 
-        explicit JsonWriter(asio::thread_pool& thread_pool, const std::string& filename)
+        explicit Json(asio::thread_pool& thread_pool, const std::string& filename)
             : filename_{ filename }
             , file_stream_{ filename, std::ios::out | std::ios::trunc }
         {

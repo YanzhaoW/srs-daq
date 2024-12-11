@@ -28,7 +28,7 @@ namespace srs
             common::coro_sync_start(coro_, std::optional<InputType>{}, asio::use_awaitable);
         }
 
-        auto create_future(this auto&& self, InputFuture& pre_fut, DataWriter& writers) -> OutputFuture
+        auto create_future(this auto&& self, InputFuture& pre_fut, writer::Manager& writers) -> OutputFuture
         {
             constexpr auto converter_options = std::remove_cvref_t<decltype(self)>::ConverterOption;
             auto is_needed = std::ranges::any_of(

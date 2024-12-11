@@ -6,7 +6,7 @@
 #include <srs/utils/ConnectionBase.hpp>
 #include <srs/writers/DataWriterOptions.hpp>
 
-namespace srs
+namespace srs::writer
 {
     class UDPWriterConnection : public ConnectionBase<>
     {
@@ -17,10 +17,10 @@ namespace srs
         }
     };
 
-    class UDPWriter
+    class UDP
     {
       public:
-        UDPWriter(App& app, asio::ip::udp::endpoint endpoint, DataConvertOptions derser_mode = DataConvertOptions::none)
+        UDP(App& app, asio::ip::udp::endpoint endpoint, DataConvertOptions derser_mode = DataConvertOptions::none)
             : convert_mode_{ derser_mode }
             , connection_{ ConnectionInfo{ &app } }
             , app_{ app }

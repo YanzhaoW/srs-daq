@@ -9,9 +9,9 @@
 #include <srs/utils/CommonConcepts.hpp>
 #include <string>
 
-namespace srs
+namespace srs::writer
 {
-    class BinaryFileWriter
+    class BinaryFile
     {
       public:
         using InputType = std::string_view;
@@ -21,9 +21,7 @@ namespace srs
         using OutputFuture = boost::unique_future<std::optional<OutputType>>;
         static constexpr auto IsStructType = false;
 
-        explicit BinaryFileWriter(asio::thread_pool& thread_pool,
-                                  const std::string& filename,
-                                  DataConvertOptions deser_mode)
+        explicit BinaryFile(asio::thread_pool& thread_pool, const std::string& filename, DataConvertOptions deser_mode)
             : convert_mode_{ deser_mode }
             , file_name_{ filename }
             , ofstream_{ filename, std::ios::trunc }

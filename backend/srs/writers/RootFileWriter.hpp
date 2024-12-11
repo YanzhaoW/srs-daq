@@ -7,9 +7,9 @@
 #include <srs/analysis/DataProcessManager.hpp>
 #include <srs/data/SRSDataStructs.hpp>
 
-namespace srs
+namespace srs::writer
 {
-    class RootFileWriter
+    class RootFile
     {
       public:
         using InputType = const StructData*;
@@ -19,7 +19,7 @@ namespace srs
         using OutputFuture = boost::unique_future<std::optional<OutputType>>;
         static constexpr auto IsStructType = true;
 
-        explicit RootFileWriter(asio::thread_pool& thread_pool, auto&&... args)
+        explicit RootFile(asio::thread_pool& thread_pool, auto&&... args)
             : root_file{ std::forward<decltype(args)>(args)... }
         {
             spdlog::debug("Root file {:?} has been opened.", root_file.GetName());
@@ -31,7 +31,7 @@ namespace srs
             // spdlog::trace("ROOT LIBRARIES: {}", gSystem->GetLibraries());
         }
 
-        ~RootFileWriter()
+        ~RootFile()
         {
             if (not is_closed_)
             {
@@ -80,10 +80,10 @@ namespace srs
         }
 
       public:
-        RootFileWriter(const RootFileWriter&) = delete;
-        RootFileWriter(RootFileWriter&&) = delete;
-        RootFileWriter& operator=(const RootFileWriter&) = delete;
-        RootFileWriter& operator=(RootFileWriter&&) = delete;
+        RootFile(const RootFile&) = delete;
+        RootFile(RootFile&&) = delete;
+        RootFile& operator=(const RootFile&) = delete;
+        RootFile& operator=(RootFile&&) = delete;
     };
 
 } // namespace srs
