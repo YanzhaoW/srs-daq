@@ -23,9 +23,9 @@ namespace srs
             spdlog::critical("The input file is not open!");
             return 0;
         }
-        binary_data.reserve(LARGE_READ_MSG_BUFFER_SIZE);
-        std::array<char, sizeof(RawDelimSizeType)> size_buffer{};
-        auto size = RawDelimSizeType{};
+        binary_data.reserve(common::LARGE_READ_MSG_BUFFER_SIZE);
+        std::array<char, sizeof(common::RawDelimSizeType)> size_buffer{};
+        auto size = common::RawDelimSizeType{};
         if (input_file.eof())
         {
             spdlog::info("End of the binary file.");

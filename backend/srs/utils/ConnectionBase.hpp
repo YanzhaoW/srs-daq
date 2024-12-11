@@ -8,13 +8,14 @@
 #include <srs/Application.hpp>
 #include <srs/converters/SerializableBuffer.hpp>
 #include <srs/utils/CommonConcepts.hpp>
+#include <srs/utils/CommonFunctions.hpp>
 #include <srs/utils/ConnectionTypeDef.hpp>
 
 namespace srs
 {
 
     // derive from enable_shared_from_this to make sure object still alive in the coroutine
-    template <int buffer_size = SMALL_READ_MSG_BUFFER_SIZE>
+    template <int buffer_size = common::SMALL_READ_MSG_BUFFER_SIZE>
     class ConnectionBase : public std::enable_shared_from_this<ConnectionBase<buffer_size>>
     {
       public:
@@ -65,7 +66,7 @@ namespace srs
         bool is_continuous_ = false;
         int local_port_number_ = 0;
         std::atomic<bool> is_socket_closed_{ false };
-        uint32_t counter_ = INIT_COUNT_VALUE;
+        uint32_t counter_ = common::INIT_COUNT_VALUE;
         std::string name_ = "ConnectionBase";
         gsl::not_null<App*> app_;
         std::unique_ptr<udp::socket> socket_;
@@ -74,7 +75,7 @@ namespace srs
         std::span<const char> continuous_send_msg_;
         std::unique_ptr<asio::signal_set> signal_set_;
         ReadBufferType<buffer_size> read_msg_buffer_{};
-        int timeout_seconds_ = DEFAULT_TIMEOUT_SECONDS;
+        int timeout_seconds_ = common::DEFAULT_TIMEOUT_SECONDS;
 
         void encode_write_msg(const std::vector<CommunicateEntryType>& data, uint16_t address);
         static auto signal_handling(SharedConnectionPtr auto connection) -> asio::awaitable<void>;
@@ -217,8 +218,12 @@ namespace srs
     template <int size>
     void ConnectionBase<size>::encode_write_msg(const std::vector<CommunicateEntryType>& data, uint16_t address)
     {
-        write_msg_buffer_.serialize(
-            counter_, ZERO_UINT16_PADDING, address, WRITE_COMMAND_BITS, DEFAULT_TYPE_BITS, COMMAND_LENGTH_BITS);
+        write_msg_buffer_.serialize(counter_,
+                                    common::ZERO_UINT16_PADDING,
+                                    address,
+                                    common::WRITE_COMMAND_BITS,
+                                    common::DEFAULT_TYPE_BITS,
+                                    common::COMMAND_LENGTH_BITS);
         write_msg_buffer_.serialize(data);
     }
 
@@ -232,7 +237,8 @@ namespace srs
         }
 
         co_spawn(self.app_->get_io_context(),
-                 signal_handling(get_shared_from_this(self)) || listen_message(get_shared_from_this(self), is_non_stop),
+                 signal_handling(common::get_shared_from_this(self)) ||
+                     listen_message(common::get_shared_from_this(self), is_non_stop),
                  asio::detached);
         spdlog::trace("Connection {}: spawned listen coroutine", self.name_);
     }

@@ -26,7 +26,7 @@ namespace srs
             tree.SetDirectory(&root_file);
             tree.Branch("srs_frame_data", &output_buffer_);
             coro_ = generate_coro(thread_pool.get_executor());
-            coro_sync_start(coro_, std::optional<InputType>{}, asio::use_awaitable);
+            common::coro_sync_start(coro_, std::optional<InputType>{}, asio::use_awaitable);
             // spdlog::trace("ROOT INCLUDE DIRS: {}", gSystem->GetIncludePath());
             // spdlog::trace("ROOT LIBRARIES: {}", gSystem->GetLibraries());
         }
@@ -40,7 +40,7 @@ namespace srs
             }
         }
 
-        auto write(auto pre_future) -> OutputFuture { return create_coro_future(coro_, pre_future); }
+        auto write(auto pre_future) -> OutputFuture { return common::create_coro_future(coro_, pre_future); }
         [[nodiscard]] static auto get_convert_mode() -> DataConvertOptions { return DataConvertOptions::structure; }
 
       private:

@@ -5,8 +5,8 @@
 #include <srs/Application.hpp>
 #include <srs/converters/DataConverterBase.hpp>
 #include <srs/data/SRSDataStructs.hpp>
-#include <srs/utils/CommonFunctions.hpp>
 #include <srs/utils/CommonAlias.hpp>
+#include <srs/utils/CommonFunctions.hpp>
 
 #include <zpp_bits.h>
 
@@ -15,7 +15,7 @@ namespace srs
     class StructDeserializer : public DataConverterBase<std::string_view, const StructData*>
     {
       public:
-        using DataElementType = std::bitset<HIT_DATA_BIT_LENGTH>;
+        using DataElementType = std::bitset<common::HIT_DATA_BIT_LENGTH>;
         using ReceiveDataSquence = std::vector<DataElementType>;
         static constexpr auto ConverterOption = std::array{ structure };
 
@@ -37,7 +37,10 @@ namespace srs
         auto convert(std::string_view binary_data) -> std::size_t;
         void translate_raw_data(StructData& struct_data);
         void byte_reverse_data_sq();
-        static auto check_is_hit(const DataElementType& element) -> bool { return element.test(FLAG_BIT_POSITION); }
+        static auto check_is_hit(const DataElementType& element) -> bool
+        {
+            return element.test(common::FLAG_BIT_POSITION);
+        }
     };
 
 } // namespace srs

@@ -29,7 +29,7 @@ namespace srs
                 app.get_io_context(), asio::ip::udp::endpoint{ asio::ip::udp::v4(), 0 }));
             connection_.set_remote_endpoint(std::move(endpoint));
             coro_ = connection_.send_continuous_message();
-            coro_sync_start(coro_, std::optional<std::string_view>{}, asio::use_awaitable);
+            common::coro_sync_start(coro_, std::optional<std::string_view>{}, asio::use_awaitable);
         }
 
         static constexpr auto IsStructType = false;
@@ -38,7 +38,7 @@ namespace srs
         auto get_convert_mode() const -> DataConvertOptions { return convert_mode_; }
         auto write(auto last_fut) -> boost::unique_future<std::optional<int>>
         {
-            return create_coro_future(coro_, last_fut);
+            return common::create_coro_future(coro_, last_fut);
         }
 
         // INFO: this will be called in coroutine

@@ -33,9 +33,9 @@ namespace srs
                 throw std::runtime_error(fmt::format("Filename {:?} cannot be open!", filename));
             }
             coro_ = generate_coro(thread_pool.get_executor());
-            coro_sync_start(coro_, std::optional<InputType>{}, asio::use_awaitable);
+            common::coro_sync_start(coro_, std::optional<InputType>{}, asio::use_awaitable);
         }
-        auto write(auto pre_future) -> OutputFuture { return create_coro_future(coro_, pre_future); }
+        auto write(auto pre_future) -> OutputFuture { return common::create_coro_future(coro_, pre_future); }
         auto get_convert_mode() const -> DataConvertOptions { return convert_mode_; }
         void close() { ofstream_.close(); }
 

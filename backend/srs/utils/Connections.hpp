@@ -19,7 +19,7 @@ namespace srs
         void acq_on()
         {
             const auto data = std::vector<CommunicateEntryType>{ 0, 15, 1 };
-            communicate(data, NULL_ADDRESS);
+            communicate(data, common::NULL_ADDRESS);
         }
         void on_fail()
         {
@@ -32,22 +32,22 @@ namespace srs
     class Stopper : public ConnectionBase<>
     {
       public:
-        /** 
-         * \brief Deleted copy constructor (rule of 5). 
+        /**
+         * \brief Deleted copy constructor (rule of 5).
          */
         Stopper(const Stopper&) = delete;
 
-        /** 
+        /**
          * \brief Deleted move constructor (rule of 5).
          */
         Stopper(Stopper&&) = delete;
 
-        /** 
+        /**
          * \brief Deleted copy assignment operator (rule of 5).
          */
         Stopper& operator=(const Stopper&) = delete;
 
-        /** 
+        /**
          * \brief Deleted move assignment operator (rule of 5).
          */
         Stopper& operator=(Stopper&&) = delete;
@@ -62,7 +62,7 @@ namespace srs
         {
         }
 
-        /** 
+        /**
          * \brief Destructor for Stopper connection class
          *
          * The destructor change the Status::is_acq_off to be true
@@ -74,22 +74,24 @@ namespace srs
             get_app().set_status_acq_off();
         }
 
-        /** 
+        /**
          * \brief called if an error occurs
          */
         static void on_fail() { spdlog::debug("on_fail of stopper is called"); }
 
-        /** 
+        /**
          * \brief Turn off the data acquisition from SRS system
          *
-         * This is the primary execution from the Stopper class. It first checks if the Status::is_acq_on from the App is true. If the status is still false after 4 seconds, an exception will be **thrown**. If the status is true, member function ConnectionBase::communicate would be called.
+         * This is the primary execution from the Stopper class. It first checks if the Status::is_acq_on from the App
+         * is true. If the status is still false after 4 seconds, an exception will be **thrown**. If the status is
+         * true, member function ConnectionBase::communicate would be called.
          * @see ConnectionBase::communicate
          */
         void acq_off();
         // void close() {}
     };
 
-    class DataReader : public ConnectionBase<LARGE_READ_MSG_BUFFER_SIZE>
+    class DataReader : public ConnectionBase<common::LARGE_READ_MSG_BUFFER_SIZE>
     {
       public:
         DataReader(const ConnectionInfo& info, DataProcessor* processor)

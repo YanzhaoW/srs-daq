@@ -15,7 +15,7 @@ namespace srs
         , writers_{ data_processor }
     {
         coro_ = generate_starting_coro(thread_pool.get_executor());
-        coro_sync_start(coro_, false, asio::use_awaitable);
+        common::coro_sync_start(coro_, false, asio::use_awaitable);
     }
 
     auto DataProcessManager::analysis_one(tbb::concurrent_bounded_queue<SerializableMsgBuffer>& data_queue,
@@ -55,7 +55,7 @@ namespace srs
 
     auto DataProcessManager::run_processes(bool is_stopped) -> std::expected<void, std::string_view>
     {
-        auto starting_fut = create_coro_future(coro_, is_stopped).share();
+        auto starting_fut = common::create_coro_future(coro_, is_stopped).share();
         auto raw_to_delim_raw_fut = raw_to_delim_raw_converter_.create_future(starting_fut, writers_);
         auto struct_deser_fut = struct_deserializer_.create_future(starting_fut, writers_);
         auto proto_converter_fut = struct_proto_converter_.create_future(struct_deser_fut, writers_);

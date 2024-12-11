@@ -28,7 +28,7 @@ namespace srs
             throw std::runtime_error("TIMEOUT during waiting for status is_acq_on true.");
         }
         const auto data = std::vector<CommunicateEntryType>{ 0, 15, 0 };
-        communicate(data, NULL_ADDRESS);
+        communicate(data, common::NULL_ADDRESS);
     }
 
     void DataReader::close()

@@ -89,13 +89,13 @@ namespace srs
             }
             file_stream_ << "[\n";
             coro_ = generate_coro(thread_pool.get_executor());
-            coro_sync_start(coro_, std::optional<InputType>{}, asio::use_awaitable);
+            common::coro_sync_start(coro_, std::optional<InputType>{}, asio::use_awaitable);
         }
 
         [[nodiscard]] static auto get_convert_mode() -> DataConvertOptions { return DataConvertOptions::structure; }
         auto write(auto pre_future) -> boost::unique_future<std::optional<int>>
         {
-            return create_coro_future(coro_, pre_future);
+            return common::create_coro_future(coro_, pre_future);
         }
 
       private:
