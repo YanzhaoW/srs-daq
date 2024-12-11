@@ -10,7 +10,7 @@
 
 #include <zpp_bits.h>
 
-namespace srs
+namespace srs::process
 {
     class StructDeserializer : public DataConverterBase<std::string_view, const StructData*>
     {

@@ -6,8 +6,12 @@
 
 namespace srs
 {
-    class Proto2StructConverter;
-    class ProtoDeserializer;
+    namespace process
+    {
+        class Proto2StructConverter;
+        class ProtoDeserializer;
+    } // namespace process
+
     class ProtoMsgReader
     {
       public:
@@ -52,9 +56,9 @@ namespace srs
 
       private:
         //! A converter to transform Protobuf struct to native C++ struct
-        std::unique_ptr<Proto2StructConverter> proto_to_struct_converter_;
+        std::unique_ptr<process::Proto2StructConverter> proto_to_struct_converter_;
 
         //! A converter to transform binary data to Protobuf struct
-        std::unique_ptr<ProtoDeserializer> proto_deserializer_;
+        std::unique_ptr<process::ProtoDeserializer> proto_deserializer_;
     };
 } // namespace srs

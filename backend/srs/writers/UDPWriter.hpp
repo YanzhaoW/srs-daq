@@ -20,7 +20,9 @@ namespace srs::writer
     class UDP
     {
       public:
-        UDP(App& app, asio::ip::udp::endpoint endpoint, DataConvertOptions derser_mode = DataConvertOptions::none)
+        UDP(App& app,
+            asio::ip::udp::endpoint endpoint,
+            process::DataConvertOptions derser_mode = process::DataConvertOptions::none)
             : convert_mode_{ derser_mode }
             , connection_{ ConnectionInfo{ &app } }
             , app_{ app }
@@ -35,7 +37,7 @@ namespace srs::writer
         static constexpr auto IsStructType = false;
         auto is_deserialize_valid() { return convert_mode_ == raw or convert_mode_ == proto; }
 
-        auto get_convert_mode() const -> DataConvertOptions { return convert_mode_; }
+        auto get_convert_mode() const -> process::DataConvertOptions { return convert_mode_; }
         auto write(auto last_fut) -> boost::unique_future<std::optional<int>>
         {
             return common::create_coro_future(coro_, last_fut);
@@ -49,11 +51,11 @@ namespace srs::writer
         auto get_remote_endpoint() -> const auto& { return connection_.get_remote_endpoint(); }
 
       private:
-        using enum DataConvertOptions;
-        DataConvertOptions convert_mode_;
+        using enum process::DataConvertOptions;
+        process::DataConvertOptions convert_mode_;
         UDPWriterConnection connection_;
         std::reference_wrapper<App> app_;
         asio::experimental::coro<int(std::optional<std::string_view>)> coro_;
     };
 
-} // namespace srs
+} // namespace srs::writer

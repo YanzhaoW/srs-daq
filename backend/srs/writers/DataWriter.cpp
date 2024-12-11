@@ -56,7 +56,7 @@ namespace srs::writer
 
     Manager::~Manager() = default;
 
-    auto Manager::is_convert_required(DataConvertOptions dependee) const -> bool
+    auto Manager::is_convert_required(process::DataConvertOptions dependee) const -> bool
     {
         return std::ranges::any_of(
             convert_count_map_,
@@ -66,7 +66,7 @@ namespace srs::writer
 
     void Manager::wait_for_finished() { boost::wait_for_all(write_futures_.begin(), write_futures_.end()); }
 
-    auto Manager::add_binary_file(const std::string& filename, DataConvertOptions deser_mode) -> bool
+    auto Manager::add_binary_file(const std::string& filename, process::DataConvertOptions deser_mode) -> bool
     {
         auto& app = data_processor_->get_app();
         return binary_files_
@@ -74,7 +74,7 @@ namespace srs::writer
             .second;
     }
 
-    auto Manager::add_udp_file(const std::string& filename, DataConvertOptions deser_mode) -> bool
+    auto Manager::add_udp_file(const std::string& filename, process::DataConvertOptions deser_mode) -> bool
     {
         auto& app = data_processor_->get_app();
         auto endpoint = convert_str_to_endpoint(app.get_io_context(), filename);

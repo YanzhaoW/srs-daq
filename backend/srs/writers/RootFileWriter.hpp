@@ -41,7 +41,10 @@ namespace srs::writer
         }
 
         auto write(auto pre_future) -> OutputFuture { return common::create_coro_future(coro_, pre_future); }
-        [[nodiscard]] static auto get_convert_mode() -> DataConvertOptions { return DataConvertOptions::structure; }
+        [[nodiscard]] static auto get_convert_mode() -> process::DataConvertOptions
+        {
+            return process::DataConvertOptions::structure;
+        }
 
       private:
         bool is_closed_ = false;
@@ -86,6 +89,6 @@ namespace srs::writer
         RootFile& operator=(RootFile&&) = delete;
     };
 
-} // namespace srs
+} // namespace srs::writer
 
 #endif

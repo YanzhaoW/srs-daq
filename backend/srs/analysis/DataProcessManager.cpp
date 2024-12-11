@@ -18,7 +18,7 @@ namespace srs
         common::coro_sync_start(coro_, false, asio::use_awaitable);
     }
 
-    auto DataProcessManager::analysis_one(tbb::concurrent_bounded_queue<SerializableMsgBuffer>& data_queue,
+    auto DataProcessManager::analysis_one(tbb::concurrent_bounded_queue<process::SerializableMsgBuffer>& data_queue,
                                           bool is_blocking) -> bool
     {
         auto pop_res = true;

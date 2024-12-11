@@ -2,7 +2,7 @@
 #include <bitset>
 #include <srs/converters/StructDeserializer.hpp>
 
-namespace srs
+namespace srs::process
 {
     namespace
     {

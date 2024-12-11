@@ -8,7 +8,7 @@
 
 #include <fmt/ranges.h>
 
-namespace srs
+namespace srs::process
 {
     template <typename Input, typename Output>
     class DataConverterBase

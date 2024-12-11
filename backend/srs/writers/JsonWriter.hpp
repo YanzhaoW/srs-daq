@@ -92,7 +92,7 @@ namespace srs::writer
             common::coro_sync_start(coro_, std::optional<InputType>{}, asio::use_awaitable);
         }
 
-        [[nodiscard]] static auto get_convert_mode() -> DataConvertOptions { return DataConvertOptions::structure; }
+        [[nodiscard]] static auto get_convert_mode() -> process::DataConvertOptions { return process::DataConvertOptions::structure; }
         auto write(auto pre_future) -> boost::unique_future<std::optional<int>>
         {
             return common::create_coro_future(coro_, pre_future);

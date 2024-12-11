@@ -21,7 +21,9 @@ namespace srs::writer
         using OutputFuture = boost::unique_future<std::optional<OutputType>>;
         static constexpr auto IsStructType = false;
 
-        explicit BinaryFile(asio::thread_pool& thread_pool, const std::string& filename, DataConvertOptions deser_mode)
+        explicit BinaryFile(asio::thread_pool& thread_pool,
+                            const std::string& filename,
+                            process::DataConvertOptions deser_mode)
             : convert_mode_{ deser_mode }
             , file_name_{ filename }
             , ofstream_{ filename, std::ios::trunc }
@@ -34,11 +36,11 @@ namespace srs::writer
             common::coro_sync_start(coro_, std::optional<InputType>{}, asio::use_awaitable);
         }
         auto write(auto pre_future) -> OutputFuture { return common::create_coro_future(coro_, pre_future); }
-        auto get_convert_mode() const -> DataConvertOptions { return convert_mode_; }
+        auto get_convert_mode() const -> process::DataConvertOptions { return convert_mode_; }
         void close() { ofstream_.close(); }
 
       private:
-        DataConvertOptions convert_mode_ = DataConvertOptions::none;
+        process::DataConvertOptions convert_mode_ = process::DataConvertOptions::none;
         std::string file_name_;
         std::ofstream ofstream_;
         CoroType coro_;
@@ -68,4 +70,4 @@ namespace srs::writer
             }
         }
     };
-} // namespace srs
+} // namespace srs::writer

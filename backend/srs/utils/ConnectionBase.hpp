@@ -71,7 +71,7 @@ namespace srs
         gsl::not_null<App*> app_;
         std::unique_ptr<udp::socket> socket_;
         udp::endpoint remote_endpoint_;
-        SerializableMsgBuffer write_msg_buffer_;
+        process::SerializableMsgBuffer write_msg_buffer_;
         std::span<const char> continuous_send_msg_;
         std::unique_ptr<asio::signal_set> signal_set_;
         ReadBufferType<buffer_size> read_msg_buffer_{};

@@ -100,7 +100,7 @@ namespace srs
         DataMonitor monitor_;
 
         // Data buffer
-        tbb::concurrent_bounded_queue<SerializableMsgBuffer> data_queue_;
+        tbb::concurrent_bounded_queue<process::SerializableMsgBuffer> data_queue_;
         DataProcessManager data_processes_;
 
         // should run on a different task

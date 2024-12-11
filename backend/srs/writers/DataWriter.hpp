@@ -24,7 +24,7 @@ namespace srs::writer
     {
       public:
         using enum DataWriterOption;
-        using enum DataConvertOptions;
+        using enum process::DataConvertOptions;
 
         explicit Manager(DataProcessor* processor);
 
@@ -40,11 +40,11 @@ namespace srs::writer
         void set_output_filenames(const std::vector<std::string>& filenames);
 
         // Getter:
-        [[nodiscard]] auto is_convert_required(DataConvertOptions dependee) const -> bool;
+        [[nodiscard]] auto is_convert_required(process::DataConvertOptions dependee) const -> bool;
 
       private:
-        std::map<DataConvertOptions, int> convert_count_map_{ EMPTY_CONVERT_OPTION_COUNT_MAP.begin(),
-                                                              EMPTY_CONVERT_OPTION_COUNT_MAP.end() };
+        std::map<process::DataConvertOptions, int> convert_count_map_{ process::EMPTY_CONVERT_OPTION_COUNT_MAP.begin(),
+                                                              process::EMPTY_CONVERT_OPTION_COUNT_MAP.end() };
         std::map<std::string, std::unique_ptr<BinaryFile>> binary_files_;
         std::map<std::string, std::unique_ptr<UDP>> udp_files_;
         std::map<std::string, std::unique_ptr<Json>> json_files_;
@@ -54,8 +54,8 @@ namespace srs::writer
         DataProcessor* data_processor_ = nullptr;
         std::vector<boost::unique_future<std::optional<int>>> write_futures_;
 
-        auto add_binary_file(const std::string& filename, DataConvertOptions deser_mode) -> bool;
-        auto add_udp_file(const std::string& filename, DataConvertOptions deser_mode) -> bool;
+        auto add_binary_file(const std::string& filename, process::DataConvertOptions deser_mode) -> bool;
+        auto add_udp_file(const std::string& filename, process::DataConvertOptions deser_mode) -> bool;
         auto add_root_file(const std::string& filename) -> bool;
         auto add_json_file(const std::string& filename) -> bool;
 

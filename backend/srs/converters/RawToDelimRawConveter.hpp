@@ -4,7 +4,7 @@
 #include <srs/converters/DataConverterBase.hpp>
 #include <zpp_bits.h>
 
-namespace srs
+namespace srs::process
 {
     class Raw2DelimRawConverter : public DataConverterBase<std::string_view, std::string_view>
     {

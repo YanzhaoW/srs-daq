@@ -18,10 +18,10 @@ namespace srs
     };
 
     inline auto get_filetype_from_filename(std::string_view filename)
-        -> std::tuple<DataWriterOption, DataConvertOptions>
+        -> std::tuple<DataWriterOption, process::DataConvertOptions>
     {
         using enum DataWriterOption;
-        using enum DataConvertOptions;
+        using enum process::DataConvertOptions;
         namespace fs = std::filesystem;
 
         if (auto pos = filename.find(':'); pos != std::string::npos)
