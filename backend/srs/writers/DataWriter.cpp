@@ -1,8 +1,7 @@
 #include <boost/asio/ip/address.hpp>
-#include <spdlog/spdlog.h>
+
 #include <srs/workflow/DataProcessor.hpp>
 #include <srs/writers/BinaryFileWriter.hpp>
-#include <srs/writers/DataWriter.hpp>
 #include <srs/writers/JsonWriter.hpp>
 #include <srs/writers/RootFileWriter.hpp>
 #include <srs/writers/UDPWriter.hpp>
@@ -48,8 +47,8 @@ namespace srs::writer
 
     } // namespace
 
-    Manager::Manager(DataProcessor* processor)
-        : data_processor_{ processor }
+    Manager::Manager(workflow::Handler* processor)
+        : workflow_handler_{ processor }
     {
     }
 
@@ -67,7 +66,7 @@ namespace srs::writer
 
     auto Manager::add_binary_file(const std::string& filename, process::DataConvertOptions deser_mode) -> bool
     {
-        auto& app = data_processor_->get_app();
+        auto& app = workflow_handler_->get_app();
         return binary_files_
             .try_emplace(filename, std::make_unique<BinaryFile>(app.get_io_context(), filename, deser_mode))
             .second;
@@ -75,7 +74,7 @@ namespace srs::writer
 
     auto Manager::add_udp_file(const std::string& filename, process::DataConvertOptions deser_mode) -> bool
     {
-        auto& app = data_processor_->get_app();
+        auto& app = workflow_handler_->get_app();
         auto endpoint = convert_str_to_endpoint(app.get_io_context(), filename);
         if (endpoint.has_value())
         {
@@ -89,7 +88,7 @@ namespace srs::writer
     auto Manager::add_root_file(const std::string& filename) -> bool
     {
 #ifdef HAS_ROOT
-        auto& app = data_processor_->get_app();
+        auto& app = workflow_handler_->get_app();
         return root_files_
             .try_emplace(filename, std::make_unique<RootFile>(app.get_io_context(), filename.c_str(), "RECREATE"))
             .second;
@@ -100,13 +99,13 @@ namespace srs::writer
 
     auto Manager::add_json_file(const std::string& filename) -> bool
     {
-        auto& app = data_processor_->get_app();
+        auto& app = workflow_handler_->get_app();
         return json_files_.try_emplace(filename, std::make_unique<Json>(app.get_io_context(), filename)).second;
     }
 
     void Manager::set_output_filenames(const std::vector<std::string>& filenames)
     {
-        auto& app = data_processor_->get_app();
+        auto& app = workflow_handler_->get_app();
 
         for (const auto& filename : filenames)
         {

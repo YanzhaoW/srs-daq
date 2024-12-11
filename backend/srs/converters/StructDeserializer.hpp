@@ -1,14 +1,9 @@
 #pragma once
 
-#include <boost/asio/experimental/coro.hpp>
-#include <spdlog/spdlog.h>
+#include <zpp_bits.h>
+
 #include <srs/Application.hpp>
 #include <srs/converters/DataConverterBase.hpp>
-#include <srs/data/SRSDataStructs.hpp>
-#include <srs/utils/CommonAlias.hpp>
-#include <srs/utils/CommonFunctions.hpp>
-
-#include <zpp_bits.h>
 
 namespace srs::process
 {
@@ -43,4 +38,4 @@ namespace srs::process
         }
     };
 
-} // namespace srs
+} // namespace srs::process

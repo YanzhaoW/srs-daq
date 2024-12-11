@@ -1,13 +1,13 @@
 #pragma once
 
-#include <DataWriterOptions.hpp>
+#include <string>
+
 #include <boost/asio.hpp>
 #include <boost/asio/experimental/coro.hpp>
-#include <fmt/format.h>
-#include <fstream>
-#include <srs/workflow/DataProcessManager.hpp>
+
 #include <srs/utils/CommonConcepts.hpp>
-#include <string>
+#include <srs/workflow/DataProcessManager.hpp>
+#include <srs/writers/DataWriterOptions.hpp>
 
 namespace srs::writer
 {

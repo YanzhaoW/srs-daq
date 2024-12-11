@@ -14,7 +14,7 @@ namespace srs
     {
         spdlog::set_pattern("[%H:%M:%S] [%^%=7l%$] [thread %t] %v");
         spdlog::info("Welcome to SRS Application");
-        data_processor_ = std::make_unique<DataProcessor>(this);
+        data_processor_ = std::make_unique<workflow::Handler>(this);
     }
 
     AppExitHelper::~AppExitHelper() noexcept { app_->end_of_work(); }

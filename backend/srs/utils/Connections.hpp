@@ -4,8 +4,10 @@
 
 namespace srs
 {
-
-    class DataProcessor;
+    namespace workflow
+    {
+        class Handler;
+    }
 
     class Starter : public ConnectionBase<>
     {
@@ -94,7 +96,7 @@ namespace srs
     class DataReader : public ConnectionBase<common::LARGE_READ_MSG_BUFFER_SIZE>
     {
       public:
-        DataReader(const ConnectionInfo& info, DataProcessor* processor)
+        DataReader(const ConnectionInfo& info, workflow::Handler* processor)
             : data_processor_{ processor }
             , ConnectionBase(info, "DataReader")
         {
@@ -127,7 +129,7 @@ namespace srs
         void read_data_handle(std::span<BufferElementType> read_data);
 
       private:
-        gsl::not_null<DataProcessor*> data_processor_;
+        gsl::not_null<workflow::Handler*> data_processor_;
     };
 
 } // namespace srs

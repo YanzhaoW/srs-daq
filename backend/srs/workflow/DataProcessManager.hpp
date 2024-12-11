@@ -1,38 +1,34 @@
 #pragma once
 
 #include <expected>
-#include <spdlog/spdlog.h>
-#include <srs/Application.hpp>
-#include <srs/converters/DataConvertOptions.hpp>
+#include <tbb/concurrent_queue.h>
+
 #include <srs/converters/ProtoDelimSerializer.hpp>
 #include <srs/converters/ProtoSerializer.hpp>
 #include <srs/converters/RawToDelimRawConveter.hpp>
 #include <srs/converters/SerializableBuffer.hpp>
-#include <srs/converters/StructDeserializer.hpp>
 #include <srs/converters/StructToProtoConverter.hpp>
-#include <srs/data/SRSDataStructs.hpp>
 #include <srs/utils/ValidData.hpp>
-#include <srs/writers/DataWriter.hpp>
-#include <tbb/concurrent_queue.h>
 
-namespace srs
+namespace srs::workflow
 {
-    class DataProcessManager
+    class TaskDiagram
     {
       public:
-        explicit DataProcessManager(DataProcessor* data_processor, asio::thread_pool& thread_pool);
+        explicit TaskDiagram(Handler* data_processor, asio::thread_pool& thread_pool);
 
         // rule of 5
-        ~DataProcessManager();
-        DataProcessManager(const DataProcessManager&) = delete;
-        DataProcessManager(DataProcessManager&&) = delete;
-        DataProcessManager& operator=(const DataProcessManager&) = delete;
-        DataProcessManager& operator=(DataProcessManager&&) = delete;
+        ~TaskDiagram();
+        TaskDiagram(const TaskDiagram&) = delete;
+        TaskDiagram(TaskDiagram&&) = delete;
+        TaskDiagram& operator=(const TaskDiagram&) = delete;
+        TaskDiagram& operator=(TaskDiagram&&) = delete;
 
         using enum process::DataConvertOptions;
         using StartingCoroType = asio::experimental::coro<std::string_view(bool)>;
 
-        auto analysis_one(tbb::concurrent_bounded_queue<process::SerializableMsgBuffer>& data_queue, bool is_blocking) -> bool;
+        auto analysis_one(tbb::concurrent_bounded_queue<process::SerializableMsgBuffer>& data_queue, bool is_blocking)
+            -> bool;
         void set_output_filenames(const std::vector<std::string>& filenames);
         void reset();
         // void stop() { run_processes(true); }
@@ -60,7 +56,7 @@ namespace srs
     };
 
     template <process::DataConvertOptions option>
-    auto DataProcessManager::get_data() -> std::string_view
+    auto TaskDiagram::get_data() -> std::string_view
     {
         if constexpr (option == raw)
         {
@@ -75,4 +71,4 @@ namespace srs
             static_assert(false, "Cannot get the data from this option!");
         }
     };
-} // namespace srs
+} // namespace srs::workflow

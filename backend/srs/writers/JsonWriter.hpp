@@ -1,10 +1,10 @@
 #pragma once
 
 #include <fstream>
-#include <glaze/glaze.hpp>
 #include <map>
-#include <spdlog/spdlog.h>
-#include <srs/data/SRSDataStructs.hpp>
+
+#include <glaze/glaze.hpp>
+
 #include <srs/workflow/DataProcessManager.hpp>
 
 namespace srs::writer

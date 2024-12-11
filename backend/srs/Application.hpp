@@ -1,19 +1,25 @@
 #pragma once
 
+#include <thread>
+
 #include <boost/asio/ip/udp.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/asio/thread_pool.hpp>
+
 // #include <srs/devices/Fec.hpp>
 #include <srs/devices/Configuration.hpp>
 #include <srs/utils/AppStatus.hpp>
 #include <srs/utils/CommonAlias.hpp>
-#include <thread>
 
 namespace srs
 {
-    class DataProcessor;
-    class DataReader;
+    namespace workflow
+    {
+        class Handler;
+    } // namespace workflow
+
     class App;
+    class DataReader;
 
     class AppExitHelper
     {
@@ -54,7 +60,8 @@ namespace srs
         void notify_status_change() { status_.status_change.notify_all(); }
         void start_analysis(bool is_blocking = true);
         void wait_for_finish();
-        auto wait_for_status(auto&& condition, std::chrono::seconds time_duration = common::DEFAULT_STATUS_WAITING_TIME_SECONDS) -> bool
+        auto wait_for_status(auto&& condition,
+                             std::chrono::seconds time_duration = common::DEFAULT_STATUS_WAITING_TIME_SECONDS) -> bool
         {
             return status_.wait_for_status(std::forward<decltype(condition)>(condition), time_duration);
         }
@@ -96,7 +103,7 @@ namespace srs
         asio::signal_set signal_set_{ io_context_, SIGINT, SIGTERM };
         std::jthread working_thread_;
         AppExitHelper exit_helper_{ this };
-        std::unique_ptr<DataProcessor> data_processor_;
+        std::unique_ptr<workflow::Handler> data_processor_;
         std::shared_ptr<DataReader> data_reader_;
 
         void exit();

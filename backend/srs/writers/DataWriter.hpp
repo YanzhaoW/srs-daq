@@ -1,17 +1,16 @@
 #pragma once
 
 #include <boost/thread/future.hpp>
-#include <map>
 #include <spdlog/spdlog.h>
+
 #include <srs/converters/DataConvertOptions.hpp>
 #include <srs/data/SRSDataStructs.hpp>
 #include <srs/writers/DataWriterOptions.hpp>
 
-namespace srs
+namespace srs::workflow
 {
-    class DataProcessManager;
-    class DataProcessor;
-}
+    class Handler;
+} // namespace srs::workflow
 
 namespace srs::writer
 {
@@ -26,7 +25,7 @@ namespace srs::writer
         using enum DataWriterOption;
         using enum process::DataConvertOptions;
 
-        explicit Manager(DataProcessor* processor);
+        explicit Manager(workflow::Handler* processor);
 
         ~Manager();
         Manager(const Manager&) = delete;
@@ -44,14 +43,14 @@ namespace srs::writer
 
       private:
         std::map<process::DataConvertOptions, int> convert_count_map_{ process::EMPTY_CONVERT_OPTION_COUNT_MAP.begin(),
-                                                              process::EMPTY_CONVERT_OPTION_COUNT_MAP.end() };
+                                                                       process::EMPTY_CONVERT_OPTION_COUNT_MAP.end() };
         std::map<std::string, std::unique_ptr<BinaryFile>> binary_files_;
         std::map<std::string, std::unique_ptr<UDP>> udp_files_;
         std::map<std::string, std::unique_ptr<Json>> json_files_;
 #ifdef HAS_ROOT
         std::map<std::string, std::unique_ptr<RootFile>> root_files_;
 #endif
-        DataProcessor* data_processor_ = nullptr;
+        workflow::Handler* workflow_handler_ = nullptr;
         std::vector<boost::unique_future<std::optional<int>>> write_futures_;
 
         auto add_binary_file(const std::string& filename, process::DataConvertOptions deser_mode) -> bool;
@@ -79,4 +78,4 @@ namespace srs::writer
         write_to_files(root_files_, make_future);
 #endif
     }
-} // namespace srs
+} // namespace srs::writer

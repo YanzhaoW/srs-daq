@@ -1,28 +1,29 @@
 #pragma once
 
 #include <atomic>
+#include <chrono>
+#include <span>
+
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/steady_timer.hpp>
-#include <chrono>
 #include <gsl/gsl-lite.hpp>
-#include <span>
 #include <spdlog/logger.h>
-#include <srs/converters/SerializableBuffer.hpp>
-#include <srs/converters/StructDeserializer.hpp>
-#include <srs/data/SRSDataStructs.hpp>
+
 #include <srs/workflow/DataProcessManager.hpp>
-#include <srs/writers/DataWriter.hpp>
-#include <tbb/concurrent_queue.h>
 
 namespace srs
 {
-    class DataProcessor;
     class App;
+}
+
+namespace srs::workflow
+{
+    class Handler;
 
     class DataMonitor
     {
       public:
-        explicit DataMonitor(DataProcessor* processor, io_context_type* io_context);
+        explicit DataMonitor(Handler* processor, io_context_type* io_context);
         void show_data_speed(bool val = true) { is_shown_ = val; }
         void set_display_period(std::chrono::milliseconds duration) { period_ = duration; }
         void start();
@@ -36,7 +37,7 @@ namespace srs
 
       private:
         bool is_shown_ = true;
-        gsl::not_null<DataProcessor*> processor_;
+        gsl::not_null<Handler*> processor_;
         gsl::not_null<io_context_type*> io_context_;
         std::shared_ptr<spdlog::logger> console_;
         asio::steady_timer clock_;
@@ -52,16 +53,16 @@ namespace srs
         auto print_cycle() -> asio::awaitable<void>;
     };
 
-    class DataProcessor
+    class Handler
     {
       public:
-        explicit DataProcessor(App* control);
+        explicit Handler(App* control);
 
-        DataProcessor(const DataProcessor&) = delete;
-        DataProcessor(DataProcessor&&) = delete;
-        DataProcessor& operator=(const DataProcessor&) = delete;
-        DataProcessor& operator=(DataProcessor&&) = delete;
-        ~DataProcessor();
+        Handler(const Handler&) = delete;
+        Handler(Handler&&) = delete;
+        Handler& operator=(const Handler&) = delete;
+        Handler& operator=(Handler&&) = delete;
+        ~Handler();
 
         // From socket interface. Need to be fast return
         void read_data_once(std::span<BufferElementType> read_data);
@@ -101,7 +102,7 @@ namespace srs
 
         // Data buffer
         tbb::concurrent_bounded_queue<process::SerializableMsgBuffer> data_queue_;
-        DataProcessManager data_processes_;
+        TaskDiagram data_processes_;
 
         // should run on a different task
         void analysis_loop(bool is_blocking);
@@ -111,4 +112,4 @@ namespace srs
         void clear_data_buffer();
     };
 
-} // namespace srs
+} // namespace srs::workflow
