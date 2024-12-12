@@ -4,17 +4,20 @@
 #include <srs/workflow/TaskDiagram.hpp>
 #include <srs/writers/DataWriterOptions.hpp>
 
-namespace srs::writer
+namespace srs::connection
 {
-    class UDPWriterConnection : public ConnectionBase<>
+    class UDPWriterConnection : public Base<>
     {
       public:
-        explicit UDPWriterConnection(const ConnectionInfo& info)
-            : ConnectionBase(info, "UDP writer")
+        explicit UDPWriterConnection(const Info& info)
+            : Base(info, "UDP writer")
         {
         }
     };
+} // namespace srs::connection
 
+namespace srs::writer
+{
     class UDP
     {
       public:
@@ -22,7 +25,7 @@ namespace srs::writer
             asio::ip::udp::endpoint endpoint,
             process::DataConvertOptions derser_mode = process::DataConvertOptions::none)
             : convert_mode_{ derser_mode }
-            , connection_{ ConnectionInfo{ &app } }
+            , connection_{ connection::Info{ &app } }
             , app_{ app }
         {
             connection_.set_socket(std::make_unique<asio::ip::udp::socket>(
@@ -51,7 +54,7 @@ namespace srs::writer
       private:
         using enum process::DataConvertOptions;
         process::DataConvertOptions convert_mode_;
-        UDPWriterConnection connection_;
+        connection::UDPWriterConnection connection_;
         std::reference_wrapper<App> app_;
         asio::experimental::coro<int(std::optional<std::string_view>)> coro_;
     };

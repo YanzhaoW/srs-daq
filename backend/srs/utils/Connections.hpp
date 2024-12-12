@@ -2,18 +2,18 @@
 
 #include "ConnectionBase.hpp"
 
-namespace srs
+namespace srs::workflow
 {
-    namespace workflow
-    {
-        class Handler;
-    }
+    class Handler;
+}
 
-    class Starter : public ConnectionBase<>
+namespace srs::connection
+{
+    class Starter : public Base<>
     {
       public:
-        explicit Starter(const ConnectionInfo& info)
-            : ConnectionBase(info, "Starter")
+        explicit Starter(const Info& info)
+            : Base(info, "Starter")
         {
         }
 
@@ -31,7 +31,7 @@ namespace srs
         }
     };
 
-    class Stopper : public ConnectionBase<>
+    class Stopper : public Base<>
     {
       public:
         /**
@@ -59,8 +59,8 @@ namespace srs
          *
          * @param info connection information
          */
-        explicit Stopper(const ConnectionInfo& info)
-            : ConnectionBase(info, "Stopper")
+        explicit Stopper(const Info& info)
+            : Base(info, "Stopper")
         {
         }
 
@@ -86,19 +86,19 @@ namespace srs
          *
          * This is the primary execution from the Stopper class. It first checks if the Status::is_acq_on from the App
          * is true. If the status is still false after 4 seconds, an exception will be **thrown**. If the status is
-         * true, member function ConnectionBase::communicate would be called.
-         * @see ConnectionBase::communicate
+         * true, member function connection::Base::communicate would be called.
+         * @see connection::Base::communicate
          */
         void acq_off();
         // void close() {}
     };
 
-    class DataReader : public ConnectionBase<common::LARGE_READ_MSG_BUFFER_SIZE>
+    class DataReader : public Base<common::LARGE_READ_MSG_BUFFER_SIZE>
     {
       public:
-        DataReader(const ConnectionInfo& info, workflow::Handler* processor)
-            : data_processor_{ processor }
-            , ConnectionBase(info, "DataReader")
+        DataReader(const Info& info, workflow::Handler* processor)
+            : workflow_handler_{ processor }
+            , Base(info, "DataReader")
         {
             set_timeout_seconds(1);
             set_continuous();
@@ -129,7 +129,7 @@ namespace srs
         void read_data_handle(std::span<BufferElementType> read_data);
 
       private:
-        gsl::not_null<workflow::Handler*> data_processor_;
+        gsl::not_null<workflow::Handler*> workflow_handler_;
     };
 
-} // namespace srs
+} // namespace srs::connection

@@ -128,27 +128,27 @@ namespace srs
 
     void App::switch_on()
     {
-        auto connection_info = ConnectionInfo{ this };
+        auto connection_info = connection::Info{ this };
         connection_info.local_port_number = configurations_.fec_control_local_port;
-        auto connection = std::make_shared<Starter>(connection_info);
+        auto connection = std::make_shared<connection::Starter>(connection_info);
         connection->set_remote_endpoint(remote_endpoint_);
         connection->acq_on();
     }
 
     void App::switch_off()
     {
-        auto connection_info = ConnectionInfo{ this };
+        auto connection_info = connection::Info{ this };
         connection_info.local_port_number = configurations_.fec_control_local_port;
-        auto connection = std::make_shared<Stopper>(connection_info);
+        auto connection = std::make_shared<connection::Stopper>(connection_info);
         connection->set_remote_endpoint(remote_endpoint_);
         connection->acq_off();
     }
 
     void App::read_data(bool is_non_stop)
     {
-        auto connection_info = ConnectionInfo{ this };
+        auto connection_info = connection::Info{ this };
         connection_info.local_port_number = configurations_.fec_data_receive_port;
-        data_reader_ = std::make_shared<DataReader>(connection_info, workflow_handler_.get());
+        data_reader_ = std::make_shared<connection::DataReader>(connection_info, workflow_handler_.get());
         data_reader_->start(is_non_stop);
     }
 

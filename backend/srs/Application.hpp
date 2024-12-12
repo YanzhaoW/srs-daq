@@ -18,8 +18,12 @@ namespace srs
         class Handler;
     } // namespace workflow
 
+    namespace connection
+    {
+        class DataReader;
+    }
+
     class App;
-    class DataReader;
 
     class AppExitHelper
     {
@@ -81,7 +85,7 @@ namespace srs
         // [[nodiscard]] auto get_fec_config() const -> const auto& { return fec_config_; }
         [[nodiscard]] auto get_status() const -> const auto& { return status_; }
         [[nodiscard]] auto get_io_context() -> auto& { return io_context_; }
-        auto get_data_reader() -> DataReader* { return data_reader_.get(); }
+        auto get_data_reader() -> connection::DataReader* { return data_reader_.get(); }
         [[nodiscard]] auto get_error_string() const -> const std::string& { return error_string_; }
         [[nodiscard]] auto get_workflow_handler() const -> const auto& { return *workflow_handler_; };
 
@@ -104,7 +108,7 @@ namespace srs
         std::jthread working_thread_;
         AppExitHelper exit_helper_{ this };
         std::unique_ptr<workflow::Handler> workflow_handler_;
-        std::shared_ptr<DataReader> data_reader_;
+        std::shared_ptr<connection::DataReader> data_reader_;
 
         void exit();
         void wait_for_reading_finish();
